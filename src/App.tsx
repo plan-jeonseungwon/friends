@@ -699,7 +699,14 @@ export default function App() {
                 <span className="font-bold text-gray-800 text-sm">342</span>
                 <div className="w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center text-[10px] font-bold text-white border border-white">C</div>
               </div>
-              <Users className="w-6 h-6 text-gray-800 cursor-pointer" onClick={() => setView('friends_main')} />
+              <div className="relative cursor-pointer" onClick={() => setView('friends_main')}>
+                <Users className="w-6 h-6 text-gray-800" />
+                {friendRequests.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                    {friendRequests.length}
+                  </span>
+                )}
+              </div>
               <Bell className="w-6 h-6 text-gray-800" />
             </div>
           </header>
@@ -725,6 +732,75 @@ export default function App() {
               <Share2 className="w-6 h-6" />
             </div>
           </div>
+
+          {/* Friends Ranking Widget */}
+          {(() => {
+            const sortedForWidget = [...friends].sort((a, b) => b.steps - a.steps);
+            const mySteps = mockData.myProfile.steps;
+            const myRankInWidget = sortedForWidget.filter(f => f.steps > mySteps).length + 1;
+            const topFriends = sortedForWidget.slice(0, 3);
+            return (
+              <div
+                className="mx-4 mt-3 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden cursor-pointer active:scale-[0.98] transition-transform"
+                onClick={() => setView('ranking')}
+              >
+                <div className="px-4 pt-4 pb-2 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Trophy className="w-4 h-4 text-yellow-500" />
+                    <span className="text-sm font-bold text-gray-800">이번 주 친구 랭킹</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-gray-300" />
+                </div>
+                <div className="px-4 pb-3 flex flex-col gap-2">
+                  {topFriends.length > 0 ? (
+                    <>
+                      {topFriends.map((friend, idx) => {
+                        const rankColors = ['text-yellow-500', 'text-blue-400', 'text-gray-400'];
+                        const rankLabels = ['1st', '2nd', '3rd'];
+                        return (
+                          <div key={friend.id} className="flex items-center gap-3">
+                            <span className={`text-xs font-bold w-6 text-center ${rankColors[idx]}`}>{rankLabels[idx]}</span>
+                            <div className="w-7 h-7 rounded-full overflow-hidden bg-gray-100 shrink-0">
+                              <img src={friend.avatar} alt={friend.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 flex-1 truncate">{friend.name}</span>
+                            <div className="flex items-center gap-1 text-gray-400 text-xs">
+                              <Footprints className="w-3 h-3" />
+                              <span className="font-bold">{friend.steps.toLocaleString()}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div className="mt-1 pt-2 border-t border-gray-50 flex items-center gap-3">
+                        <span className="text-xs font-bold w-6 text-center text-orange-500">{myRankInWidget}위</span>
+                        <div className="w-7 h-7 rounded-full overflow-hidden bg-gray-100 shrink-0">
+                          <img src={mockData.myProfile.avatar} alt="me" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-700 flex-1 truncate">
+                          {mockData.myProfile.id}
+                          <span className="ml-1 text-[10px] bg-orange-100 text-orange-500 px-1 rounded font-bold">나</span>
+                        </span>
+                        <div className="flex items-center gap-1 text-orange-400 text-xs">
+                          <Footprints className="w-3 h-3" />
+                          <span className="font-bold">{mySteps.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="py-3 text-center">
+                      <p className="text-xs text-gray-400 mb-2">아직 친구가 없어요. 친구를 추가하고 경쟁해보세요!</p>
+                      <button
+                        onClick={(e: React.MouseEvent) => { e.stopPropagation(); setView('friendManagement'); setFriendTab('findNew'); }}
+                        className="text-xs font-bold text-orange-500 border border-orange-300 px-3 py-1 rounded-full"
+                      >
+                        친구 추가하기
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="p-4 bg-white mt-2">
             <div className="flex items-center gap-2 mb-3">
