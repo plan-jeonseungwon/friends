@@ -1102,95 +1102,17 @@ export default function App() {
         </>
       )}
 
-      {/* Social Hub Banner - dynamic */}
-      {(() => {
-        const sortedForBanner = [...friends].sort((a, b) => b.steps - a.steps);
-        const mySteps = mockData.myProfile.steps;
-        const leader = sortedForBanner[0];
-        const myRankInBanner = sortedForBanner.filter(f => f.steps > mySteps).length + 1;
-
-        let label: string;
-        let labelColor: string;
-        let message: string;
-        let destination: ViewState;
-        let destTab: FriendTab | undefined = undefined;
-        let avatarNodes: React.ReactNode;
-
-        if (friendRequests.length > 0) {
-          label = '친구 요청';
-          labelColor = 'text-orange-300';
-          message = `${friendRequests.length}명이 친구 신청을 보냈어요`;
-          destination = 'friendRequests';
-          avatarNodes = (
-            <div className="flex">
-              {(friendRequests as any[]).slice(0, 3).map((req, i) => (
-                <img key={req.id} src={req.avatar} alt={req.name}
-                  className={`w-9 h-9 rounded-full border-2 border-gray-700 object-cover${i > 0 ? ' -ml-3' : ''}`}
-                  referrerPolicy="no-referrer" />
-              ))}
-            </div>
-          );
-        } else if (leader && leader.steps > mySteps) {
-          label = `랭킹 ${myRankInBanner}위`;
-          labelColor = 'text-yellow-300';
-          message = `${leader.name}님이 나를 앞질렀어요!`;
-          destination = 'ranking';
-          avatarNodes = (
-            <div className="flex">
-              <img src={leader.avatar} alt={leader.name}
-                className="w-9 h-9 rounded-full border-2 border-yellow-400 object-cover"
-                referrerPolicy="no-referrer" />
-              <img src={mockData.myProfile.avatar} alt="me"
-                className="w-9 h-9 rounded-full border-2 border-gray-600 object-cover -ml-3"
-                referrerPolicy="no-referrer" />
-            </div>
-          );
-        } else if (friends.length > 0) {
-          label = `친구 ${friends.length}명`;
-          labelColor = 'text-green-300';
-          message = '함께 걷는 중이에요!';
-          destination = 'friends_main';
-          avatarNodes = (
-            <div className="flex">
-              {friends.slice(0, 3).map((f, i) => (
-                <img key={f.id} src={f.avatar} alt={f.name}
-                  className={`w-9 h-9 rounded-full border-2 border-gray-700 object-cover${i > 0 ? ' -ml-3' : ''}`}
-                  referrerPolicy="no-referrer" />
-              ))}
-            </div>
-          );
-        } else {
-          label = '친구 추가';
-          labelColor = 'text-gray-400';
-          message = '친구를 추가하고 함께 걸어요!';
-          destination = 'friendManagement';
-          destTab = 'findNew';
-          avatarNodes = (
-            <div className="flex items-end h-10">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=transparent"
-                className="w-11 h-11 -mb-2" referrerPolicy="no-referrer" />
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka&backgroundColor=transparent"
-                className="w-9 h-9 -mb-2 -ml-3" referrerPolicy="no-referrer" />
-            </div>
-          );
-        }
-
-        return (
-          <div
-            onClick={() => { setView(destination); if (destTab) setFriendTab(destTab); }}
-            className="fixed bottom-[60px] left-0 right-0 max-w-md mx-auto bg-gray-900 text-white px-5 py-3 flex items-center justify-between cursor-pointer z-40 active:bg-gray-800 transition-colors"
-          >
-            <div className="flex flex-col gap-0.5">
-              <span className={`text-xs font-bold ${labelColor}`}>{label}</span>
-              <span className="font-bold text-sm">{message}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              {avatarNodes}
-              <ChevronRight className="w-4 h-4 text-gray-500 shrink-0" />
-            </div>
-          </div>
-        );
-      })()}
+      {/* Invite Banner */}
+      <div className="fixed bottom-[60px] left-0 right-0 max-w-md mx-auto bg-gray-900 text-white px-6 py-3 flex items-center justify-between z-40">
+        <div className="flex flex-col">
+          <span className="font-bold text-sm">Invite Your Friends and</span>
+          <span className="font-bold text-sm">Get Bonus Coins!</span>
+        </div>
+        <div className="flex items-end h-10">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=transparent" className="w-12 h-12 -mb-2" referrerPolicy="no-referrer" />
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka&backgroundColor=transparent" className="w-10 h-10 -mb-2 -ml-4" referrerPolicy="no-referrer" />
+        </div>
+      </div>
 
       {/* Main Bottom Nav */}
       <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-100 flex items-center justify-between px-2 py-1 z-50">
