@@ -468,14 +468,42 @@ export default function App() {
 
     return (
       <div className="min-h-screen bg-white font-sans text-gray-900 max-w-md mx-auto shadow-xl relative overflow-x-hidden pb-32">
-        {renderHeader(<h1 className="text-xl font-bold text-orange-600 tracking-tight">Friends</h1>)}
+        {/* Yellow Header */}
+        <header className="sticky top-0 z-30 bg-[#FFD700] px-4 pt-3">
+          <div className="flex items-center justify-between mb-0">
+            <ArrowLeft
+              className="w-6 h-6 text-gray-800 cursor-pointer"
+              onClick={() => { setView(currentTab); }}
+            />
+            <h1 className="text-lg font-bold text-gray-800">Friends</h1>
+            <div className="flex items-center gap-3">
+              <Search className="w-6 h-6 text-gray-800 cursor-pointer" onClick={() => { setView('friendManagement'); setFriendTab('myFriends'); }} />
+              <UserPlus className="w-6 h-6 text-gray-800 cursor-pointer" onClick={() => { setView('friendManagement'); setFriendTab('findNew'); }} />
+              <Settings className="w-6 h-6 text-gray-800 cursor-pointer" onClick={() => setView('settings')} />
+            </div>
+          </div>
+          {/* Top Tabs */}
+          <div className="flex mt-1">
+            <button
+              onClick={() => setView('friends_main')}
+              className="flex-1 py-2.5 text-sm font-bold border-b-2 border-transparent text-gray-600 transition-colors"
+            >
+              친구
+            </button>
+            <button
+              onClick={() => setView('ranking')}
+              className="flex-1 py-2.5 text-sm font-bold border-b-2 border-gray-800 text-gray-800 transition-colors"
+            >
+              랭킹
+            </button>
+          </div>
+        </header>
         
         <div className="text-center py-4 text-xs text-gray-400 font-medium">
           {today}
         </div>
 
         <div className="flex flex-col">
-          {/* My Rank Highlight at top if in top 3 or something, but images show it at bottom */}
           {sortedFriends.length > 0 ? (
             sortedFriends.map((friend, index) => {
               const rank = index + 1;
@@ -551,18 +579,6 @@ export default function App() {
         </div>
 
         <ProfileBottomSheet {...profileBottomSheetProps} />
-        
-        {/* Bottom Nav */}
-        <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-100 flex items-center justify-around py-2 px-4 z-20">
-          <button className="flex flex-col items-center gap-1 text-gray-400" onClick={() => setView('friends_main')}>
-            <Users className="w-6 h-6" />
-            <span className="text-[10px] font-bold">친구</span>
-          </button>
-          <button className="flex flex-col items-center gap-1 text-orange-600" onClick={() => setView('ranking')}>
-            <Trophy className="w-6 h-6" />
-            <span className="text-[10px] font-bold">랭킹</span>
-          </button>
-        </nav>
       </div>
     );
   }
@@ -570,8 +586,36 @@ export default function App() {
   if (view === 'friends_main') {
     return (
       <div className="min-h-screen bg-gray-50 font-sans text-gray-900 pb-20 max-w-md mx-auto shadow-xl relative overflow-x-hidden">
-        {/* Header */}
-        {renderHeader(<h1 className="text-xl font-bold text-orange-600 tracking-tight">Friends</h1>, true, () => { setView(currentTab); })}
+        {/* Yellow Header with top tabs */}
+        <header className="sticky top-0 z-30 bg-[#FFD700] px-4 pt-3">
+          <div className="flex items-center justify-between mb-0">
+            <ArrowLeft
+              className="w-6 h-6 text-gray-800 cursor-pointer"
+              onClick={() => { setView(currentTab); }}
+            />
+            <h1 className="text-lg font-bold text-gray-800">Friends</h1>
+            <div className="flex items-center gap-3">
+              <Search className="w-6 h-6 text-gray-800 cursor-pointer" onClick={() => { setView('friendManagement'); setFriendTab('myFriends'); }} />
+              <UserPlus className="w-6 h-6 text-gray-800 cursor-pointer" onClick={() => { setView('friendManagement'); setFriendTab('findNew'); }} />
+              <Settings className="w-6 h-6 text-gray-800 cursor-pointer" onClick={() => setView('settings')} />
+            </div>
+          </div>
+          {/* Top Tabs */}
+          <div className="flex mt-1">
+            <button
+              onClick={() => setView('friends_main')}
+              className="flex-1 py-2.5 text-sm font-bold border-b-2 border-gray-800 text-gray-800 transition-colors"
+            >
+              친구
+            </button>
+            <button
+              onClick={() => setView('ranking')}
+              className="flex-1 py-2.5 text-sm font-bold border-b-2 border-transparent text-gray-600 transition-colors"
+            >
+              랭킹
+            </button>
+          </div>
+        </header>
 
         {/* Content */}
         <main className="flex flex-col gap-4 bg-gray-50">
@@ -660,18 +704,6 @@ export default function App() {
           {toast}
         </div>
       )}
-
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-100 flex items-center justify-around py-2 px-4 z-20">
-        <button className="flex flex-col items-center gap-1 text-orange-600" onClick={() => setView('friends_main')}>
-          <Users className="w-6 h-6" />
-          <span className="text-[10px] font-bold">친구</span>
-        </button>
-        <button className="flex flex-col items-center gap-1 text-gray-400" onClick={() => setView('ranking')}>
-          <Trophy className="w-6 h-6" />
-          <span className="text-[10px] font-bold">랭킹</span>
-        </button>
-      </nav>
 
       {/* Custom Styles for hiding scrollbar */}
       <style>{`
