@@ -1,0 +1,62 @@
+{
+  "myProfile": {
+    "id": "KRNP37N",
+    "recommendCode": "KRNP37N",
+    "steps": 1157,
+    "avatar": "https://picsum.photos/seed/me/100/100"
+  },
+  "friends": [
+    {
+      "id": "friend_1",
+      "name": "공주강아지",
+      "avatar": "https://picsum.photos/seed/friend1/100/100",
+      "steps": 9103,
+      "friendCount": 72
+    },
+    {
+      "id": "friend_2",
+      "name": "산책왕",
+      "avatar": "https://picsum.photos/seed/friend2/100/100",
+      "steps": 8500,
+      "friendCount": 45
+    },
+    {
+      "id": "friend_3",
+      "name": "캐시워크매니아",
+      "avatar": "https://picsum.photos/seed/friend3/100/100",
+      "steps": 7200,
+      "friendCount": 120
+    },
+    {
+      "id": "friend_4",
+      "name": "걷기요정",
+      "avatar": "https://picsum.photos/seed/friend4/100/100",
+      "steps": 5400,
+      "friendCount": 33
+    },
+    {
+      "id": "friend_5",
+      "name": "동네한바퀴",
+      "avatar": "https://picsum.photos/seed/friend5/100/100",
+      "steps": 3200,
+      "friendCount": 18
+    }
+  ],
+  "mockUsers": [
+    {
+      "id": "user_123",
+      "name": "행운의친구",
+      "recommendCode": "123",
+      "avatar": "https://picsum.photos/seed/lucky/100/100",
+      "friendCount": 12
+    }
+  ],
+  "friendRequests": [
+    {
+      "id": "req_1",
+      "name": "김철수",
+      "avatar": "https://picsum.photos/seed/req1/100/100",
+      "time": "1시간 전"
+    }
+  ]
+}

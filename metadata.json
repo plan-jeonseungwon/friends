@@ -1,0 +1,5 @@
+{
+  "name": "Friends",
+  "description": "A mobile UI for managing friends and rankings, with friend request management and profile views.",
+  "requestFramePermissions": []
+}
