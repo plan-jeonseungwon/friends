@@ -182,6 +182,15 @@ export default function App() {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [friendRequests, setFriendRequests] = useState(mockData.friendRequests || []);
   const [friends, setFriends] = useState<Friend[]>(mockData.friends);
+  const [widgetHasFriends, setWidgetHasFriends] = useState(true);
+  
+  // Variant selection from URL (?opt=1, 2, or 3)
+  const [variant, setVariant] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setVariant(params.get('opt'));
+  }, []);
 
   const mockUsers: MockUser[] = mockData.mockUsers;
 
@@ -731,14 +740,6 @@ export default function App() {
                 <span className="font-bold text-gray-800 text-sm">342</span>
                 <div className="w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center text-[10px] font-bold text-white border border-white">C</div>
               </div>
-              <div className="relative cursor-pointer" onClick={() => setView('friends_main')}>
-                <Users className="w-6 h-6 text-gray-800" />
-                {friendRequests.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
-                    {friendRequests.length}
-                  </span>
-                )}
-              </div>
               <Bell className="w-6 h-6 text-gray-800" />
             </div>
           </header>
@@ -764,75 +765,6 @@ export default function App() {
               <Share2 className="w-6 h-6" />
             </div>
           </div>
-
-          {/* Friends Ranking Widget */}
-          {(() => {
-            const sortedForWidget = [...friends].sort((a, b) => b.steps - a.steps);
-            const mySteps = mockData.myProfile.steps;
-            const myRankInWidget = sortedForWidget.filter(f => f.steps > mySteps).length + 1;
-            const topFriends = sortedForWidget.slice(0, 3);
-            return (
-              <div
-                className="mx-4 mt-3 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden cursor-pointer active:scale-[0.98] transition-transform"
-                onClick={() => setView('ranking')}
-              >
-                <div className="px-4 pt-4 pb-2 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Trophy className="w-4 h-4 text-yellow-500" />
-                    <span className="text-sm font-bold text-gray-800">이번 주 친구 랭킹</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-300" />
-                </div>
-                <div className="px-4 pb-3 flex flex-col gap-2">
-                  {topFriends.length > 0 ? (
-                    <>
-                      {topFriends.map((friend, idx) => {
-                        const rankColors = ['text-yellow-500', 'text-blue-400', 'text-gray-400'];
-                        const rankLabels = ['1st', '2nd', '3rd'];
-                        return (
-                          <div key={friend.id} className="flex items-center gap-3">
-                            <span className={`text-xs font-bold w-6 text-center ${rankColors[idx]}`}>{rankLabels[idx]}</span>
-                            <div className="w-7 h-7 rounded-full overflow-hidden bg-gray-100 shrink-0">
-                              <img src={friend.avatar} alt={friend.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                            </div>
-                            <span className="text-sm font-medium text-gray-700 flex-1 truncate">{friend.name}</span>
-                            <div className="flex items-center gap-1 text-gray-400 text-xs">
-                              <Footprints className="w-3 h-3" />
-                              <span className="font-bold">{friend.steps.toLocaleString()}</span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                      <div className="mt-1 pt-2 border-t border-gray-50 flex items-center gap-3">
-                        <span className="text-xs font-bold w-6 text-center text-orange-500">{myRankInWidget}위</span>
-                        <div className="w-7 h-7 rounded-full overflow-hidden bg-gray-100 shrink-0">
-                          <img src={mockData.myProfile.avatar} alt="me" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                        </div>
-                        <span className="text-sm font-medium text-gray-700 flex-1 truncate">
-                          {mockData.myProfile.id}
-                          <span className="ml-1 text-[10px] bg-orange-100 text-orange-500 px-1 rounded font-bold">나</span>
-                        </span>
-                        <div className="flex items-center gap-1 text-orange-400 text-xs">
-                          <Footprints className="w-3 h-3" />
-                          <span className="font-bold">{mySteps.toLocaleString()}</span>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="py-3 text-center">
-                      <p className="text-xs text-gray-400 mb-2">아직 친구가 없어요. 친구를 추가하고 경쟁해보세요!</p>
-                      <button
-                        onClick={(e: React.MouseEvent) => { e.stopPropagation(); setView('friendManagement'); setFriendTab('findNew'); }}
-                        className="text-xs font-bold text-orange-500 border border-orange-300 px-3 py-1 rounded-full"
-                      >
-                        친구 추가하기
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })()}
 
           <div className="p-4 bg-white mt-2">
             <div className="flex items-center gap-2 mb-3">
@@ -867,6 +799,133 @@ export default function App() {
               </div>
             </div>
           </div>
+
+          {/* Option 2: Floating Action Button (FAB) */}
+          {(variant === '2' || variant === null) && (
+            <motion.button 
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setView('friends_main')}
+              className="fixed right-6 bottom-32 w-12 h-12 bg-orange-500 rounded-full shadow-lg shadow-orange-200 flex items-center justify-center text-white z-[45]"
+            >
+              <Users className="w-6 h-6" />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
+            </motion.button>
+          )}
+
+          {/* Friends Daily Ranking Widget */}
+          {(() => {
+            const sortedForWidget = [...friends].sort((a, b) => b.steps - a.steps);
+            const mySteps = mockData.myProfile.steps;
+            const myRankInWidget = sortedForWidget.filter(f => f.steps > mySteps).length + 1;
+            const topFriends = sortedForWidget.slice(0, 3);
+            const medalColors = ['#FFD700', '#C0C0C0', '#CD7F32'];
+            return (
+              <div className="mx-4 mt-1 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="px-4 pt-3 pb-2 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Trophy className="w-4 h-4 text-yellow-500" />
+                    <span className="text-sm font-bold text-gray-800">오늘의 친구 랭킹</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {/* 임시 토글 */}
+                    <button
+                      onClick={() => setWidgetHasFriends(v => !v)}
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-colors ${widgetHasFriends ? 'border-green-400 text-green-600 bg-green-50' : 'border-gray-300 text-gray-400 bg-gray-50'}`}
+                    >
+                      {widgetHasFriends ? '친구 있음' : '친구 없음'}
+                    </button>
+                    {/* Option 1: Friends Page Icon in Widget Header */}
+                    {(variant === '1' || variant === null) && (
+                      <button 
+                        onClick={() => setView('friends_main')}
+                        className="p-1.5 bg-orange-50 rounded-full text-orange-500 hover:bg-orange-100 transition-colors"
+                      >
+                        <Users className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setView(widgetHasFriends ? 'ranking' : 'friends_main')}
+                      className="text-[11px] text-gray-400 flex items-center gap-0.5 active:text-gray-600"
+                    >
+                      전체보기 <ChevronRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+                <div className="px-4 pb-3">
+                  {widgetHasFriends ? (
+                    <div className="flex gap-2">
+                      {topFriends.map((friend, idx) => (
+                        <button
+                          key={friend.id}
+                          onClick={() => setView('ranking')}
+                          className="flex-1 flex flex-col items-center gap-1.5 py-2 rounded-xl active:bg-gray-50 transition-colors"
+                        >
+                          <div className="relative">
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 border-transparent">
+                              <img src={friend.avatar} alt={friend.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            </div>
+                            <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white shadow-sm" style={{ backgroundColor: medalColors[idx] }}>
+                              {idx + 1}
+                            </span>
+                          </div>
+                          <span className="text-[10px] font-medium text-gray-600 truncate w-full text-center px-0.5">{friend.name.split(' ')[0]}</span>
+                          <span className="text-[10px] font-bold text-gray-800">{friend.steps.toLocaleString()}</span>
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => setView('ranking')}
+                        className="flex-1 flex flex-col items-center gap-1.5 py-2 rounded-xl active:bg-gray-50 transition-colors"
+                      >
+                        <div className="relative">
+                          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 border-orange-400">
+                            <img src={mockData.myProfile.avatar} alt="me" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                          </div>
+                          <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-orange-400 flex items-center justify-center text-[8px] font-black text-white shadow-sm">나</span>
+                        </div>
+                        <span className="text-[10px] font-medium text-gray-600 truncate w-full text-center px-0.5">나</span>
+                        <span className="text-[10px] font-bold text-orange-500">#{myRankInWidget}위</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="py-3 text-center">
+                      <p className="text-xs text-gray-400 mb-2">아직 친구가 없어요. 친구를 추가해보세요!</p>
+                      <button
+                        onClick={() => { setView('friendManagement'); setFriendTab('findNew'); }}
+                        className="text-xs font-bold text-orange-500 border border-orange-300 px-3 py-1 rounded-full"
+                      >
+                        친구 추가하기
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Option 3: Dedicated Friends Banner */}
+          {(variant === '3' || variant === null) && (
+            <div className="mx-4 mt-3">
+              <motion.div 
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setView('friends_main')}
+                className="bg-gradient-to-r from-orange-400 to-orange-500 rounded-2xl p-4 shadow-md shadow-orange-100 flex items-center justify-between overflow-hidden relative"
+              >
+                <div className="relative z-10">
+                  <h3 className="text-white font-bold text-sm mb-1">캐시톡 친구를 찾아보세요!</h3>
+                  <p className="text-orange-50 text-[11px]">친구와 함께 걸으면 더 즐거워요</p>
+                </div>
+                <div className="bg-white/20 p-2 rounded-xl relative z-10 backdrop-blur-sm">
+                  <UserPlus className="w-5 h-5 text-white" />
+                </div>
+                {/* Decorative circles */}
+                <div className="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full border border-white/5" />
+                <div className="absolute -right-2 -bottom-2 w-12 h-12 bg-white/5 rounded-full" />
+              </motion.div>
+            </div>
+          )}
 
           <div className="p-4 flex gap-3 overflow-x-auto no-scrollbar">
             <div className="min-w-[140px] bg-white rounded-xl p-3 border border-gray-100 shadow-sm shrink-0">

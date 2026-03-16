@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Users/넛지/Documents/[Dev]/friends -maxdepth 2 -type f \\\\\\( -name \"CLAUDE.md\" -o -name \".cursorrules\" -o -name \"*copilot*\" \\\\\\))",
+      "Bash(find /c/Users/넛지/Documents/[Dev]/friends/src -type f -name \"*.ts\" -o -name \"*.tsx\" -o -name \"*.json\")",
+      "Bash(find /c/Users/넛지/Documents/[Dev]/friends/src -type f)",
+      "Bash(ls -la /c/Users/넛지/Documents/[Dev]/friends/.github/)",
+      "Bash(ls -la /c/Users/넛지/Documents/[Dev]/friends/.github/workflows/)",
+      "Bash(wc -l /c/Users/넛지/Documents/[Dev]/friends/src/App.tsx)",
+      "Bash(cat /c/Users/넛지/Documents/[Dev]/friends/.gitignore)",
+      "Bash(grep -n \"^const\\\\|^function\\\\|^export\" /c/Users/넛지/Documents/[Dev]/friends/src/App.tsx)",
+      "Bash(find /c/Users/넛지/Documents/[Dev]/friends -maxdepth 1 -name \".*\" -type f)",
+      "Bash(grep -n \"^  if \\(view ===\" /c/Users/넛지/Documents/[Dev]/friends/src/App.tsx)",
+      "Bash(grep -A 5 \"currentTab ===\" /c/Users/넛지/Documents/[Dev]/friends/src/App.tsx)",
+      "Bash(tail -100 /c/Users/넛지/Documents/[Dev]/friends/src/App.tsx)",
+      "Read(//c/Users/넛지/Documents/**)",
+      "Bash(npm run lint)"
+    ]
+  }
+}
