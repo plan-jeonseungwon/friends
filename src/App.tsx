@@ -35,7 +35,11 @@ import {
   Eye,
   ThumbsUp,
   Bookmark,
-  Edit3
+  Edit3,
+  Smartphone,
+  Ticket,
+  History,
+  Watch
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import mockData from './data.json';
@@ -166,6 +170,93 @@ const Toggle = ({ enabled, setEnabled }: { enabled: boolean, setEnabled: (v: boo
   </button>
 );
 
+interface SideDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onNavigate: (view: ViewState) => void;
+}
+
+const SideDrawer = ({ isOpen, onClose, onNavigate }: SideDrawerProps) => (
+  <AnimatePresence>
+    {isOpen && (
+      <>
+        {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="fixed inset-0 bg-black/50 z-[100] max-w-md mx-auto"
+        />
+        {/* Drawer Content */}
+        <motion.div
+          initial={{ x: '-100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '-100%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className="absolute inset-y-0 left-0 w-[80%] max-w-[320px] bg-white z-[110] flex flex-col shadow-2xl h-screen"
+        >
+          {/* Header */}
+          <div className="bg-[#FFD700] p-6 pb-8 flex flex-col items-center relative">
+            <div className="w-full flex justify-between mb-4">
+              <button onClick={onClose} className="p-1 -ml-2">
+                <ArrowLeft className="w-6 h-6 text-gray-800" />
+              </button>
+              <button 
+                onClick={() => { onNavigate('settings'); onClose(); }}
+                className="p-1 -mr-2"
+              >
+                <Settings className="w-6 h-6 text-gray-800" />
+              </button>
+            </div>
+            
+            <div className="w-20 h-20 rounded-full bg-[#00A9B5] flex items-center justify-center mb-3 border-4 border-white/20 shadow-inner">
+              <span className="text-white text-2xl font-bold">승원</span>
+            </div>
+            
+            <h2 className="text-xl font-bold text-gray-800 mb-2">전승원</h2>
+            
+            <div className="bg-white/30 px-3 py-1 rounded-full flex items-center gap-1 border border-white/20">
+              <span className="font-bold text-gray-800 text-sm">345</span>
+              <div className="w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center text-[10px] font-bold text-white border border-white shadow-sm">C</div>
+            </div>
+          </div>
+
+          {/* Menu Items */}
+          <div className="flex-1 py-4 overflow-y-auto">
+            <button className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left">
+              <Smartphone className="w-6 h-6 text-gray-400 shrink-0" />
+              <span className="text-gray-700 font-medium">Open lockscreen</span>
+            </button>
+            <button className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left">
+              <Ticket className="w-6 h-6 text-gray-400 shrink-0" />
+              <span className="text-gray-700 font-medium">My rewards</span>
+            </button>
+            <button className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left">
+              <History className="w-6 h-6 text-gray-400 shrink-0" />
+              <span className="text-gray-700 font-medium">Coin History</span>
+            </button>
+            <button className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left">
+              <Watch className="w-6 h-6 text-gray-400 shrink-0" />
+              <span className="text-gray-700 font-medium">Wearable Device</span>
+            </button>
+            
+            <div className="h-px bg-gray-100 my-2 mx-6" />
+            
+            <button 
+              onClick={() => { onNavigate('friends_main'); onClose(); }}
+              className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
+            >
+              <UserPlus className="w-6 h-6 text-gray-400 shrink-0" />
+              <span className="text-gray-700 font-medium">Invite friends</span>
+            </button>
+          </div>
+        </motion.div>
+      </>
+    )}
+  </AnimatePresence>
+);
+
 export default function App() {
   const [view, setView] = useState<ViewState>('home');
   const [currentTab, setCurrentTab] = useState<Tab>('home');
@@ -183,6 +274,7 @@ export default function App() {
   const [friendRequests, setFriendRequests] = useState(mockData.friendRequests || []);
   const [friends, setFriends] = useState<Friend[]>(mockData.friends);
   const [widgetHasFriends, setWidgetHasFriends] = useState(true);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
   // Variant selection from URL (?opt=1, 2, or 3)
   const [variant, setVariant] = useState<string | null>(null);
@@ -732,8 +824,16 @@ export default function App() {
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900 pb-32 max-w-md mx-auto shadow-xl relative overflow-x-hidden">
       {view === 'home' && (
         <>
+          <SideDrawer 
+            isOpen={isDrawerOpen} 
+            onClose={() => setIsDrawerOpen(false)} 
+            onNavigate={(v) => { setView(v); setCurrentTab(v as Tab); }}
+          />
           <header className="sticky top-0 z-30 bg-[#FFD700] px-4 py-3 flex items-center justify-between">
-            <Menu className="w-6 h-6 text-gray-800" />
+            <Menu 
+              className="w-6 h-6 text-gray-800 cursor-pointer active:scale-95 transition-transform" 
+              onClick={() => setIsDrawerOpen(true)}
+            />
             <h1 className="text-lg font-bold text-gray-800">Home</h1>
             <div className="flex items-center gap-3">
               <div className="bg-white/30 px-3 py-1 rounded-full flex items-center gap-1">
@@ -808,7 +908,7 @@ export default function App() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setView('friends_main')}
-              className="fixed right-6 bottom-32 w-12 h-12 bg-orange-500 rounded-full shadow-lg shadow-orange-200 flex items-center justify-center text-white z-[45]"
+              className="absolute right-6 bottom-32 w-12 h-12 bg-orange-500 rounded-full shadow-lg shadow-orange-200 flex items-center justify-center text-white z-[45]"
             >
               <Users className="w-6 h-6" />
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
