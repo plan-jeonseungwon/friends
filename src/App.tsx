@@ -6,18 +6,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, 
-  Search, 
   UserPlus, 
   Settings, 
   Copy, 
   ChevronRight, 
-  RefreshCw, 
-  ChevronUp,
   Users,
-  MessageCircle,
   Trophy,
-  Info,
-  MoreHorizontal,
   Frown,
   Check,
   Menu,
@@ -39,14 +33,19 @@ import {
   Smartphone,
   Ticket,
   History,
-  Watch
+  Watch,
+  Clover,
+  BellOff,
+  Wifi,
+  Search,
+  MoreHorizontal,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import mockData from './data.json';
 
 type Tab = 'home' | 'challenge' | 'rewards' | 'play' | 'feeds';
-type ViewState = Tab | 'friends_main' | 'settings' | 'friendManagement' | 'ranking' | 'friendRequests';
-type FriendTab = 'myFriends' | 'findNew';
+type ViewState = Tab | 'friends_main' | 'settings' | 'friendManagement' | 'ranking' | 'friendRequests' | 'lockscreen';
+
 
 interface Friend {
   id: string;
@@ -224,7 +223,10 @@ const SideDrawer = ({ isOpen, onClose, onNavigate }: SideDrawerProps) => (
 
           {/* Menu Items */}
           <div className="flex-1 py-4 overflow-y-auto">
-            <button className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left">
+            <button 
+              onClick={() => { onNavigate('lockscreen'); onClose(); }}
+              className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
+            >
               <Smartphone className="w-6 h-6 text-gray-400 shrink-0" />
               <span className="text-gray-700 font-medium">Open lockscreen</span>
             </button>
@@ -260,8 +262,6 @@ const SideDrawer = ({ isOpen, onClose, onNavigate }: SideDrawerProps) => (
 export default function App() {
   const [view, setView] = useState<ViewState>('home');
   const [currentTab, setCurrentTab] = useState<Tab>('home');
-  const [friendTab, setFriendTab] = useState<FriendTab>('myFriends');
-  const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState<string | null>(null);
   const [foundUser, setFoundUser] = useState<MockUser | null>(null);
@@ -274,14 +274,14 @@ export default function App() {
   const [friendRequests, setFriendRequests] = useState(mockData.friendRequests || []);
   const [friends, setFriends] = useState<Friend[]>(mockData.friends);
   const [widgetHasFriends, setWidgetHasFriends] = useState(true);
+  const [simulateRank, setSimulateRank] = useState<number | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  
-  // Variant selection from URL (?opt=1, 2, or 3)
-  const [variant, setVariant] = useState<string | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    setVariant(params.get('opt'));
+    if (window.location.pathname.includes('/lock') || params.has('lock') || window.location.hash.includes('lock')) {
+      setView('lockscreen');
+    }
   }, []);
 
   const mockUsers: MockUser[] = mockData.mockUsers;
@@ -295,16 +295,10 @@ export default function App() {
 
   const showToast = (message: string) => setToast(message);
 
-  const toggleMenu = () => setMenuOpen(!menuOpen);
-
   const handleCopyCode = () => {
     navigator.clipboard.writeText(mockData.myProfile.recommendCode);
     showToast('추천코드가 복사되었습니다.');
   };
-
-  const filteredFriends = friends.filter(f => 
-    f.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const handleSearchCode = (query: string) => {
     setSearchQuery(query);
@@ -315,15 +309,6 @@ export default function App() {
   const handleRemoveFriend = (friendId: string) => {
     setFriends(friends.filter(f => f.id !== friendId));
     showToast('친구 관계가 해제되었습니다.');
-  };
-
-  const renderMoreMenu = () => {
-    if (!menuOpen) return null;
-    return (
-      <div className="absolute right-4 top-12 bg-white shadow-2xl rounded-lg py-2 w-48 z-50 border border-gray-100 animate-in fade-in zoom-in duration-200">
-        <button onClick={() => { setView('friendRequests'); setMenuOpen(false); }} className="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 transition-colors">친구 요청 관리</button>
-      </div>
-    );
   };
 
   const renderHeader = (title: string | React.ReactNode, showIcons = true, onBack?: () => void) => (
@@ -339,7 +324,6 @@ export default function App() {
               setSearchQuery('');
               setFoundUser(null);
             }
-            setMenuOpen(false);
           }} 
         />
         {typeof title === 'string' ? (
@@ -348,8 +332,7 @@ export default function App() {
       </div>
       {showIcons && (
         <div className="flex items-center gap-4">
-          <Search className="w-6 h-6 text-gray-700 cursor-pointer" onClick={() => { setView('friendManagement'); setFriendTab('myFriends'); }} />
-          <UserPlus className="w-6 h-6 text-gray-700 cursor-pointer" onClick={() => { setView('friendManagement'); setFriendTab('findNew'); }} />
+          <UserPlus className="w-6 h-6 text-gray-700 cursor-pointer" onClick={() => { setView('friendManagement'); setSearchQuery(''); setFoundUser(null); }} />
           <Settings className="w-6 h-6 text-gray-700 cursor-pointer" onClick={() => setView('settings')} />
         </div>
       )}
@@ -363,6 +346,102 @@ export default function App() {
     setProfileMenuOpen,
     handleRemoveFriend
   };
+
+  if (view === 'lockscreen') {
+    return (
+      <div 
+        className="min-h-screen font-sans text-gray-900 max-w-md mx-auto relative overflow-hidden bg-cover bg-center"
+        style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80)' }}
+      >
+        <div className="absolute inset-0 bg-black/10"></div>
+        
+        {/* Android Status Bar */}
+        <div className="relative z-10 flex items-center justify-between px-4 pt-2 pb-1 text-white">
+          <div className="flex items-center gap-1 text-[13px] font-medium tracking-wide">
+            11:03
+            <MessageSquare className="w-3 h-3 ml-1 opacity-80" />
+            <span className="opacity-80 text-[10px] bg-white/20 rounded-sm px-0.5">N</span>
+            <Camera className="w-3 h-3 opacity-80" />
+          </div>
+          <div className="flex items-center gap-1.5 text-xs">
+            <BellOff className="w-3 h-3" />
+            <Wifi className="w-3 h-3" />
+            <div className="flex items-end gap-0.5 h-3 ml-0.5">
+              <div className="w-0.5 h-1.5 bg-white"></div>
+              <div className="w-0.5 h-2 bg-white"></div>
+              <div className="w-0.5 h-2.5 bg-white"></div>
+              <div className="w-0.5 h-3 bg-white"></div>
+            </div>
+            <div className="relative flex items-center ml-1">
+              <div className="pl-1 pr-1.5 border border-white/60 rounded-sm text-[10px] font-bold h-[16px] flex items-center gap-1">
+                56
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Top App Icons */}
+        <div className="relative z-10 flex items-center justify-end gap-5 px-6 pt-3 pb-8 text-white">
+          <UserPlus className="w-[22px] h-[22px] drop-shadow-md" />
+          <Trophy className="w-[22px] h-[22px] drop-shadow-md" />
+          <MessageSquare className="w-[22px] h-[22px] drop-shadow-md" />
+          <Camera className="w-[22px] h-[22px] drop-shadow-md" />
+          <Clover className="w-[22px] h-[22px] drop-shadow-md" />
+          <Gamepad2 className="w-[22px] h-[22px] drop-shadow-md" />
+        </div>
+
+        {/* Time and Date */}
+        <div className="relative z-10 flex flex-col items-center pt-2 pb-12">
+          <h1 className="text-[76px] leading-[0.9] font-normal text-white tracking-widest drop-shadow-lg">11:03</h1>
+          <p className="text-white/90 text-[17px] font-medium tracking-wide drop-shadow-md mt-2">3월 20일 금요일</p>
+        </div>
+
+        {/* Circular Steps Counter */}
+        <div className="relative z-10 w-64 h-64 mx-auto mt-4 pt-4">
+          <svg className="absolute inset-0 w-full h-full transform -rotate-90">
+            <circle cx="128" cy="128" r="126" stroke="rgba(255,255,255,0.15)" strokeWidth="2" fill="none" />
+            <circle cx="128" cy="128" r="126" stroke="#FFD700" strokeWidth="4" fill="none" strokeDasharray="791" strokeDashoffset="550" strokeLinecap="round" />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center pt-2">
+            <span className="text-[52px] font-light text-white leading-tight tracking-tight drop-shadow-md">2,749</span>
+            <span className="text-[15px] font-medium text-white/60 mb-3 drop-shadow-md tracking-wider">Steps</span>
+            <div className="flex items-center gap-5 text-[15px] font-medium mt-1">
+              <span className="text-white drop-shadow-md">123 <span className="text-white/60 font-normal">kcal</span></span>
+              <span className="text-white drop-shadow-md">1.4 <span className="text-white/60 font-normal">mi</span></span>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom overlapping banners */}
+        <div className="absolute bottom-[6.5rem] w-full px-5 flex justify-center z-20">
+          <div className="relative w-full max-w-sm">
+            {/* Overlapping Update Banner */}
+            <div className="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-[#555555]/80 backdrop-blur-md rounded-full px-5 py-2 z-10 shadow-xl whitespace-nowrap">
+              <span className="text-white/95 text-[13px] drop-shadow-md font-medium tracking-wide">
+                A new version is available. <span className="font-bold text-white">Tap here to update</span>
+              </span>
+            </div>
+            
+            {/* NEWS Banner */}
+            <div className="w-full bg-black/40 backdrop-blur-md rounded-lg px-4 py-3.5 flex items-center shadow-lg pt-4 pb-4">
+              <span className="border border-white/50 text-white/90 text-[10px] font-medium tracking-wider px-1.5 py-0.5 rounded mr-3 shrink-0">NEWS</span>
+              <span className="text-white/80 text-[13.5px] truncate tracking-wide">Traveling with disabilities is often hard. These too...</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Slide to unlock */}
+        <div className="absolute bottom-[3.5rem] w-full text-center z-20">
+          <span className="text-white font-bold text-[15px] tracking-wide drop-shadow-md cursor-pointer hover:opacity-80 transition-opacity" onClick={() => {
+            setView('home'); 
+            setIsDrawerOpen(false); 
+          }}>
+            Slide to unlock &gt;&gt;
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   if (view === 'settings') {
     return (
@@ -394,7 +473,7 @@ export default function App() {
         <div className="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 mt-4">친구 관리</div>
         <div className="bg-white">
           {[
-            { label: '내 친구 관리', action: () => { setView('friendManagement'); setFriendTab('myFriends'); } },
+            { label: '친구 추가', action: () => { setView('friendManagement'); setSearchQuery(''); setFoundUser(null); } },
             { label: '친구 요청 관리', action: () => setView('friendRequests') },
           ].map((item, idx) => (
             <button key={idx} onClick={item.action} className="w-full px-4 py-4 flex items-center justify-between border-b border-gray-50 last:border-0 hover:bg-gray-50">
@@ -413,27 +492,9 @@ export default function App() {
     return (
       <div className="min-h-screen bg-white font-sans text-gray-900 max-w-md mx-auto shadow-xl relative overflow-x-hidden pb-20">
         <header className="sticky top-0 z-10 bg-white border-b border-gray-100">
-          <div className="px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <ArrowLeft className="w-6 h-6 text-gray-700 cursor-pointer" onClick={() => setView('friends_main')} />
-              <h1 className="text-lg font-bold text-gray-800 flex-1 text-center pr-6">친구 관리</h1>
-            </div>
-            <MoreHorizontal className="w-6 h-6 text-gray-700 cursor-pointer" onClick={toggleMenu} />
-            {renderMoreMenu()}
-          </div>
-          <div className="flex">
-            <button 
-              onClick={() => { setFriendTab('myFriends'); setSearchQuery(''); setFoundUser(null); }}
-              className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors ${friendTab === 'myFriends' ? 'border-gray-800 text-gray-800' : 'border-transparent text-gray-400'}`}
-            >
-              내 친구
-            </button>
-            <button 
-              onClick={() => { setFriendTab('findNew'); setSearchQuery(''); setFoundUser(null); }}
-              className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors ${friendTab === 'findNew' ? 'border-gray-800 text-gray-800' : 'border-transparent text-gray-400'}`}
-            >
-              새 친구 찾기
-            </button>
+          <div className="px-4 py-3 flex items-center">
+            <ArrowLeft className="w-6 h-6 text-gray-700 cursor-pointer" onClick={() => { setView('friends_main'); setSearchQuery(''); setFoundUser(null); }} />
+            <h1 className="text-lg font-bold text-gray-800 flex-1 text-center pr-6">친구 추가</h1>
           </div>
         </header>
 
@@ -441,66 +502,42 @@ export default function App() {
           <div className="relative mb-6">
             <input 
               type="text" 
-              placeholder={friendTab === 'myFriends' ? "친구 이름 검색하기" : "추천 코드 검색하기"}
+              placeholder="추천 코드 검색하기"
               className="w-full bg-gray-100 rounded-xl py-3 px-4 pr-10 focus:outline-none focus:ring-2 focus:ring-orange-200 transition-all"
               value={searchQuery}
-              onChange={(e) => friendTab === 'myFriends' ? setSearchQuery(e.target.value) : handleSearchCode(e.target.value)}
+              onChange={(e) => handleSearchCode(e.target.value)}
             />
             <Search className="absolute right-3 top-3.5 w-5 h-5 text-gray-400" />
           </div>
 
-          {friendTab === 'myFriends' ? (
-            <>
-              {filteredFriends.length > 0 ? (
-                <div className="flex flex-col gap-4">
-                  {filteredFriends.map(friend => (
-                    <div key={friend.id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer" onClick={() => setSelectedProfile(friend)}>
-                      <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
-                        <img src={friend.avatar} alt={friend.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                      </div>
-                      <span className="font-bold text-gray-800">{friend.name}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center mt-20 text-center px-10">
-                  <Frown className="w-12 h-12 text-gray-200 mb-4" />
-                  <p className="text-gray-400 font-medium">내 친구가 없습니다.</p>
-                </div>
-              )}
-            </>
+          {foundUser ? (
+            <div className="mt-8 p-6 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col items-center animate-in slide-in-from-bottom-4 duration-300">
+              <div className="w-24 h-24 rounded-full overflow-hidden mb-4 shadow-md cursor-pointer" onClick={() => setSelectedProfile({ id: foundUser.id, name: foundUser.name, avatar: foundUser.avatar, steps: 0, friendCount: foundUser.friendCount })}>
+                <img src={foundUser.avatar} alt={foundUser.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-1">{foundUser.name}</h3>
+              <p className="text-sm text-gray-400 mb-6">친구 {foundUser.friendCount}명</p>
+              <button 
+                onClick={() => showToast(`${foundUser.name}님에게 친구 신청을 보냈습니다.`)}
+                className="w-full py-3 bg-orange-500 text-white font-bold rounded-xl shadow-lg shadow-orange-200 hover:bg-orange-600 transition-all active:scale-95"
+              >
+                친구 신청하기
+              </button>
+            </div>
+          ) : searchQuery ? (
+            <div className="flex flex-col items-center justify-center mt-20 text-center px-8">
+              <Frown className="w-12 h-12 text-gray-200 mb-4" />
+              <p className="text-gray-400 font-medium">해당 코드로 가입된 사용자가 없습니다.</p>
+            </div>
           ) : (
-            <>
-              {foundUser ? (
-                <div className="mt-8 p-6 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col items-center animate-in slide-in-from-bottom-4 duration-300">
-                  <div className="w-24 h-24 rounded-full overflow-hidden mb-4 shadow-md cursor-pointer" onClick={() => setSelectedProfile({ id: foundUser.id, name: foundUser.name, avatar: foundUser.avatar, steps: 0, friendCount: foundUser.friendCount })}>
-                    <img src={foundUser.avatar} alt={foundUser.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-1">{foundUser.name}</h3>
-                  <p className="text-sm text-gray-400 mb-6">친구 {foundUser.friendCount}명</p>
-                  <button 
-                    onClick={() => showToast(`${foundUser.name}님에게 친구 신청을 보냈습니다.`)}
-                    className="w-full py-3 bg-orange-500 text-white font-bold rounded-xl shadow-lg shadow-orange-200 hover:bg-orange-600 transition-all active:scale-95"
-                  >
-                    친구 신청하기
-                  </button>
-                </div>
-              ) : searchQuery ? (
-                <div className="flex flex-col items-center justify-center mt-20 text-center px-8">
-                  <Frown className="w-12 h-12 text-gray-200 mb-4" />
-                  <p className="text-gray-400 font-medium">해당 코드로 가입된 사용자가 없습니다.</p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center mt-20 text-center px-8">
-                  <p className="text-gray-400 font-medium leading-relaxed">
-                    검색창에 친구하고 싶은 사람의<br />
-                    추천코드를 검색해보세요.<br /><br />
-                    추천코드는 "설정 &gt; 프로필 설정"에서<br />
-                    확인 가능해요.
-                  </p>
-                </div>
-              )}
-            </>
+            <div className="flex flex-col items-center justify-center mt-20 text-center px-8">
+              <p className="text-gray-400 font-medium leading-relaxed">
+                검색창에 친구하고 싶은 사람의<br />
+                추천코드를 검색해보세요.<br /><br />
+                추천코드는 "설정 &gt; 프로필 설정"에서<br />
+                확인 가능해요.
+              </p>
+            </div>
           )}
         </div>
         <ProfileBottomSheet {...profileBottomSheetProps} />
@@ -578,8 +615,7 @@ export default function App() {
             />
             <h1 className="text-lg font-bold text-gray-800">Friends</h1>
             <div className="flex items-center gap-3">
-              <Search className="w-6 h-6 text-gray-800 cursor-pointer" onClick={() => { setView('friendManagement'); setFriendTab('myFriends'); }} />
-              <UserPlus className="w-6 h-6 text-gray-800 cursor-pointer" onClick={() => { setView('friendManagement'); setFriendTab('findNew'); }} />
+              <UserPlus className="w-6 h-6 text-gray-800 cursor-pointer" onClick={() => { setView('friendManagement'); setSearchQuery(''); setFoundUser(null); }} />
               <Settings className="w-6 h-6 text-gray-800 cursor-pointer" onClick={() => setView('settings')} />
             </div>
           </div>
@@ -648,7 +684,7 @@ export default function App() {
                 친구추가하고 대결을 해볼까요?
               </p>
               <div className="flex flex-col gap-2 mt-6 w-full max-w-[200px]">
-                <button onClick={() => { setView('friendManagement'); setFriendTab('findNew'); }} className="w-full py-3 border border-gray-200 text-gray-600 font-bold rounded-xl text-sm">새 친구 찾기</button>
+                <button onClick={() => { setView('friendManagement'); setSearchQuery(''); setFoundUser(null); }} className="w-full py-3 border border-gray-200 text-gray-600 font-bold rounded-xl text-sm">친구 추가하기</button>
               </div>
             </div>
           )}
@@ -696,8 +732,7 @@ export default function App() {
             />
             <h1 className="text-lg font-bold text-gray-800">Friends</h1>
             <div className="flex items-center gap-3">
-              <Search className="w-6 h-6 text-gray-800 cursor-pointer" onClick={() => { setView('friendManagement'); setFriendTab('myFriends'); }} />
-              <UserPlus className="w-6 h-6 text-gray-800 cursor-pointer" onClick={() => { setView('friendManagement'); setFriendTab('findNew'); }} />
+              <UserPlus className="w-6 h-6 text-gray-800 cursor-pointer" onClick={() => { setView('friendManagement'); setSearchQuery(''); setFoundUser(null); }} />
               <Settings className="w-6 h-6 text-gray-800 cursor-pointer" onClick={() => setView('settings')} />
             </div>
           </div>
@@ -900,28 +935,48 @@ export default function App() {
             </div>
           </div>
 
-          {/* Option 2: Floating Action Button (FAB) */}
-          {(variant === '2' || variant === null) && (
-            <motion.button 
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setView('friends_main')}
-              className="absolute right-6 bottom-32 w-12 h-12 bg-orange-500 rounded-full shadow-lg shadow-orange-200 flex items-center justify-center text-white z-[45]"
-            >
-              <Users className="w-6 h-6" />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
-            </motion.button>
-          )}
+
 
           {/* Friends Daily Ranking Widget */}
           {(() => {
             const sortedForWidget = [...friends].sort((a, b) => b.steps - a.steps);
-            const mySteps = mockData.myProfile.steps;
+            const realMySteps = mockData.myProfile.steps;
+
+            // 순위 시뮬레이션: simulateRank가 설정되면 해당 순위에 맞는 걸음수로 치환
+            let mySteps = realMySteps;
+            if (simulateRank !== null) {
+              const totalCount = sortedForWidget.length + 1; // 친구 수 + 나
+              if (simulateRank === 1) {
+                mySteps = sortedForWidget[0].steps + 500;
+              } else if (simulateRank > sortedForWidget.length) {
+                mySteps = sortedForWidget[sortedForWidget.length - 1].steps - 500;
+              } else {
+                const above = sortedForWidget[simulateRank - 2].steps;
+                const below = sortedForWidget[simulateRank - 1].steps;
+                mySteps = Math.floor((above + below) / 2);
+              }
+            }
+
             const myRankInWidget = sortedForWidget.filter(f => f.steps > mySteps).length + 1;
-            const topFriends = sortedForWidget.slice(0, 3);
+
+            // 내가 상위권일 때: 내 슬롯이 상위 3개 안에 들어가도록 재구성
+            const allParticipants = [
+              ...sortedForWidget.map(f => ({ ...f, isMe: false })),
+            ];
+            // 나를 올바른 위치에 삽입
+            const withMe = [
+              ...allParticipants.slice(0, myRankInWidget - 1),
+              { id: 'me', name: '나', avatar: mockData.myProfile.avatar, steps: mySteps, isMe: true },
+              ...allParticipants.slice(myRankInWidget - 1),
+            ];
+            const top3 = withMe.slice(0, 3);
+            // "나"가 top3 안에 있는지 확인
+            const isMeInTop3 = myRankInWidget <= 3;
+
             const medalColors = ['#FFD700', '#C0C0C0', '#CD7F32'];
+            const rankLabels = ['1위', '2위', '3위', '4위', '5위', '꼴찌'];
+            const rankValues = [1, 2, 3, 4, 5, sortedForWidget.length + 1];
+
             return (
               <div className="mx-4 mt-1 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 <div className="px-4 pt-3 pb-2 flex items-center justify-between">
@@ -930,22 +985,13 @@ export default function App() {
                     <span className="text-sm font-bold text-gray-800">오늘의 친구 랭킹</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {/* 임시 토글 */}
+                    {/* 친구 있음/없음 토글 */}
                     <button
                       onClick={() => setWidgetHasFriends(v => !v)}
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-colors ${widgetHasFriends ? 'border-green-400 text-green-600 bg-green-50' : 'border-gray-300 text-gray-400 bg-gray-50'}`}
                     >
                       {widgetHasFriends ? '친구 있음' : '친구 없음'}
                     </button>
-                    {/* Option 1: Friends Page Icon in Widget Header */}
-                    {(variant === '1' || variant === null) && (
-                      <button 
-                        onClick={() => setView('friends_main')}
-                        className="p-1.5 bg-orange-50 rounded-full text-orange-500 hover:bg-orange-100 transition-colors"
-                      >
-                        <Users className="w-3.5 h-3.5" />
-                      </button>
-                    )}
                     <button
                       onClick={() => setView(widgetHasFriends ? 'ranking' : 'friends_main')}
                       className="text-[11px] text-gray-400 flex items-center gap-0.5 active:text-gray-600"
@@ -954,46 +1000,81 @@ export default function App() {
                     </button>
                   </div>
                 </div>
+
+                {/* 🔧 순위 시뮬레이터 토글 */}
+                {widgetHasFriends && (
+                  <div className="px-4 pb-2 flex items-center gap-1.5">
+                    <span className="text-[9px] text-gray-400 font-bold mr-0.5">미리보기</span>
+                    {rankLabels.map((label, i) => {
+                      const val = rankValues[i];
+                      const isActive = simulateRank === val;
+                      return (
+                        <button
+                          key={label}
+                          onClick={() => setSimulateRank(isActive ? null : val)}
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-all ${
+                            isActive
+                              ? 'bg-orange-500 text-white border-orange-500 scale-105'
+                              : 'bg-gray-50 text-gray-400 border-gray-200 hover:border-orange-300 hover:text-orange-400'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
                 <div className="px-4 pb-3">
                   {widgetHasFriends ? (
                     <div className="flex gap-2">
-                      {topFriends.map((friend, idx) => (
+                      {top3.map((participant, idx) => {
+                        const isMe = (participant as any).isMe;
+                        return (
                         <button
-                          key={friend.id}
+                          key={participant.id + idx}
                           onClick={() => setView('ranking')}
                           className="flex-1 flex flex-col items-center gap-1.5 py-2 rounded-xl active:bg-gray-50 transition-colors"
                         >
                           <div className="relative">
-                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 border-transparent">
-                              <img src={friend.avatar} alt={friend.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            <div className={`w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 ${ isMe ? 'border-orange-400' : 'border-transparent' }`}>
+                              <img src={participant.avatar} alt={participant.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                             </div>
-                            <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white shadow-sm" style={{ backgroundColor: medalColors[idx] }}>
-                              {idx + 1}
-                            </span>
+                            {isMe ? (
+                              <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-orange-400 flex items-center justify-center text-[8px] font-black text-white shadow-sm">나</span>
+                            ) : (
+                              <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white shadow-sm" style={{ backgroundColor: medalColors[idx] }}>
+                                {idx + 1}
+                              </span>
+                            )}
                           </div>
-                          <span className="text-[10px] font-medium text-gray-600 truncate w-full text-center px-0.5">{friend.name.split(' ')[0]}</span>
-                          <span className="text-[10px] font-bold text-gray-800">{friend.steps.toLocaleString()}</span>
+                          <span className="text-[10px] font-medium text-gray-600 truncate w-full text-center px-0.5">{isMe ? '나' : participant.name.split(' ')[0]}</span>
+                          <span className={`text-[10px] font-bold ${ isMe ? 'text-orange-500' : 'text-gray-800' }`}>{isMe ? `${myRankInWidget}위` : `${idx + 1}위`}</span>
                         </button>
-                      ))}
-                      <button
-                        onClick={() => setView('ranking')}
-                        className="flex-1 flex flex-col items-center gap-1.5 py-2 rounded-xl active:bg-gray-50 transition-colors"
-                      >
-                        <div className="relative">
-                          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 border-orange-400">
-                            <img src={mockData.myProfile.avatar} alt="me" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                        );
+                      })}
+                      {/* 내가 top3 밖이면 오른쪽에 별도 "나" 슬롯 표시 */}
+                      {!isMeInTop3 && (
+                        <button
+                          onClick={() => setView('ranking')}
+                          className="flex-1 flex flex-col items-center gap-1.5 py-2 rounded-xl active:bg-gray-50 transition-colors"
+                        >
+                          <div className="relative">
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 border-orange-400">
+                              <img src={mockData.myProfile.avatar} alt="me" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            </div>
+                            <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-orange-400 flex items-center justify-center text-[8px] font-black text-white shadow-sm">나</span>
                           </div>
-                          <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-orange-400 flex items-center justify-center text-[8px] font-black text-white shadow-sm">나</span>
-                        </div>
-                        <span className="text-[10px] font-medium text-gray-600 truncate w-full text-center px-0.5">나</span>
-                        <span className="text-[10px] font-bold text-orange-500">#{myRankInWidget}위</span>
-                      </button>
+                          <span className="text-[10px] font-medium text-gray-600 truncate w-full text-center px-0.5">나</span>
+                          <span className="text-[10px] font-bold text-orange-500">{myRankInWidget}위</span>
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <div className="py-3 text-center">
                       <p className="text-xs text-gray-400 mb-2">아직 친구가 없어요. 친구를 추가해보세요!</p>
                       <button
-                        onClick={() => { setView('friendManagement'); setFriendTab('findNew'); }}
+                        onClick={() => { setView('friendManagement'); setSearchQuery(''); setFoundUser(null); }}
                         className="text-xs font-bold text-orange-500 border border-orange-300 px-3 py-1 rounded-full"
                       >
                         친구 추가하기
@@ -1005,27 +1086,25 @@ export default function App() {
             );
           })()}
 
-          {/* Option 3: Dedicated Friends Banner */}
-          {(variant === '3' || variant === null) && (
-            <div className="mx-4 mt-3">
-              <motion.div 
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setView('friends_main')}
-                className="bg-gradient-to-r from-orange-400 to-orange-500 rounded-2xl p-4 shadow-md shadow-orange-100 flex items-center justify-between overflow-hidden relative"
-              >
-                <div className="relative z-10">
-                  <h3 className="text-white font-bold text-sm mb-1">캐시톡 친구를 찾아보세요!</h3>
-                  <p className="text-orange-50 text-[11px]">친구와 함께 걸으면 더 즐거워요</p>
-                </div>
-                <div className="bg-white/20 p-2 rounded-xl relative z-10 backdrop-blur-sm">
-                  <UserPlus className="w-5 h-5 text-white" />
-                </div>
-                {/* Decorative circles */}
-                <div className="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full border border-white/5" />
-                <div className="absolute -right-2 -bottom-2 w-12 h-12 bg-white/5 rounded-full" />
-              </motion.div>
-            </div>
-          )}
+          {/* Friends Banner */}
+          <div className="mx-4 mt-3">
+            <motion.div 
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setView('friends_main')}
+              className="bg-gradient-to-r from-orange-400 to-orange-500 rounded-2xl p-4 shadow-md shadow-orange-100 flex items-center justify-between overflow-hidden relative"
+            >
+              <div className="relative z-10">
+                <h3 className="text-white font-bold text-sm mb-1">캐시톡 친구를 찾아보세요!</h3>
+                <p className="text-orange-50 text-[11px]">친구와 함께 걸으면 더 즐거워요</p>
+              </div>
+              <div className="bg-white/20 p-2 rounded-xl relative z-10 backdrop-blur-sm">
+                <UserPlus className="w-5 h-5 text-white" />
+              </div>
+              {/* Decorative circles */}
+              <div className="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full border border-white/5" />
+              <div className="absolute -right-2 -bottom-2 w-12 h-12 bg-white/5 rounded-full" />
+            </motion.div>
+          </div>
 
           <div className="p-4 flex gap-3 overflow-x-auto no-scrollbar">
             <div className="min-w-[140px] bg-white rounded-xl p-3 border border-gray-100 shadow-sm shrink-0">
