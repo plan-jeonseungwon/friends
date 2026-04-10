@@ -39,9 +39,11 @@ import {
   Wifi,
   Search,
   MoreHorizontal,
+  X,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import mockData from './data.json';
+import { AddFriendsScreen, LeaderboardScreen, ManageRequestsScreen } from './FriendScreens';
 
 type Tab = 'home' | 'challenge' | 'rewards' | 'play' | 'feeds';
 type ViewState = Tab | 'friends_main' | 'settings' | 'friendManagement' | 'ranking' | 'friendRequests' | 'lockscreen';
@@ -271,7 +273,30 @@ export default function App() {
   const [pushNotifications, setPushNotifications] = useState(true);
   const [selectedProfile, setSelectedProfile] = useState<Friend | null>(null);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  const [friendRequests, setFriendRequests] = useState(mockData.friendRequests || []);
+  const [friendRequests, setFriendRequests] = useState<any[]>([
+    {
+      id: 'req_hawkeye',
+      name: 'Hawkeye',
+      avatar: 'https://picsum.photos/seed/hawkeye/100/100',
+      time: '1h ago',
+      cover: 'https://images.unsplash.com/photo-1682687982501-1e58ab814714?auto=format&fit=crop&w=1200&q=80',
+    },
+  ]);
+  const [sentRequests, setSentRequests] = useState<any[]>([
+    {
+      id: 'sent_cashwalker2',
+      name: 'Cashwalker2',
+      avatar: 'https://picsum.photos/seed/cashwalker2/100/100',
+      time: 'just now',
+      cover: 'https://images.unsplash.com/photo-1482192505345-5655af888cc4?auto=format&fit=crop&w=1200&q=80',
+    },
+  ]);
+  const [requestTab, setRequestTab] = useState<'received' | 'sent'>('received');
+  const [requestActionModal, setRequestActionModal] = useState<{
+    mode: 'accept' | 'decline' | 'cancel';
+    request: any;
+  } | null>(null);
+  const [requestPreview, setRequestPreview] = useState<any | null>(null);
   const [friends, setFriends] = useState<Friend[]>(mockData.friends);
   const [widgetHasFriends, setWidgetHasFriends] = useState(true);
   const [simulateRank, setSimulateRank] = useState<number | null>(null);
@@ -309,6 +334,20 @@ export default function App() {
   const handleRemoveFriend = (friendId: string) => {
     setFriends(friends.filter(f => f.id !== friendId));
     showToast('친구 관계가 해제되었습니다.');
+  };
+
+  const confirmRequestAction = () => {
+    if (!requestActionModal) return;
+
+    if (requestActionModal.mode === 'accept' || requestActionModal.mode === 'decline') {
+      setFriendRequests((prev) => prev.filter((req: any) => req.id !== requestActionModal.request.id));
+      showToast(requestActionModal.mode === 'accept' ? 'Accepted request' : 'Declined request');
+    } else {
+      setSentRequests((prev) => prev.filter((req: any) => req.id !== requestActionModal.request.id));
+      showToast('Canceled request');
+    }
+
+    setRequestActionModal(null);
   };
 
   const renderHeader = (title: string | React.ReactNode, showIcons = true, onBack?: () => void) => (
@@ -485,6 +524,36 @@ export default function App() {
 
         <ProfileBottomSheet {...profileBottomSheetProps} />
       </div>
+    );
+  }
+
+  if (view === 'friendManagement') {
+    return (
+      <AddFriendsScreen
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        foundUser={foundUser}
+        handleSearchCode={handleSearchCode}
+        showToast={showToast}
+        setView={setView}
+      />
+    );
+  }
+
+  if (view === 'friendRequests') {
+    return <ManageRequestsScreen setView={setView} />;
+  }
+
+  if (view === 'ranking') {
+    return (
+      <LeaderboardScreen
+        friends={friends}
+        myAvatar={mockData.myProfile.avatar}
+        myId={mockData.myProfile.id}
+        mySteps={mockData.myProfile.steps}
+        setSelectedProfile={setSelectedProfile}
+        setView={setView}
+      />
     );
   }
 
