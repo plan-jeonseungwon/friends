@@ -484,6 +484,11 @@ export function LeaderboardScreen({
   const pageSize = 8;
   const isEmpty = displayList.length === 0;
 
+  const myRank = useMemo(() => {
+    const idx = displayList.findIndex((entry) => entry.id === myId);
+    return idx === -1 ? null : idx + 1;
+  }, [displayList, myId]);
+
   useEffect(() => {
     if (loadMode === 'all') {
       setVisibleCount(displayList.length);
@@ -683,16 +688,24 @@ export function LeaderboardScreen({
           )}
 
           {/* My rank floating bar */}
-          <div className="absolute inset-x-0 bottom-4 px-3">
-            <div className="flex h-[50px] items-center justify-between rounded-full border-2 border-[#f0c300] bg-white px-4 shadow-[0_1px_4px_rgba(0,0,0,0.08)]">
-              <div className="flex items-center gap-2.5">
-                <Medal className="h-5 w-5 text-[#c78642]" strokeWidth={2.1} />
-                <div className="h-8 w-8 overflow-hidden rounded-full border-2 border-[#c78642]">
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-md px-6 z-40">
+            <div className="flex h-[56px] items-center justify-between rounded-full border-2 border-[#ffd100] bg-white px-5 shadow-[0_8px_16px_rgba(0,0,0,0.1)]">
+              <div className="flex items-center gap-3">
+                <div className="flex w-6 justify-center">
+                  <span className="text-[13px] font-black text-[#ffd100]">{myRank}</span>
+                </div>
+                <div className="h-9 w-9 overflow-hidden rounded-full border-2 border-[#ffd100]/30 bg-gray-100">
                   <img src={myAvatar} alt={myId} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
                 </div>
-                <span className="text-[10px] font-semibold text-[#3f3f3f]">{myId}</span>
+                <div className="flex flex-col -gap-0.5">
+                  <span className="text-[11px] font-black text-[#222]">{myId}</span>
+                  <span className="text-[9px] font-medium text-gray-400">내 랭킹</span>
+                </div>
               </div>
-              <span className="text-[10px] font-semibold text-[#b7b7b7]">{mySteps.toLocaleString()}</span>
+              <div className="flex items-center gap-1.5 text-right">
+                <span className="text-[13px] font-black text-[#222]">{mySteps.toLocaleString()}</span>
+                <span className="text-[10px] font-bold text-[#b7b7b7]">걸음</span>
+              </div>
             </div>
           </div>
         </section>
