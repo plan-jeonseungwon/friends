@@ -33,13 +33,6 @@
       "avatar": "https://picsum.photos/seed/friend4/100/100",
       "steps": 5400,
       "friendCount": 33
-    },
-    {
-      "id": "friend_5",
-      "name": "동네한바퀴",
-      "avatar": "https://picsum.photos/seed/friend5/100/100",
-      "steps": 3200,
-      "friendCount": 18
     }
   ],
   "mockUsers": [
@@ -57,6 +50,72 @@
       "name": "김철수",
       "avatar": "https://picsum.photos/seed/req1/100/100",
       "time": "1시간 전"
+    }
+  ],
+  "recommendedUsers": [
+    {
+      "id": "rec_1",
+      "name": "달리는곰돌이",
+      "avatar": "https://picsum.photos/seed/rec1/100/100",
+      "steps": 11400,
+      "friendCount": 43,
+      "mutualFriends": 3
+    },
+    {
+      "id": "rec_2",
+      "name": "청춘러너",
+      "avatar": "https://picsum.photos/seed/rec2/100/100",
+      "steps": 9700,
+      "friendCount": 67,
+      "mutualFriends": 2
+    },
+    {
+      "id": "rec_3",
+      "name": "밤하늘별빛",
+      "avatar": "https://picsum.photos/seed/rec3/100/100",
+      "steps": 8200,
+      "friendCount": 28,
+      "mutualFriends": 2
+    },
+    {
+      "id": "rec_4",
+      "name": "스텝업마스터",
+      "avatar": "https://picsum.photos/seed/rec4/100/100",
+      "steps": 7500,
+      "friendCount": 31,
+      "mutualFriends": 1
+    },
+    {
+      "id": "rec_5",
+      "name": "오렌지주스",
+      "avatar": "https://picsum.photos/seed/rec5/100/100",
+      "steps": 6800,
+      "friendCount": 15,
+      "mutualFriends": 1
+    },
+    {
+      "id": "rec_6",
+      "name": "해피워커",
+      "avatar": "https://picsum.photos/seed/rec6/100/100",
+      "steps": 5100,
+      "friendCount": 22,
+      "mutualFriends": 2
+    },
+    {
+      "id": "rec_7",
+      "name": "아침햇살",
+      "avatar": "https://picsum.photos/seed/rec7/100/100",
+      "steps": 4300,
+      "friendCount": 9,
+      "mutualFriends": 1
+    },
+    {
+      "id": "rec_8",
+      "name": "루비스텝",
+      "avatar": "https://picsum.photos/seed/rec8/100/100",
+      "steps": 3800,
+      "friendCount": 11,
+      "mutualFriends": 1
     }
   ]
 }
