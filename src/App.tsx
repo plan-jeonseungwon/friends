@@ -308,7 +308,7 @@ export default function App() {
 
   const handleAddRecommended = (id: string, name: string) => {
     setAddedRecommended((prev) => new Set([...prev, id]));
-    showToast(`${name}님에게 친구 신청을 보냈습니다.`);
+    showToast(`Sent friend request to ${name}.`);
   };
 
   useEffect(() => {
@@ -331,7 +331,7 @@ export default function App() {
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(mockData.myProfile.recommendCode);
-    showToast('추천코드가 복사되었습니다.');
+    showToast('Recommendation code copied.');
   };
 
   const handleSearchCode = (query: string) => {
@@ -342,7 +342,7 @@ export default function App() {
 
   const handleRemoveFriend = (friendId: string) => {
     setFriends(friends.filter(f => f.id !== friendId));
-    showToast('친구 관계가 해제되었습니다.');
+    showToast('Friend removed.');
   };
 
   const confirmRequestAction = () => {
@@ -670,13 +670,13 @@ export default function App() {
               onClick={() => setView('friends_main')}
               className="flex-1 py-2.5 text-sm font-bold border-b-2 border-gray-800 text-gray-800 transition-colors"
             >
-              친구
+              Friends
             </button>
             <button
               onClick={() => setView('ranking')}
               className="flex-1 py-2.5 text-sm font-bold border-b-2 border-transparent text-gray-600 transition-colors"
             >
-              랭킹
+              Leaderboard
             </button>
           </div>
         </header>
@@ -685,7 +685,7 @@ export default function App() {
         <main className="flex flex-col gap-4 bg-gray-50">
         {/* Profile Section */}
         <section className="bg-white p-4">
-          <h2 className="text-xs font-semibold text-gray-500 mb-3">내 프로필</h2>
+          <h2 className="text-xs font-semibold text-gray-500 mb-3">My Profile</h2>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-14 h-14 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
@@ -696,7 +696,7 @@ export default function App() {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-[10px] text-gray-400">내 추천코드</p>
+              <p className="text-[10px] text-gray-400">My Recommendation Code</p>
               <div className="flex items-center gap-1 text-gray-600 font-medium">
                 <span>{mockData.myProfile.recommendCode}</span>
                 <Copy className="w-3 h-3 cursor-pointer hover:text-orange-500 transition-colors" onClick={handleCopyCode} />
@@ -717,8 +717,8 @@ export default function App() {
                 <img src="https://picsum.photos/seed/req_icon/100/100" alt="req" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs font-bold text-gray-500">받은 친구 요청</span>
-                <span className="text-sm font-bold text-gray-800">친구 요청 목록을 확인하세요!</span>
+                <span className="text-xs font-bold text-gray-500">Received Friend Requests</span>
+                <span className="text-sm font-bold text-gray-800">Check your friend requests</span>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -736,7 +736,7 @@ export default function App() {
         <section className="bg-white p-4 pt-2">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-1">
-              <h2 className="text-sm font-bold text-gray-800">오늘의 행운 친구 🍀</h2>
+              <h2 className="text-sm font-bold text-gray-800">Today's Lucky Friends 🍀</h2>
             </div>
             <div className="flex items-center gap-3">
               <RefreshCw className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors" />
@@ -750,18 +750,18 @@ export default function App() {
                   <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 </div>
                 <p className="text-xs font-bold text-gray-800 truncate w-full text-center px-1 mb-0.5">{user.name}</p>
-                <p className="text-[10px] text-gray-400 mb-4">친구 {user.friendCount || user.mutualFriends * 20}명</p>
+                <p className="text-[10px] text-gray-400 mb-4">{user.friendCount || user.mutualFriends * 20} Friends</p>
                 <button
                   onClick={() => {
                     if (!addedRecommended.has(user.id)) handleAddRecommended(user.id, user.name);
                   }}
-                  className={`h-8 w-full rounded-lg text-[11px] font-bold transition-all active:scale-95 ${
+                  className={`h-8 w-full rounded-lg text-[11px] font-black transition-all active:scale-95 ${
                     addedRecommended.has(user.id)
                       ? 'bg-gray-200 text-gray-400'
-                      : 'bg-[#555555] text-white shadow-sm hover:bg-[#444444]'
+                      : 'bg-[#ffd100] text-black shadow-sm'
                   }`}
                 >
-                  {addedRecommended.has(user.id) ? '요청됨' : '친구추가'}
+                  {addedRecommended.has(user.id) ? 'Requested' : '+ Add'}
                 </button>
               </div>
             ))}
@@ -772,7 +772,7 @@ export default function App() {
         <section className="bg-white p-4 min-h-[300px]">
           {friends.length > 0 ? (
             <>
-              <h2 className="text-sm font-semibold text-gray-500 mb-4">친구 {friends.length}명</h2>
+              <h2 className="text-sm font-semibold text-gray-500 mb-4">{friends.length} Friends</h2>
               <div className="flex flex-col gap-4">
                 {friends.map(friend => (
                   <div key={friend.id} className="flex items-center justify-between">

@@ -146,7 +146,7 @@ export function AddFriendsScreen({
   return (
     <div className={shellClass}>
       <Header
-        title="친구 추가"
+        title="Add Friends"
         onBack={() => {
           setView('friends_main');
           setSearchQuery('');
@@ -161,7 +161,7 @@ export function AddFriendsScreen({
             type="text"
             value={searchQuery}
             onChange={(e) => handleSearchCode(e.target.value)}
-            placeholder="추천코드로 검색하기"
+            placeholder="Search by recommendation code"
             className="h-10 w-full rounded-[10px] border border-white/60 bg-white px-3 pr-10 text-[11px] text-[#202020] outline-none placeholder:text-[#c0c0c0]"
           />
           <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#a9a9a9]" strokeWidth={2} />
@@ -174,23 +174,23 @@ export function AddFriendsScreen({
                 <img src={foundUser.avatar} alt={foundUser.name} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
               </div>
               <p className="mt-2 text-[10px] font-medium text-black">{foundUser.name}</p>
-              <p className="text-[9px] text-[#b0b0b0]">친구 {foundUser.friendCount}명</p>
+              <p className="text-[9px] text-[#b0b0b0]">{foundUser.friendCount} Friends</p>
               <button
-                onClick={() => showToast(`${foundUser.name}님에게 친구 신청을 보냈습니다.`)}
+                onClick={() => showToast(`Sent friend request to ${foundUser.name}.`)}
                 className="mt-3 h-8 w-full rounded-[4px] bg-[#ffd100] text-[10px] font-semibold text-black"
               >
-                친구 추가
+                Add Friend
               </button>
             </div>
           ) : searchQuery ? (
             <div className="flex min-h-[100px] items-center justify-center px-8 text-center text-[11px] font-medium text-[#6d6d6d]">
-              "{searchQuery}"에 해당하는 유저가 없습니다.
+              No user found for "{searchQuery}".
             </div>
           ) : (
             <div className="flex min-h-[100px] items-center justify-center px-8 text-center text-[11px] font-medium leading-[1.4] text-[#b0b0b0]">
-              추천코드를 검색해서
+              Search with recommendation code
               <br />
-              새 친구를 찾아보세요!
+              to find new friends
             </div>
           )}
         </section>
@@ -198,7 +198,7 @@ export function AddFriendsScreen({
         {/* OR divider */}
         <div className="flex items-center gap-3 px-1 py-0.5">
           <div className="h-px flex-1 bg-[#e0e0e0]" />
-          <span className="text-[10px] font-semibold text-[#c8c8c8]">또는</span>
+          <span className="text-[10px] font-semibold text-[#c8c8c8]">OR</span>
           <div className="h-px flex-1 bg-[#e0e0e0]" />
         </div>
 
@@ -208,18 +208,18 @@ export function AddFriendsScreen({
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#fff3cc]">
               <Share2 className="h-3.5 w-3.5 text-[#b8860b]" strokeWidth={2} />
             </div>
-            <span className="text-[12px] font-bold text-[#202020]">미가입 친구 초대하기</span>
+            <span className="text-[12px] font-bold text-[#202020]">Invite non-joined friends</span>
           </div>
           <p className="mb-3 text-[10px] leading-[1.55] text-[#9a9a9a]">
-            초대 링크를 통해 신규 가입 후 추천인 코드를 입력하면
+            If they join through the link and enter the code,
             <br />
-            <span className="font-semibold text-[#707070]">자동으로 친구로 추가됩니다.</span>
+            <span className="font-semibold text-[#707070]">they are automatically added as friends.</span>
           </p>
           <button
             onClick={() => setView('inviteFriends')}
             className="h-9 w-full rounded-[7px] bg-[#ffd100] text-[10px] font-semibold text-black"
           >
-            초대 링크 만들기
+            Create Invite Link
           </button>
         </section>
       </div>
@@ -250,7 +250,7 @@ export function ManageRequestsScreen({ setView }: { setView: (v: ViewState) => v
 
   const activeItems = tab === 'received' ? received : sent;
 
-  const confirmModal = () => {
+  const confirmRequestAction = () => {
     if (!modal) return;
     if (modal.mode === 'cancel') {
       setSent((prev) => prev.filter((item) => item.id !== modal.item.id));
@@ -262,7 +262,7 @@ export function ManageRequestsScreen({ setView }: { setView: (v: ViewState) => v
 
   return (
     <div className={shellClass}>
-      <Header title="친구 요청 관리" onBack={() => setView('friends_main')} />
+      <Header title="Manage Friend Requests" onBack={() => setView('friends_main')} />
 
       <div className="bg-white">
         <div className="grid grid-cols-2 text-center">
@@ -270,14 +270,14 @@ export function ManageRequestsScreen({ setView }: { setView: (v: ViewState) => v
             onClick={() => setTab('received')}
             className={`relative h-11 text-[11px] font-semibold ${tab === 'received' ? 'text-black' : 'text-[#8e8e8e]'}`}
           >
-            받은 요청
+            Received
             {tab === 'received' && <span className="absolute inset-x-0 bottom-0 mx-auto h-[1.5px] w-full bg-black" />}
           </button>
           <button
             onClick={() => setTab('sent')}
             className={`relative h-11 text-[11px] font-semibold ${tab === 'sent' ? 'text-black' : 'text-[#8e8e8e]'}`}
           >
-            보낸 요청
+            Sent
             {tab === 'sent' && <span className="absolute inset-x-0 bottom-0 mx-auto h-[1.5px] w-full bg-black" />}
           </button>
         </div>
@@ -302,13 +302,13 @@ export function ManageRequestsScreen({ setView }: { setView: (v: ViewState) => v
                         onClick={() => setModal({ mode: 'accept', item })}
                         className="h-9 rounded-[4px] bg-[#f3cf4a] px-5 text-[10px] font-semibold text-white"
                       >
-                        수락
+                        Accept
                       </button>
                       <button
                         onClick={() => setModal({ mode: 'decline', item })}
                         className="h-9 rounded-[4px] border border-[#8e8e8e] bg-white px-4 text-[10px] font-semibold text-[#8e8e8e]"
                       >
-                        거절
+                        Decline
                       </button>
                     </div>
                   ) : (
@@ -316,7 +316,7 @@ export function ManageRequestsScreen({ setView }: { setView: (v: ViewState) => v
                       onClick={() => setModal({ mode: 'cancel', item })}
                       className="h-9 rounded-[4px] border border-[#8e8e8e] bg-white px-4 text-[10px] font-semibold text-[#8e8e8e]"
                     >
-                      취소
+                      Cancel
                     </button>
                   )}
                 </div>
@@ -326,16 +326,16 @@ export function ManageRequestsScreen({ setView }: { setView: (v: ViewState) => v
             <div className="flex min-h-[560px] flex-col items-center justify-center px-8 text-center">
               <Frown className="h-7 w-7 text-[#9d9d9d]" strokeWidth={1.75} />
               <p className="mt-3 text-[11px] font-medium leading-[1.25] text-[#767676]">
-                아직 친구 요청이 없어요.
+                No friend requests yet.
                 <br />
-                친구를 추가해서 함께 걸어보세요!
+                Add friends and walk together.
               </p>
               <button
                 onClick={() => setView('friendManagement')}
                 className="mt-4 inline-flex h-9 items-center gap-2 rounded-[7px] bg-[#ffd100] px-4 text-[10px] font-semibold text-black"
               >
                 <Users className="h-4 w-4" strokeWidth={2.25} />
-                친구 추가하기
+                Add Friends
               </button>
             </div>
           )}
@@ -346,15 +346,15 @@ export function ManageRequestsScreen({ setView }: { setView: (v: ViewState) => v
         <ConfirmModal
           title={
             modal.mode === 'accept'
-              ? '친구 요청을 수락할까요?'
+              ? 'Accept friend request?'
               : modal.mode === 'decline'
-                ? '친구 요청을 거절할까요?'
-                : '친구 요청을 취소할까요?'
+                ? 'Decline friend request?'
+                : 'Cancel sent request?'
           }
-          cancelLabel="취소"
-          confirmLabel={modal.mode === 'accept' ? '수락' : modal.mode === 'decline' ? '거절' : '삭제'}
+          cancelLabel="Close"
+          confirmLabel={modal.mode === 'accept' ? 'Accept' : modal.mode === 'decline' ? 'Decline' : 'Cancel'}
           onCancel={() => setModal(null)}
-          onConfirm={confirmModal}
+          onConfirm={confirmRequestAction}
         />
       )}
       {preview && <RequestsPreviewSheet item={preview} onClose={() => setPreview(null)} />}
@@ -418,12 +418,12 @@ function LeaderboardRow({
             <div className="flex items-center">
               <p className="text-[15px] font-medium text-gray-800">{friend.name}</p>
               {isRecommended && (
-                <span className="ml-[6px] rounded-[4px] border border-[#a0a0a0] px-[4px] py-[1px] text-[8px] font-bold text-[#808080]">
+                <span className="ml-[6px] rounded-[4px] bg-[#f2f2f2] border border-[#e0e0e0] px-[4px] py-[1.5px] text-[8px] font-bold text-[#8a8a8a] uppercase tracking-tight">
                   Suggested
                 </span>
               )}
               {isMe && (
-                <span className="ml-[6px] rounded-full bg-[#5d5d5d] px-[6px] py-[1.5px] text-[9px] font-bold text-white">
+                <span className="ml-[6px] flex h-[16px] items-center justify-center rounded-full bg-[#555555] px-[6px] text-[8px] font-black text-white">
                   Me
                 </span>
               )}
@@ -438,7 +438,7 @@ function LeaderboardRow({
       {isRecommended &&
         (isAdded ? (
           <span className="rounded-[4px] border border-[#d0d0d0] px-3 py-1.5 text-[10px] font-semibold text-[#b0b0b0]">
-            요청됨
+            Requested
           </span>
         ) : (
           <button
@@ -446,9 +446,9 @@ function LeaderboardRow({
               e.stopPropagation();
               onAddFriend?.();
             }}
-            className="rounded-[5px] bg-[#ffd100] px-3 py-1.5 text-[10px] font-semibold text-black"
+            className="rounded-[6px] bg-[#ffd100] px-4 py-2 text-[12px] font-black text-black shadow-sm transition-transform active:scale-95"
           >
-            친구 추가
+            + Add
           </button>
         ))}
     </div>
@@ -580,15 +580,15 @@ export function LeaderboardScreen({
         <div className="flex mt-1">
           <button
             onClick={() => setView('friends_main')}
-            className="flex-1 py-2.5 text-sm font-bold border-b-2 border-transparent text-gray-600 transition-colors"
+            className="flex-1 border-b-2 border-transparent py-2.5 text-sm font-bold text-gray-600 transition-colors"
           >
-            친구
+            Friends
           </button>
           <button
             onClick={() => setView('ranking')}
-            className="flex-1 py-2.5 text-sm font-bold border-b-2 border-gray-800 text-gray-800 transition-colors"
+            className="flex-1 border-b-2 border-gray-800 py-2.5 text-sm font-bold text-gray-800 transition-colors"
           >
-            랭킹
+            Leaderboard
           </button>
         </div>
       </header>
@@ -600,9 +600,12 @@ export function LeaderboardScreen({
           {/* Slim status strip for few-friends mode */}
           {isFewFriends && !isEmpty && (
             <div className="mx-3 mt-3 rounded-[8px] bg-[#f5f5f5] px-3 py-2.5">
-              <span className="text-[11px] font-bold text-[#444]">
-                {friends.length} of 5 friends to unlock real ranking
-              </span>
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-[11px] font-bold text-[#8a6900]">
+                  {friends.length} Friends · Add {5 - friends.length} more to start the real ranking.
+                </p>
+                <span className="text-[10px] font-semibold text-[#b8960b]">{friends.length}/5</span>
+              </div>
               <div className="mt-1 flex items-center gap-1.5">
                 <span className="text-[10px] text-[#999]">
                   {showRecommendedInRanking
@@ -749,11 +752,11 @@ export function LeaderboardScreen({
                 <div className="h-[42px] w-[42px] overflow-hidden rounded-full bg-gray-100">
                   <img src={myAvatar} alt={myId} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
                 </div>
-                <span className="text-[15px] font-medium text-black">{myId}</span>
+                <span className="text-[13px] font-bold text-black">{myId}</span>
               </div>
               <div className="flex items-center gap-1.5 text-right font-bold text-[#b0b0b0]">
                 <Footprints className="h-[14px] w-[14px]" fill="currentColor" />
-                <span className="text-[15px]">{mySteps.toLocaleString()}</span>
+                <span className="text-[15px] text-[#808080]">{mySteps.toLocaleString()}</span>
               </div>
             </div>
           </div>
