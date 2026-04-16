@@ -273,6 +273,7 @@ export default function App() {
   // Settings states
   const [allowSearch, setAllowSearch] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
+  const [showRecommendedInRanking, setShowRecommendedInRanking] = useState(true);
   const [selectedProfile, setSelectedProfile] = useState<Friend | null>(null);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [friendRequests, setFriendRequests] = useState<any[]>([
@@ -517,6 +518,17 @@ export default function App() {
           </div>
         </div>
 
+        <div className="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 mt-4">랭킹 설정</div>
+        <div className="bg-white">
+          <div className="px-4 py-4 flex items-center justify-between border-b border-gray-50">
+            <div>
+              <div className="font-bold text-gray-800">추천 친구 표시</div>
+              <div className="text-xs text-gray-400">친구 5명 미만일 때 랭킹에 추천 친구를 함께 보여줍니다.</div>
+            </div>
+            <Toggle enabled={showRecommendedInRanking} setEnabled={setShowRecommendedInRanking} />
+          </div>
+        </div>
+
         <div className="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 mt-4">친구 관리</div>
         <div className="bg-white">
           {[
@@ -562,6 +574,7 @@ export default function App() {
         setSelectedProfile={setSelectedProfile}
         setView={setView}
         recommendedUsers={mockData.recommendedUsers}
+        showRecommendedInRanking={showRecommendedInRanking}
         addedRecommended={addedRecommended}
         onAddRecommended={handleAddRecommended}
       />

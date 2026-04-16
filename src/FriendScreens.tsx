@@ -463,6 +463,7 @@ export function LeaderboardScreen({
   setSelectedProfile,
   setView,
   recommendedUsers,
+  showRecommendedInRanking = true,
   addedRecommended,
   onAddRecommended,
   onBack,
@@ -474,6 +475,7 @@ export function LeaderboardScreen({
   setSelectedProfile: (f: Friend) => void;
   setView: (v: ViewState) => void;
   recommendedUsers?: RecommendedUser[];
+  showRecommendedInRanking?: boolean;
   addedRecommended?: Set<string>;
   onAddRecommended?: (id: string, name: string) => void;
   onBack?: () => void;
@@ -495,7 +497,7 @@ export function LeaderboardScreen({
     const hasMe = realFriends.some(f => f.id === myId);
     if (!hasMe) realFriends.push(meEntry);
 
-    if (!isFewFriends || !recommendedUsers?.length) {
+    if (!isFewFriends || !recommendedUsers?.length || !showRecommendedInRanking) {
       return [...realFriends].sort((a, b) => b.steps - a.steps);
     }
 
@@ -595,20 +597,24 @@ export function LeaderboardScreen({
         <section className="relative min-h-[calc(100vh-116px)] rounded-[14px] bg-white pb-20">
           <div className="pt-4 text-center text-[10px] font-medium text-[#9a9a9a]">2026. 03. 17</div>
 
-          {/* Progress banner for few-friends mode */}
+          {/* Slim status strip for few-friends mode */}
           {isFewFriends && !isEmpty && (
-            <div className="mx-3 mt-3 rounded-[10px] bg-[#fff8e1] px-4 py-3">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-[11px] font-bold text-[#8a6900]">
-                  친구 {friends.length}명 · {5 - friends.length}명 더 추가하면 실제 랭킹 시작!
-                </p>
-                <span className="text-[10px] font-semibold text-[#b8960b]">{friends.length}/5</span>
-              </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#ffe082]">
-                <div
-                  className="h-full rounded-full bg-[#ffc107] transition-all"
-                  style={{ width: `${(friends.length / 5) * 100}%` }}
-                />
+            <div className="mx-3 mt-3 rounded-[8px] bg-[#f5f5f5] px-3 py-2.5">
+              <span className="text-[11px] font-bold text-[#444]">
+                {friends.length} of 5 friends to unlock real ranking
+              </span>
+              <div className="mt-1 flex items-center gap-1.5">
+                <span className="text-[10px] text-[#999]">
+                  {showRecommendedInRanking
+                    ? 'Suggested friends are included in this list.'
+                    : 'Suggested friends are hidden.'}
+                </span>
+                <button
+                  onClick={() => setView('settings')}
+                  className="shrink-0 text-[10px] font-semibold text-[#555] underline underline-offset-2 active:opacity-50"
+                >
+                  Change in Settings
+                </button>
               </div>
             </div>
           )}
