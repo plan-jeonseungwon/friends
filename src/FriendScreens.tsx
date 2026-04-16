@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Ellipsis, Frown, Medal, Search, Settings, Share2, UserPlus, Users, X } from 'lucide-react';
+import { ArrowLeft, Ellipsis, Frown, Medal, Search, Settings, Share2, UserPlus, Users, X, Trophy, Footprints } from 'lucide-react';
 
 type Friend = {
   id: string;
@@ -351,13 +351,12 @@ export function ManageRequestsScreen({ setView }: { setView: (v: ViewState) => v
                 ? '친구 요청을 거절할까요?'
                 : '친구 요청을 취소할까요?'
           }
-          cancelLabel={modal.mode === 'cancel' ? '아니오' : '취소'}
-          confirmLabel={modal.mode === 'accept' ? '수락' : modal.mode === 'decline' ? '거절' : '예'}
+          cancelLabel="취소"
+          confirmLabel={modal.mode === 'accept' ? '수락' : modal.mode === 'decline' ? '거절' : '삭제'}
           onCancel={() => setModal(null)}
           onConfirm={confirmModal}
         />
       )}
-
       {preview && <RequestsPreviewSheet item={preview} onClose={() => setPreview(null)} />}
     </div>
   );
@@ -371,6 +370,7 @@ function LeaderboardRow({
   isRecommended,
   onAddFriend,
   isAdded,
+  isMe,
 }: {
   friend: Friend;
   rank: number;
@@ -379,54 +379,78 @@ function LeaderboardRow({
   isRecommended?: boolean;
   onAddFriend?: () => void;
   isAdded?: boolean;
+  isMe?: boolean;
 }) {
   const medalColor =
-    rank === 1 ? '#FFD700' : rank === 2 ? '#C0C0C0' : rank === 3 ? '#CD7F32' : '#9ca3af';
+    rank === 1 ? '#FACC15' : rank === 2 ? '#9CA3AF' : rank === 3 ? '#C27A3A' : '#9ca3af';
 
   return (
-    <div className={`flex items-center justify-between px-3 py-2 ${
-      highlight ? 'bg-[#fff8de]' : isRecommended ? 'bg-[#fafafa]' : 'bg-white'
-    }`}>
-      <div className="flex items-center gap-3">
-        <div className="flex w-8 items-center justify-center">
+    <div
+      className={`flex items-center justify-between px-5 py-3 ${
+        highlight ? 'bg-[#fff9e6]' : 'bg-white'
+      }`}
+    >
+      <div className="flex items-center gap-4">
+        <div className="flex w-8 justify-center">
           {rank <= 3 ? (
-            <Medal className="h-5 w-5" style={{ color: medalColor }} strokeWidth={2.1} />
+            <div className="relative flex items-center justify-center">
+              <Trophy
+                className="h-10 w-10"
+                style={{ color: medalColor, fill: medalColor }}
+                strokeWidth={1}
+              />
+              <span className="absolute top-[5px] text-[13px] font-black text-white">{rank}</span>
+            </div>
           ) : (
-            <span className="text-[11px] font-bold text-[#2d2d2d]">{rank}</span>
+            <span className="text-[18px] font-bold text-black">{rank}</span>
           )}
         </div>
-        <button onClick={onClick} className="flex items-center gap-2">
-          <div
-            className={`h-9 w-9 overflow-hidden rounded-full ${rank <= 3 ? 'border-2' : ''} ${isRecommended ? 'opacity-80' : ''}`}
-            style={{ borderColor: medalColor }}
-          >
-            <img src={friend.avatar} alt={friend.name} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+        <button onClick={onClick} className="flex items-center gap-3">
+          <div className="h-[42px] w-[42px] overflow-hidden rounded-full bg-gray-100">
+            <img
+              src={friend.avatar}
+              alt={friend.name}
+              className="h-full w-full object-cover"
+              referrerPolicy="no-referrer"
+            />
           </div>
           <div className="text-left">
-            <div className="flex items-center gap-1.5">
-              <p className="text-sm font-bold text-gray-800 leading-tight">{friend.name}</p>
+            <div className="flex items-center">
+              <p className="text-[15px] font-medium text-gray-800">{friend.name}</p>
               {isRecommended && (
-                <span className="rounded-[3px] bg-[#fff3cc] px-1 py-[1px] text-[8px] font-bold text-[#b8860b]">추천</span>
+                <span className="ml-[6px] rounded-[4px] border border-[#a0a0a0] px-[4px] py-[1px] text-[8px] font-bold text-[#808080]">
+                  Suggested
+                </span>
+              )}
+              {isMe && (
+                <span className="ml-[6px] rounded-full bg-[#5d5d5d] px-[6px] py-[1.5px] text-[9px] font-bold text-white">
+                  Me
+                </span>
               )}
             </div>
-            <p className="mt-0.5 text-xs text-gray-400">{friend.steps.toLocaleString()}</p>
+            <div className="mt-0.5 flex items-center gap-1.5 text-[12px] font-bold text-[#a0a0a0]">
+              <Footprints className="h-3 w-3" fill="currentColor" />
+              <span>{friend.steps.toLocaleString()}</span>
+            </div>
           </div>
         </button>
       </div>
-      {isRecommended && (
-        isAdded ? (
-          <span className="rounded-[5px] border border-[#d0d0d0] px-3 py-1.5 text-[10px] font-semibold text-[#b0b0b0]">
+      {isRecommended &&
+        (isAdded ? (
+          <span className="rounded-[4px] border border-[#d0d0d0] px-3 py-1.5 text-[10px] font-semibold text-[#b0b0b0]">
             요청됨
           </span>
         ) : (
           <button
-            onClick={(e) => { e.stopPropagation(); onAddFriend?.(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddFriend?.();
+            }}
             className="rounded-[5px] bg-[#ffd100] px-3 py-1.5 text-[10px] font-semibold text-black"
           >
             친구 추가
           </button>
-        )
-      )}
+        ))}
     </div>
   );
 }
@@ -460,6 +484,16 @@ export function LeaderboardScreen({
 
   const displayList = useMemo<DisplayEntry[]>(() => {
     const realFriends: DisplayEntry[] = friends.map((f) => ({ ...f, isRecommended: false }));
+    const meEntry: DisplayEntry = {
+      id: myId,
+      name: myId,
+      avatar: myAvatar,
+      steps: mySteps,
+      isRecommended: false,
+    };
+    
+    const hasMe = realFriends.some(f => f.id === myId);
+    if (!hasMe) realFriends.push(meEntry);
 
     if (!isFewFriends || !recommendedUsers?.length) {
       return [...realFriends].sort((a, b) => b.steps - a.steps);
@@ -475,7 +509,7 @@ export function LeaderboardScreen({
     }));
 
     return [...realFriends, ...recEntries].sort((a, b) => b.steps - a.steps);
-  }, [friends, recommendedUsers, isFewFriends]);
+  }, [friends, recommendedUsers, isFewFriends, myId, myAvatar, mySteps]);
 
   const [loadMode, setLoadMode] = useState<LoadMode>('all');
   const [visibleCount, setVisibleCount] = useState(displayList.length);
@@ -625,24 +659,29 @@ export function LeaderboardScreen({
             </div>
           ) : (
             <>
-              <div className="mt-3 overflow-hidden border-y border-[#efefef]">
-                {visibleList.map((entry, index) => (
-                  <div key={entry.id}>
-                    <LeaderboardRow
-                      friend={entry}
-                      rank={index + 1}
-                      highlight={!entry.isRecommended && index === 0}
-                      onClick={() => !entry.isRecommended && setSelectedProfile(entry)}
-                      isRecommended={entry.isRecommended}
-                      isAdded={addedRecommended?.has(entry.id)}
-                      onAddFriend={
-                        entry.isRecommended
-                          ? () => onAddRecommended?.(entry.id, entry.name)
-                          : undefined
-                      }
-                    />
-                  </div>
-                ))}
+              <div className="mt-3 overflow-hidden border-t border-[#efefef]">
+                {visibleList.map((entry, index) => {
+                  const isMe = entry.id === myId;
+                  return (
+                    <div key={entry.id}>
+                      <LeaderboardRow
+                        friend={entry}
+                        rank={index + 1}
+                        highlight={isMe}
+                        isMe={isMe}
+                        onClick={() => !entry.isRecommended && setSelectedProfile(entry)}
+                        isRecommended={entry.isRecommended}
+                        isAdded={addedRecommended?.has(entry.id)}
+                        onAddFriend={
+                          entry.isRecommended
+                            ? () => onAddRecommended?.(entry.id, entry.name)
+                            : undefined
+                        }
+                      />
+                      <div className="h-[1px] w-full bg-[#f6f6f6]" />
+                    </div>
+                  );
+                })}
               </div>
 
               {loadMode === 'page' && hasMore && !isFewFriends && (
@@ -663,48 +702,52 @@ export function LeaderboardScreen({
                 </div>
               )}
 
-              {isFewFriends && (
-                <div className="mx-3 mt-4 mb-2 rounded-[12px] border border-[#ffe082] bg-[#fffbec] px-4 py-4">
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#ffd100]">
-                      <Share2 className="h-4 w-4 text-black" strokeWidth={2} />
-                    </div>
-                    <div>
-                      <p className="text-[12px] font-bold text-[#1f1f1f]">앱에 없는 친구를 초대해보세요</p>
-                      <p className="mt-0.5 text-[10px] leading-[1.4] text-[#8a8a8a]">
-                        초대 후 가입하면 자동으로 친구 연결됩니다
-                      </p>
-                    </div>
+              {/* Invite Container */}
+              <div className="mx-4 mt-8 mb-28 rounded-[12px] border border-[#f0f0f0] bg-white p-4 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFD700]">
+                    <Share2 className="h-5 w-5 text-black" strokeWidth={2} />
                   </div>
-                  <button
-                    onClick={() => setView('inviteFriends')}
-                    className="h-10 w-full rounded-[8px] bg-[#ffd100] text-[11px] font-bold text-black"
-                  >
-                    초대 링크 보내기
-                  </button>
+                  <div className="flex-1">
+                    <p className="text-[13px] font-bold text-black">Invite your friends to Cashwalk!</p>
+                    <p className="mt-0.5 text-[11px] text-[#7a7a7a]">Invite friends and see who gets more steps!</p>
+                  </div>
                 </div>
-              )}
+                <button
+                  onClick={() => setView('inviteFriends')}
+                  className="mt-4 h-[40px] w-full rounded-[6px] bg-[#FFD700] text-[13px] font-bold text-black"
+                >
+                  Invite Friends
+                </button>
+              </div>
             </>
           )}
 
           {/* My rank floating bar */}
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-md px-6 z-40">
-            <div className="flex h-[56px] items-center justify-between rounded-full border-2 border-[#ffd100] bg-white px-5 shadow-[0_8px_16px_rgba(0,0,0,0.1)]">
+            <div className="flex h-[64px] items-center justify-between rounded-full border-[2px] border-[#FFD700] bg-white px-5 shadow-[0_8px_16px_rgba(0,0,0,0.1)]">
               <div className="flex items-center gap-3">
-                <div className="flex w-6 justify-center">
-                  <span className="text-[13px] font-black text-[#ffd100]">{myRank}</span>
+                <div className="flex w-10 justify-center">
+                  {myRank && myRank <= 3 ? (
+                    <div className="relative flex items-center justify-center">
+                      <Trophy className="h-10 w-10" style={{ color: myRank === 1 ? '#FACC15' : myRank === 2 ? '#9CA3AF' : '#C27A3A', fill: myRank === 1 ? '#FACC15' : myRank === 2 ? '#9CA3AF' : '#C27A3A' }} strokeWidth={1} />
+                      <span className="absolute top-[5px] text-[13px] font-black text-white">{myRank}</span>
+                    </div>
+                  ) : (
+                    <div className="relative flex items-center justify-center">
+                      <Trophy className="h-9 w-9 text-[#FFD700]" style={{ fill: '#FFD700' }} strokeWidth={1} />
+                      <span className="absolute top-[4px] text-[12px] font-black text-white">{myRank}</span>
+                    </div>
+                  )}
                 </div>
-                <div className="h-9 w-9 overflow-hidden rounded-full border-2 border-[#ffd100]/30 bg-gray-100">
+                <div className="h-[42px] w-[42px] overflow-hidden rounded-full bg-gray-100">
                   <img src={myAvatar} alt={myId} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
                 </div>
-                <div className="flex flex-col -gap-0.5">
-                  <span className="text-[11px] font-black text-[#222]">{myId}</span>
-                  <span className="text-[9px] font-medium text-gray-400">내 랭킹</span>
-                </div>
+                <span className="text-[15px] font-medium text-black">{myId}</span>
               </div>
-              <div className="flex items-center gap-1.5 text-right">
-                <span className="text-[13px] font-black text-[#222]">{mySteps.toLocaleString()}</span>
-                <span className="text-[10px] font-bold text-[#b7b7b7]">걸음</span>
+              <div className="flex items-center gap-1.5 text-right font-bold text-[#b0b0b0]">
+                <Footprints className="h-[14px] w-[14px]" fill="currentColor" />
+                <span className="text-[15px]">{mySteps.toLocaleString()}</span>
               </div>
             </div>
           </div>
