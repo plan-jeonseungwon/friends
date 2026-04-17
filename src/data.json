@@ -8,28 +8,28 @@
   "friends": [
     {
       "id": "friend_1",
-      "name": "공주강아지",
+      "name": "Princess Puppy",
       "avatar": "https://picsum.photos/seed/friend1/100/100",
       "steps": 9103,
       "friendCount": 72
     },
     {
       "id": "friend_2",
-      "name": "산책왕",
+      "name": "Walk King",
       "avatar": "https://picsum.photos/seed/friend2/100/100",
       "steps": 8500,
       "friendCount": 45
     },
     {
       "id": "friend_3",
-      "name": "캐시워크매니아",
+      "name": "Cashwalk Mania",
       "avatar": "https://picsum.photos/seed/friend3/100/100",
       "steps": 7200,
       "friendCount": 120
     },
     {
       "id": "friend_4",
-      "name": "걷기요정",
+      "name": "Walking Fairy",
       "avatar": "https://picsum.photos/seed/friend4/100/100",
       "steps": 5400,
       "friendCount": 33
@@ -38,7 +38,7 @@
   "mockUsers": [
     {
       "id": "user_123",
-      "name": "행운의친구",
+      "name": "Lucky Friend",
       "recommendCode": "123",
       "avatar": "https://picsum.photos/seed/lucky/100/100",
       "friendCount": 12
@@ -47,15 +47,15 @@
   "friendRequests": [
     {
       "id": "req_1",
-      "name": "김철수",
+      "name": "Chul-soo Kim",
       "avatar": "https://picsum.photos/seed/req1/100/100",
-      "time": "1시간 전"
+      "time": "1 hour ago"
     }
   ],
   "recommendedUsers": [
     {
       "id": "rec_1",
-      "name": "달리는곰돌이",
+      "name": "Running Teddy",
       "avatar": "https://picsum.photos/seed/rec1/100/100",
       "steps": 11400,
       "friendCount": 43,
@@ -63,7 +63,7 @@
     },
     {
       "id": "rec_2",
-      "name": "청춘러너",
+      "name": "Youth Runner",
       "avatar": "https://picsum.photos/seed/rec2/100/100",
       "steps": 9700,
       "friendCount": 67,
@@ -71,7 +71,7 @@
     },
     {
       "id": "rec_3",
-      "name": "밤하늘별빛",
+      "name": "Starry Night",
       "avatar": "https://picsum.photos/seed/rec3/100/100",
       "steps": 8200,
       "friendCount": 28,
@@ -79,7 +79,7 @@
     },
     {
       "id": "rec_4",
-      "name": "스텝업마스터",
+      "name": "Step-up Master",
       "avatar": "https://picsum.photos/seed/rec4/100/100",
       "steps": 7500,
       "friendCount": 31,
@@ -87,7 +87,7 @@
     },
     {
       "id": "rec_5",
-      "name": "오렌지주스",
+      "name": "Orange Juice",
       "avatar": "https://picsum.photos/seed/rec5/100/100",
       "steps": 6800,
       "friendCount": 15,
@@ -95,7 +95,7 @@
     },
     {
       "id": "rec_6",
-      "name": "해피워커",
+      "name": "Happy Walker",
       "avatar": "https://picsum.photos/seed/rec6/100/100",
       "steps": 5100,
       "friendCount": 22,
@@ -103,7 +103,7 @@
     },
     {
       "id": "rec_7",
-      "name": "아침햇살",
+      "name": "Morning Sun",
       "avatar": "https://picsum.photos/seed/rec7/100/100",
       "steps": 4300,
       "friendCount": 9,
@@ -111,7 +111,7 @@
     },
     {
       "id": "rec_8",
-      "name": "루비스텝",
+      "name": "Ruby Step",
       "avatar": "https://picsum.photos/seed/rec8/100/100",
       "steps": 3800,
       "friendCount": 11,

@@ -14,6 +14,7 @@ import {
   Trophy,
   Frown,
   Check,
+  CheckCheck,
   Menu,
   Bell,
   BarChart2,
@@ -45,7 +46,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import mockData from './data.json';
-import { AddFriendsScreen, LeaderboardScreen, ManageRequestsScreen } from './FriendScreens';
+import { AddFriendsScreen, LeaderboardScreen, ManageRequestsScreen, ConfirmModal } from './FriendScreens';
 
 type Tab = 'home' | 'challenge' | 'rewards' | 'play' | 'feeds';
 type ViewState = Tab | 'friends_main' | 'settings' | 'friendManagement' | 'ranking' | 'friendRequests' | 'lockscreen' | 'inviteFriends';
@@ -59,6 +60,12 @@ interface Friend {
   friendCount?: number;
 }
 
+interface ProfileSheetUser extends Friend {
+  isRecommended?: boolean;
+  isMe?: boolean;
+  mutualFriends?: number;
+}
+
 interface MockUser {
   id: string;
   name: string;
@@ -68,8 +75,8 @@ interface MockUser {
 }
 
 interface ProfileBottomSheetProps {
-  selectedProfile: Friend | null;
-  setSelectedProfile: (f: Friend | null) => void;
+  selectedProfile: ProfileSheetUser | null;
+  setSelectedProfile: (f: ProfileSheetUser | null) => void;
   profileMenuOpen: boolean;
   setProfileMenuOpen: (v: boolean) => void;
   handleRemoveFriend: (id: string) => void;
@@ -81,88 +88,95 @@ const ProfileBottomSheet = ({
   profileMenuOpen, 
   setProfileMenuOpen, 
   handleRemoveFriend 
-}: ProfileBottomSheetProps) => (
-  <AnimatePresence>
-    {selectedProfile && (
-      <>
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={() => {
-            setSelectedProfile(null);
-            setProfileMenuOpen(false);
-          }}
-          className="fixed inset-0 bg-black/60 z-[60]"
-        />
-        <motion.div 
-          initial={{ y: '100%' }}
-          animate={{ y: 0 }}
-          exit={{ y: '100%' }}
-          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-[32px] z-[70] overflow-hidden"
-        >
-          <div className="relative h-64">
-            <img 
-              src={`https://picsum.photos/seed/${selectedProfile.id}_bg/600/400`} 
-              alt="background" 
-              className="w-full h-full object-cover"
-              referrerPolicy="no-referrer"
-            />
+}: ProfileBottomSheetProps) => {
+  if (!selectedProfile) return null;
+
+  const showMenu = !selectedProfile.isRecommended && !selectedProfile.isMe;
+
+  return (
+    <AnimatePresence>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={() => {
+          setSelectedProfile(null);
+          setProfileMenuOpen(false);
+        }}
+        className="fixed inset-0 bg-black/55 z-[60]"
+      />
+      <motion.div 
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 26, stiffness: 220 }}
+        className="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-[70] overflow-hidden rounded-t-[28px] bg-white shadow-[0_-16px_50px_rgba(0,0,0,0.16)]"
+      >
+        <div className="relative px-5 pt-3 pb-8">
+          <div className="mx-auto mb-5 h-1.5 w-14 rounded-full bg-black/10" />
+
+          <div className="mb-4 flex items-center justify-end gap-2">
+            <div className="relative">
+              {showMenu && (
+                <button 
+                  onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f5f5] text-[#3a3328]"
+                >
+                  <MoreHorizontal className="h-5 w-5" />
+                </button>
+              )}
+
+              {showMenu && profileMenuOpen && (
+                <div className="absolute right-0 top-12 w-32 overflow-hidden rounded-2xl border border-[#ececec] bg-white py-1 shadow-2xl">
+                  <button 
+                    onClick={() => {
+                      handleRemoveFriend(selectedProfile.id);
+                      setProfileMenuOpen(false);
+                      setSelectedProfile(null);
+                    }}
+                    className="w-full px-4 py-3 text-left text-sm font-bold text-red-500 transition-colors hover:bg-red-50"
+                  >
+                    Unfriend
+                  </button>
+                </div>
+              )}
+            </div>
+
             <button 
               onClick={() => {
                 setSelectedProfile(null);
                 setProfileMenuOpen(false);
               }}
-              className="absolute top-6 left-6 w-10 h-10 bg-black/20 backdrop-blur-md rounded-full flex items-center justify-center text-white"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f5f5] text-[#3a3328]"
             >
-              <ArrowLeft className="w-6 h-6" />
+              <X className="h-5 w-5" />
             </button>
-
-            <button 
-              onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-              className="absolute top-6 right-6 w-10 h-10 bg-black/20 backdrop-blur-md rounded-full flex items-center justify-center text-white"
-            >
-              <MoreHorizontal className="w-6 h-6" />
-            </button>
-
-            {profileMenuOpen && (
-              <div className="absolute top-[72px] right-6 bg-white shadow-2xl rounded-xl py-1 w-32 z-[80] border border-gray-100 animate-in fade-in zoom-in duration-200">
-                <button 
-                  onClick={() => {
-                    handleRemoveFriend(selectedProfile.id);
-                    setProfileMenuOpen(false);
-                    setSelectedProfile(null);
-                  }}
-                  className="w-full text-left px-4 py-3 text-sm text-red-500 font-bold hover:bg-red-50 transition-colors"
-                >
-                  친구 끊기
-                </button>
-              </div>
-            )}
           </div>
-          
-          <div className="px-6 pb-10 -mt-12 relative bg-white rounded-t-[32px] flex flex-col items-center">
-            <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden shadow-lg mb-4">
+
+          <div className="flex flex-col items-center pb-2 text-center">
+            <div className="h-24 w-24 overflow-hidden rounded-full bg-[#f0f0f0]">
               <img 
                 src={selectedProfile.avatar} 
                 alt={selectedProfile.name} 
-                className="w-full h-full object-cover"
+                className="h-full w-full object-cover"
                 referrerPolicy="no-referrer"
               />
             </div>
-            
-            <h3 className="text-2xl font-bold text-gray-800 mb-1">{selectedProfile.name}</h3>
-            <div className="flex items-center gap-1 text-gray-400 mb-8">
-              <Users className="w-4 h-4" />
-              <span className="text-sm font-medium">친구 {selectedProfile.friendCount || 0}명</span>
+            <h3 className="mt-4 text-[24px] font-bold tracking-[-0.03em] text-[#1f1f1f]">
+              {selectedProfile.name}
+            </h3>
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#f7f7f7] px-4 py-2.5 text-[#333]">
+              <Footprints className="h-4 w-4" fill="currentColor" />
+              <span className="text-[16px] font-bold">
+                {selectedProfile.steps.toLocaleString()} steps
+              </span>
             </div>
           </div>
-        </motion.div>
-      </>
-    )}
-  </AnimatePresence>
-);
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
 
 const Toggle = ({ enabled, setEnabled }: { enabled: boolean, setEnabled: (v: boolean) => void }) => (
   <button 
@@ -214,10 +228,10 @@ const SideDrawer = ({ isOpen, onClose, onNavigate }: SideDrawerProps) => (
             </div>
             
             <div className="w-20 h-20 rounded-full bg-[#00A9B5] flex items-center justify-center mb-3 border-4 border-white/20 shadow-inner">
-              <span className="text-white text-2xl font-bold">승원</span>
+              <span className="text-white text-2xl font-bold">SW</span>
             </div>
             
-            <h2 className="text-xl font-bold text-gray-800 mb-2">전승원</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Seungwon Jeon</h2>
             
             <div className="bg-white/30 px-3 py-1 rounded-full flex items-center gap-1 border border-white/20">
               <span className="font-bold text-gray-800 text-sm">345</span>
@@ -274,7 +288,7 @@ export default function App() {
   const [allowSearch, setAllowSearch] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [showRecommendedInRanking, setShowRecommendedInRanking] = useState(true);
-  const [selectedProfile, setSelectedProfile] = useState<Friend | null>(null);
+  const [selectedProfile, setSelectedProfile] = useState<ProfileSheetUser | null>(null);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [friendRequests, setFriendRequests] = useState<any[]>([
     {
@@ -305,10 +319,15 @@ export default function App() {
   const [simulateRank, setSimulateRank] = useState<number | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [addedRecommended, setAddedRecommended] = useState<Set<string>>(new Set());
+  const [cancelModalId, setCancelModalId] = useState<string | null>(null);
 
   const handleAddRecommended = (id: string, name: string) => {
     setAddedRecommended((prev) => new Set([...prev, id]));
     showToast(`Sent friend request to ${name}.`);
+  };
+
+  const handleRemoveRecommended = (id: string) => {
+    setAddedRecommended((prev) => { const s = new Set(prev); s.delete(id); return s; });
   };
 
   useEffect(() => {
@@ -341,8 +360,13 @@ export default function App() {
   };
 
   const handleRemoveFriend = (friendId: string) => {
-    setFriends(friends.filter(f => f.id !== friendId));
+    setFriends(prev => prev.filter(f => f.id !== friendId));
     showToast('Friend removed.');
+  };
+
+  const openProfileSheet = (profile: ProfileSheetUser) => {
+    setProfileMenuOpen(false);
+    setSelectedProfile(profile);
   };
 
   const confirmRequestAction = () => {
@@ -441,7 +465,7 @@ export default function App() {
         {/* Time and Date */}
         <div className="relative z-10 flex flex-col items-center pt-2 pb-12">
           <h1 className="text-[76px] leading-[0.9] font-normal text-white tracking-widest drop-shadow-lg">11:03</h1>
-          <p className="text-white/90 text-[17px] font-medium tracking-wide drop-shadow-md mt-2">3월 20일 금요일</p>
+          <p className="text-white/90 text-[17px] font-medium tracking-wide drop-shadow-md mt-2">March 20, Friday</p>
         </div>
 
         {/* Circular Steps Counter */}
@@ -494,46 +518,46 @@ export default function App() {
   if (view === 'settings') {
     return (
       <div className="min-h-screen bg-gray-50 font-sans text-gray-900 max-w-md mx-auto shadow-xl relative overflow-x-hidden">
-        {renderHeader("캐시톡 설정", false)}
+        {renderHeader("Cashtalk Settings", false)}
         
-        <div className="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500">내 프로필</div>
+        <div className="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500">My Profile</div>
         <div className="bg-white">
           <div className="px-4 py-4 flex items-center justify-between border-b border-gray-50">
             <div>
-              <div className="font-bold text-gray-800">내 추천코드 검색 허용</div>
-              <div className="text-xs text-gray-400">내 추천코드를 상대방이 검색 가능합니다.</div>
+              <div className="font-bold text-gray-800">Allow recommendation code search</div>
+              <div className="text-xs text-gray-400">Others can search for you using your recommendation code.</div>
             </div>
             <Toggle enabled={allowSearch} setEnabled={setAllowSearch} />
           </div>
         </div>
 
-        <div className="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 mt-4">알림 설정</div>
+        <div className="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 mt-4">Notification Settings</div>
         <div className="bg-white">
           <div className="px-4 py-4 flex items-center justify-between">
             <div>
-              <div className="font-bold text-gray-800">친구 요청 푸시 알림</div>
-              <div className="text-xs text-gray-400">새로운 친구 요청이 오면 알림을 받습니다.</div>
+              <div className="font-bold text-gray-800">Friend Request Push Notification</div>
+              <div className="text-xs text-gray-400">Get notified when you receive a new friend request.</div>
             </div>
             <Toggle enabled={pushNotifications} setEnabled={setPushNotifications} />
           </div>
         </div>
 
-        <div className="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 mt-4">랭킹 설정</div>
+        <div className="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 mt-4">Ranking Settings</div>
         <div className="bg-white">
           <div className="px-4 py-4 flex items-center justify-between border-b border-gray-50">
             <div>
-              <div className="font-bold text-gray-800">추천 친구 표시</div>
-              <div className="text-xs text-gray-400">친구 5명 미만일 때 랭킹에 추천 친구를 함께 보여줍니다.</div>
+              <div className="font-bold text-gray-800">Show Suggested Friends</div>
+              <div className="text-xs text-gray-400">Shows suggested friends in ranking when you have less than 5 friends.</div>
             </div>
             <Toggle enabled={showRecommendedInRanking} setEnabled={setShowRecommendedInRanking} />
           </div>
         </div>
 
-        <div className="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 mt-4">친구 관리</div>
+        <div className="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 mt-4">Manage Friends</div>
         <div className="bg-white">
           {[
-            { label: '친구 추가', action: () => { setView('friendManagement'); setSearchQuery(''); setFoundUser(null); } },
-            { label: '친구 요청 관리', action: () => setView('friendRequests') },
+            { label: 'Add Friends', action: () => { setView('friendManagement'); setSearchQuery(''); setFoundUser(null); } },
+            { label: 'Manage Friend Requests', action: () => setView('friendRequests') },
           ].map((item, idx) => (
             <button key={idx} onClick={item.action} className="w-full px-4 py-4 flex items-center justify-between border-b border-gray-50 last:border-0 hover:bg-gray-50">
               <span className="font-bold text-gray-800">{item.label}</span>
@@ -566,18 +590,22 @@ export default function App() {
 
   if (view === 'ranking') {
     return (
-      <LeaderboardScreen
-        friends={friends}
-        myAvatar={mockData.myProfile.avatar}
-        myId={mockData.myProfile.id}
-        mySteps={mockData.myProfile.steps}
-        setSelectedProfile={setSelectedProfile}
-        setView={setView}
-        recommendedUsers={mockData.recommendedUsers}
-        showRecommendedInRanking={showRecommendedInRanking}
-        addedRecommended={addedRecommended}
-        onAddRecommended={handleAddRecommended}
-      />
+      <>
+        <LeaderboardScreen
+          friends={friends}
+          myAvatar={mockData.myProfile.avatar}
+          myId={mockData.myProfile.id}
+          mySteps={mockData.myProfile.steps}
+          setSelectedProfile={openProfileSheet}
+          setView={setView}
+          recommendedUsers={mockData.recommendedUsers}
+          showRecommendedInRanking={showRecommendedInRanking}
+          addedRecommended={addedRecommended}
+          onAddRecommended={handleAddRecommended}
+          onRemoveRecommended={handleRemoveRecommended}
+        />
+        <ProfileBottomSheet {...profileBottomSheetProps} />
+      </>
     );
   }
 
@@ -589,7 +617,7 @@ export default function App() {
             <button onClick={() => setView('friendManagement')} className="flex h-7 w-7 items-center justify-center text-black">
               <ArrowLeft className="h-[18px] w-[18px]" strokeWidth={2.25} />
             </button>
-            <h1 className="text-[15px] font-semibold tracking-[-0.01em] text-black">친구 초대</h1>
+            <h1 className="text-[15px] font-semibold tracking-[-0.01em] text-black">Invite Friends</h1>
             <div className="w-7" />
           </div>
         </header>
@@ -597,17 +625,17 @@ export default function App() {
         <div className="px-3 pt-4 pb-8 space-y-3">
           {/* How it works */}
           <div className="rounded-[12px] bg-white px-4 py-4">
-            <p className="text-[12px] font-bold text-[#202020] mb-2">초대하면 자동으로 친구가 됩니다</p>
+            <p className="text-[12px] font-bold text-[#202020] mb-2">Automatically become friends when invited</p>
             <p className="text-[10px] leading-[1.6] text-[#8a8a8a]">
-              아래 링크를 통해 신규 가입 후 추천인 코드를 입력하면
+              If they join through the link below and enter the recommendation code,
               <br />
-              <span className="font-semibold text-[#555]">초대한 유저와 초대받은 유저가 자동으로 친구 연결</span>됩니다.
+              <span className="font-semibold text-[#555]">the inviter and the invited user are automatically connected as friends.</span>
             </p>
           </div>
 
           {/* Deeplink card */}
           <div className="rounded-[12px] bg-white px-4 py-4">
-            <p className="text-[10px] font-semibold text-[#9a9a9a] mb-2">내 초대 링크</p>
+            <p className="text-[10px] font-semibold text-[#9a9a9a] mb-2">My Invite Link</p>
             <div className="flex items-center gap-2 rounded-[8px] bg-[#f5f5f5] px-3 py-2.5">
               <span className="flex-1 truncate text-[10px] text-[#555]">
                 https://cashwalk.page.link/invite/{mockData.myProfile.recommendCode}
@@ -626,15 +654,15 @@ export default function App() {
 
           {/* Share buttons */}
           <div className="rounded-[12px] bg-white px-4 py-4 space-y-2">
-            <p className="text-[10px] font-semibold text-[#9a9a9a] mb-3">공유하기</p>
+            <p className="text-[10px] font-semibold text-[#9a9a9a] mb-3">Share</p>
             {[
-              { label: '카카오톡으로 보내기', bg: 'bg-[#FEE500]', text: 'text-[#3C1E1E]' },
-              { label: '문자로 보내기', bg: 'bg-[#e8f0fe]', text: 'text-[#1a56c4]' },
-              { label: '링크 공유하기', bg: 'bg-[#f0f0f0]', text: 'text-[#444]' },
+              { label: 'Share via KakaoTalk', bg: 'bg-[#FEE500]', text: 'text-[#3C1E1E]' },
+              { label: 'Share via SMS', bg: 'bg-[#e8f0fe]', text: 'text-[#1a56c4]' },
+              { label: 'Share Link', bg: 'bg-[#f0f0f0]', text: 'text-[#444]' },
             ].map((item) => (
               <button
                 key={item.label}
-                onClick={() => showToast('준비 중인 기능입니다.')}
+                onClick={() => showToast('Feature coming soon.')}
                 className={`h-11 w-full rounded-[8px] ${item.bg} ${item.text} text-[11px] font-semibold`}
               >
                 {item.label}
@@ -736,7 +764,7 @@ export default function App() {
         <section className="bg-white p-4 pt-2">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-1">
-              <h2 className="text-sm font-bold text-gray-800">Today's Lucky Friends 🍀</h2>
+              <h2 className="text-sm font-bold text-gray-800">Suggested Friends</h2>
             </div>
             <div className="flex items-center gap-3">
               <RefreshCw className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors" />
@@ -753,15 +781,19 @@ export default function App() {
                 <p className="text-[10px] text-gray-400 mb-4">{user.friendCount || user.mutualFriends * 20} Friends</p>
                 <button
                   onClick={() => {
-                    if (!addedRecommended.has(user.id)) handleAddRecommended(user.id, user.name);
+                    if (addedRecommended.has(user.id)) {
+                      setCancelModalId(user.id);
+                    } else {
+                      handleAddRecommended(user.id, user.name);
+                    }
                   }}
-                  className={`h-8 w-full rounded-lg text-[11px] font-black transition-all active:scale-95 ${
+                  className={`h-8 w-full rounded-lg text-[11px] font-black transition-all active:scale-95 flex items-center justify-center ${
                     addedRecommended.has(user.id)
-                      ? 'bg-gray-200 text-gray-400'
+                      ? 'bg-white text-[#7a7a7a] border border-[#c0c0c0]'
                       : 'bg-[#ffd100] text-black shadow-sm'
                   }`}
                 >
-                  {addedRecommended.has(user.id) ? 'Requested' : '+ Add'}
+                  {addedRecommended.has(user.id) ? <CheckCheck className="w-5 h-5" /> : '+ Add'}
                 </button>
               </div>
             ))}
@@ -776,7 +808,7 @@ export default function App() {
               <div className="flex flex-col gap-4">
                 {friends.map(friend => (
                   <div key={friend.id} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelectedProfile(friend)}>
+                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => openProfileSheet(friend)}>
                       <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
                         <img src={friend.avatar} alt={friend.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                       </div>
@@ -788,8 +820,8 @@ export default function App() {
             </>
           ) : (
             <div className="flex flex-col items-center justify-center py-10 text-center px-6">
-              <p className="text-gray-500 font-bold mb-1">앗, 캐시톡 친구가 없어요.</p>
-              <p className="text-gray-400 text-sm mb-6">지금 친구를 맺고 캐시를 주고받아보세요.</p>
+              <p className="text-gray-500 font-bold mb-1">Oh, you have no Cashtalk friends yet.</p>
+              <p className="text-gray-400 text-sm mb-6">Make friends now and exchange cash!</p>
             </div>
           )}
         </section>
@@ -815,6 +847,20 @@ export default function App() {
       </main>
 
       <ProfileBottomSheet {...profileBottomSheetProps} />
+
+      {cancelModalId && (
+        <ConfirmModal
+          title="Cancel friend request?"
+          cancelLabel="Close"
+          confirmLabel="Cancel Request"
+          onCancel={() => setCancelModalId(null)}
+          onConfirm={() => {
+            handleRemoveRecommended(cancelModalId);
+            setCancelModalId(null);
+            showToast('Canceled request');
+          }}
+        />
+      )}
 
       {/* Toast Notification */}
       {toast && (
@@ -957,7 +1003,7 @@ export default function App() {
             const isMeInTop3 = myRankInWidget <= 3;
 
             const medalColors = ['#FFD700', '#C0C0C0', '#CD7F32'];
-            const rankLabels = ['1위', '2위', '3위', '4위', '5위', '꼴찌'];
+            const rankLabels = ['Rank 1', 'Rank 2', 'Rank 3', 'Rank 4', 'Rank 5', 'Last'];
             const rankValues = [1, 2, 3, 4, 5, sortedForWidget.length + 1];
 
             return (
@@ -965,7 +1011,7 @@ export default function App() {
                 <div className="px-4 pt-3 pb-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Trophy className="w-4 h-4 text-yellow-500" />
-                    <span className="text-sm font-bold text-gray-800">오늘의 친구 랭킹</span>
+                    <span className="text-sm font-bold text-gray-800">Today's Friend Ranking</span>
                   </div>
                   <div className="flex items-center gap-2">
                     {/* 친구 있음/없음 토글 */}
@@ -973,13 +1019,13 @@ export default function App() {
                       onClick={() => setWidgetHasFriends(v => !v)}
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-colors ${widgetHasFriends ? 'border-green-400 text-green-600 bg-green-50' : 'border-gray-300 text-gray-400 bg-gray-50'}`}
                     >
-                      {widgetHasFriends ? '친구 있음' : '친구 없음'}
+                      {widgetHasFriends ? 'Has Friends' : 'No Friends'}
                     </button>
                     <button
                       onClick={() => setView(widgetHasFriends ? 'ranking' : 'friends_main')}
                       className="text-[11px] text-gray-400 flex items-center gap-0.5 active:text-gray-600"
                     >
-                      전체보기 <ChevronRight className="w-3 h-3" />
+                      View All <ChevronRight className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
@@ -987,7 +1033,7 @@ export default function App() {
                 {/* 🔧 순위 시뮬레이터 토글 */}
                 {widgetHasFriends && (
                   <div className="px-4 pb-2 flex items-center gap-1.5">
-                    <span className="text-[9px] text-gray-400 font-bold mr-0.5">미리보기</span>
+                    <span className="text-[9px] text-gray-400 font-bold mr-0.5">Preview</span>
                     {rankLabels.map((label, i) => {
                       const val = rankValues[i];
                       const isActive = simulateRank === val;
@@ -1024,15 +1070,15 @@ export default function App() {
                               <img src={participant.avatar} alt={participant.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                             </div>
                             {isMe ? (
-                              <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-orange-400 flex items-center justify-center text-[8px] font-black text-white shadow-sm">나</span>
+                              <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-orange-400 flex items-center justify-center text-[8px] font-black text-white shadow-sm">Me</span>
                             ) : (
                               <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white shadow-sm" style={{ backgroundColor: medalColors[idx] }}>
                                 {idx + 1}
                               </span>
                             )}
                           </div>
-                          <span className="text-[10px] font-medium text-gray-600 truncate w-full text-center px-0.5">{isMe ? '나' : participant.name.split(' ')[0]}</span>
-                          <span className={`text-[10px] font-bold ${ isMe ? 'text-orange-500' : 'text-gray-800' }`}>{isMe ? `${myRankInWidget}위` : `${idx + 1}위`}</span>
+                          <span className="text-[10px] font-medium text-gray-600 truncate w-full text-center px-0.5">{isMe ? 'Me' : participant.name.split(' ')[0]}</span>
+                          <span className={`text-[10px] font-bold ${ isMe ? 'text-orange-500' : 'text-gray-800' }`}>{isMe ? `Rank ${myRankInWidget}` : `Rank ${idx + 1}`}</span>
                         </button>
                         );
                       })}
@@ -1046,21 +1092,21 @@ export default function App() {
                             <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 border-orange-400">
                               <img src={mockData.myProfile.avatar} alt="me" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                             </div>
-                            <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-orange-400 flex items-center justify-center text-[8px] font-black text-white shadow-sm">나</span>
+                            <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-orange-400 flex items-center justify-center text-[8px] font-black text-white shadow-sm">Me</span>
                           </div>
-                          <span className="text-[10px] font-medium text-gray-600 truncate w-full text-center px-0.5">나</span>
-                          <span className="text-[10px] font-bold text-orange-500">{myRankInWidget}위</span>
+                          <span className="text-[10px] font-medium text-gray-600 truncate w-full text-center px-0.5">Me</span>
+                          <span className="text-[10px] font-bold text-orange-500">Rank {myRankInWidget}</span>
                         </button>
                       )}
                     </div>
                   ) : (
                     <div className="py-3 text-center">
-                      <p className="text-xs text-gray-400 mb-2">아직 친구가 없어요. 친구를 추가해보세요!</p>
+                      <p className="text-xs text-gray-400 mb-2">You have no friends yet. Add some!</p>
                       <button
                         onClick={() => { setView('friendManagement'); setSearchQuery(''); setFoundUser(null); }}
                         className="text-xs font-bold text-orange-500 border border-orange-300 px-3 py-1 rounded-full"
                       >
-                        친구 추가하기
+                        Add Friends
                       </button>
                     </div>
                   )}
@@ -1077,8 +1123,8 @@ export default function App() {
               className="bg-gradient-to-r from-orange-400 to-orange-500 rounded-2xl p-4 shadow-md shadow-orange-100 flex items-center justify-between overflow-hidden relative"
             >
               <div className="relative z-10">
-                <h3 className="text-white font-bold text-sm mb-1">캐시톡 친구를 찾아보세요!</h3>
-                <p className="text-orange-50 text-[11px]">친구와 함께 걸으면 더 즐거워요</p>
+                <h3 className="text-white font-bold text-sm mb-1">Find Cashtalk Friends!</h3>
+                <p className="text-orange-50 text-[11px]">Walking together is more fun</p>
               </div>
               <div className="bg-white/20 p-2 rounded-xl relative z-10 backdrop-blur-sm">
                 <UserPlus className="w-5 h-5 text-white" />

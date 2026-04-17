@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Ellipsis, Frown, Medal, Search, Settings, Share2, UserPlus, Users, X, Trophy, Footprints } from 'lucide-react';
+import { ArrowLeft, Check, CheckCheck, Ellipsis, Frown, Medal, Search, Settings, Share2, UserPlus, Users, X, Trophy, Footprints } from 'lucide-react';
 
 type Friend = {
   id: string;
@@ -7,6 +7,12 @@ type Friend = {
   avatar: string;
   steps: number;
   friendCount?: number;
+};
+
+type ProfileSheetUser = Friend & {
+  isRecommended?: boolean;
+  isMe?: boolean;
+  mutualFriends?: number;
 };
 
 type MockUser = {
@@ -96,7 +102,7 @@ function RequestsPreviewSheet({ item, onClose }: { item: RequestItem; onClose: (
   );
 }
 
-function ConfirmModal({
+export function ConfirmModal({
   title,
   cancelLabel,
   confirmLabel,
@@ -369,6 +375,7 @@ function LeaderboardRow({
   onClick,
   isRecommended,
   onAddFriend,
+  onCancelRequest,
   isAdded,
   isMe,
 }: {
@@ -378,6 +385,7 @@ function LeaderboardRow({
   onClick: () => void;
   isRecommended?: boolean;
   onAddFriend?: () => void;
+  onCancelRequest?: () => void;
   isAdded?: boolean;
   isMe?: boolean;
 }) {
@@ -399,7 +407,7 @@ function LeaderboardRow({
                 style={{ color: medalColor, fill: medalColor }}
                 strokeWidth={1}
               />
-              <span className="absolute top-[5px] text-[13px] font-black text-white">{rank}</span>
+              <span className="absolute top-[8px] text-[12px] font-black text-white">{rank}</span>
             </div>
           ) : (
             <span className="text-[18px] font-bold text-black">{rank}</span>
@@ -418,12 +426,12 @@ function LeaderboardRow({
             <div className="flex items-center">
               <p className="text-[15px] font-medium text-gray-800">{friend.name}</p>
               {isRecommended && (
-                <span className="ml-[6px] rounded-[4px] bg-[#f2f2f2] border border-[#e0e0e0] px-[4px] py-[1.5px] text-[8px] font-bold text-[#8a8a8a] uppercase tracking-tight">
+                <span className="ml-[6px] rounded-[6px] border border-[#d0d0d0] px-[5px] py-[1px] text-[9px] font-medium text-[#7a7a7a]">
                   Suggested
                 </span>
               )}
               {isMe && (
-                <span className="ml-[6px] flex h-[16px] items-center justify-center rounded-full bg-[#555555] px-[6px] text-[8px] font-black text-white">
+                <span className="ml-[6px] flex h-[16px] min-w-[20px] items-center justify-center rounded-full bg-[#5d5a5a] px-[5px] text-[8px] font-black text-white">
                   Me
                 </span>
               )}
@@ -437,16 +445,22 @@ function LeaderboardRow({
       </div>
       {isRecommended &&
         (isAdded ? (
-          <span className="rounded-[4px] border border-[#d0d0d0] px-3 py-1.5 text-[10px] font-semibold text-[#b0b0b0]">
-            Requested
-          </span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onCancelRequest?.();
+            }}
+            className="flex h-[34px] w-[54px] shrink-0 items-center justify-center rounded-[8px] border border-[#c0c0c0] bg-white text-[#7a7a7a] transition-all active:scale-95"
+          >
+            <CheckCheck className="h-[20px] w-[20px]" strokeWidth={2.5} />
+          </button>
         ) : (
           <button
             onClick={(e) => {
               e.stopPropagation();
               onAddFriend?.();
             }}
-            className="rounded-[6px] bg-[#ffd100] px-4 py-2 text-[12px] font-black text-black shadow-sm transition-transform active:scale-95"
+            className="flex h-[34px] w-[54px] shrink-0 items-center justify-center rounded-[8px] bg-[#ffd100] text-[12px] font-black text-black shadow-sm transition-all active:scale-95"
           >
             + Add
           </button>
@@ -466,23 +480,26 @@ export function LeaderboardScreen({
   showRecommendedInRanking = true,
   addedRecommended,
   onAddRecommended,
+  onRemoveRecommended,
   onBack,
 }: {
   friends: Friend[];
   myAvatar: string;
   myId: string;
   mySteps: number;
-  setSelectedProfile: (f: Friend) => void;
+  setSelectedProfile: (f: ProfileSheetUser) => void;
   setView: (v: ViewState) => void;
   recommendedUsers?: RecommendedUser[];
   showRecommendedInRanking?: boolean;
   addedRecommended?: Set<string>;
   onAddRecommended?: (id: string, name: string) => void;
+  onRemoveRecommended?: (id: string) => void;
   onBack?: () => void;
 }) {
   const isFewFriends = friends.length < 5;
+  const [cancelModal, setCancelModal] = useState<string | null>(null);
 
-  type DisplayEntry = Friend & { isRecommended: boolean };
+  type DisplayEntry = ProfileSheetUser & { isRecommended: boolean };
 
   const displayList = useMemo<DisplayEntry[]>(() => {
     const realFriends: DisplayEntry[] = friends.map((f) => ({ ...f, isRecommended: false }));
@@ -492,6 +509,7 @@ export function LeaderboardScreen({
       avatar: myAvatar,
       steps: mySteps,
       isRecommended: false,
+      isMe: true,
     };
     
     const hasMe = realFriends.some(f => f.id === myId);
@@ -501,12 +519,19 @@ export function LeaderboardScreen({
       return [...realFriends].sort((a, b) => b.steps - a.steps);
     }
 
-    const recEntries: DisplayEntry[] = recommendedUsers.map((u) => ({
+    // if few friends, we want to show exactly 6 items total (including Me)
+    const needed = 6 - realFriends.length;
+    if (needed <= 0) {
+      return [...realFriends].sort((a, b) => b.steps - a.steps);
+    }
+
+    const recEntries: DisplayEntry[] = recommendedUsers.slice(0, needed).map((u) => ({
       id: u.id,
       name: u.name,
       avatar: u.avatar,
       steps: u.steps,
       friendCount: u.friendCount,
+      mutualFriends: u.mutualFriends,
       isRecommended: true,
     }));
 
@@ -563,6 +588,18 @@ export function LeaderboardScreen({
 
   return (
     <div className={shellClass}>
+      {cancelModal && (
+        <ConfirmModal
+          title="Cancel friend request?"
+          cancelLabel="Close"
+          confirmLabel="Cancel Request"
+          onCancel={() => setCancelModal(null)}
+          onConfirm={() => {
+            onRemoveRecommended?.(cancelModal);
+            setCancelModal(null);
+          }}
+        />
+      )}
       {/* Yellow Header with top tabs */}
       <header className="sticky top-0 z-30 bg-[#FFD700] px-4 pt-3">
         <div className="flex items-center justify-between mb-0">
@@ -647,23 +684,23 @@ export function LeaderboardScreen({
           {isEmpty ? (
             <div className="flex min-h-[420px] flex-col items-center justify-center px-8 text-center">
               <p className="text-[11px] font-medium leading-[1.2] text-[#6f6f6f]">
-                아직 친구가 없어요.
+                No friends yet.
                 <br />
-                친구를 추가해서 함께 경쟁해봐요!
+                Add friends and compete together!
               </p>
               <button
                 onClick={() => setView('inviteFriends')}
                 className="mt-4 inline-flex h-9 items-center gap-2 rounded-[7px] bg-[#ffd100] px-4 text-[10px] font-semibold text-black"
               >
                 <Share2 className="h-4 w-4" strokeWidth={2} />
-                친구 초대하기
+                Invite Friends
               </button>
               <button
                 onClick={() => setView('friendManagement')}
                 className="mt-2 inline-flex h-9 items-center gap-2 rounded-[7px] border border-[#e0e0e0] bg-white px-4 text-[10px] font-semibold text-[#707070]"
               >
                 <Users className="h-4 w-4" strokeWidth={2.25} />
-                추천코드로 찾기
+                Search by Code
               </button>
             </div>
           ) : (
@@ -678,12 +715,17 @@ export function LeaderboardScreen({
                         rank={index + 1}
                         highlight={isMe}
                         isMe={isMe}
-                        onClick={() => !entry.isRecommended && setSelectedProfile(entry)}
+                        onClick={() => setSelectedProfile({ ...entry, isMe })}
                         isRecommended={entry.isRecommended}
                         isAdded={addedRecommended?.has(entry.id)}
                         onAddFriend={
                           entry.isRecommended
                             ? () => onAddRecommended?.(entry.id, entry.name)
+                            : undefined
+                        }
+                        onCancelRequest={
+                          entry.isRecommended
+                            ? () => setCancelModal(entry.id)
                             : undefined
                         }
                       />
@@ -700,14 +742,14 @@ export function LeaderboardScreen({
                     disabled={isLoadingMore}
                     className="h-8 rounded-[7px] border border-[#f0c300] bg-[#ffd100] px-4 text-[10px] font-semibold text-black disabled:opacity-60"
                   >
-                    {isLoadingMore ? '로딩 중...' : '더 보기'}
+                    {isLoadingMore ? 'Loading...' : 'Load More'}
                   </button>
                 </div>
               )}
 
               {loadMode === 'infinite' && !isFewFriends && (
                 <div ref={sentinelRef} className="flex h-12 items-center justify-center text-[9px] text-[#a2a2a2]">
-                  {hasMore ? (isLoadingMore ? '로딩 중...' : '스크롤해서 더 보기') : '랭킹 끝'}
+                    {hasMore ? (isLoadingMore ? 'Loading...' : 'Scroll to Load More') : 'End of Ranking'}
                 </div>
               )}
 
