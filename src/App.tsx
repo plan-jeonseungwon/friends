@@ -1007,13 +1007,19 @@ export default function App() {
             const medalColors = ['#FFD700', '#C0C0C0', '#CD7F32'];
             const rankLabels = ['Rank 1', 'Rank 2', 'Rank 3', 'Rank 4', 'Rank 5', 'Last'];
             const rankValues = [1, 2, 3, 4, 5, sortedForWidget.length + 1];
+            const friendCount = sortedForWidget.length;
 
             return (
               <div className="mx-4 mt-1 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 <div className="px-4 pt-3 pb-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Trophy className="w-4 h-4 text-yellow-500" />
-                    <span className="text-sm font-bold text-gray-800">Today's Friend Ranking</span>
+                    <div>
+                      <span className="block text-sm font-bold text-gray-800">Today's Friend Ranking</span>
+                      <span className="block text-[10px] text-gray-400">
+                        {widgetHasFriends ? `Competing with ${friendCount} friends today` : 'Add friends to start competing'}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     {/* 친구 있음/없음 토글 */}
@@ -1058,32 +1064,33 @@ export default function App() {
 
                 <div className="px-4 pb-3">
                   {widgetHasFriends ? (
-                    <div className="flex gap-2">
-                      {top3.map((participant, idx) => {
-                        const isMe = (participant as any).isMe;
-                        return (
-                        <button
-                          key={participant.id + idx}
-                          onClick={() => setView('ranking')}
-                          className="flex-1 flex flex-col items-center gap-1.5 py-2 rounded-xl active:bg-gray-50 transition-colors"
-                        >
-                          <div className="relative">
-                            <div className={`w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 ${ isMe ? 'border-orange-400' : 'border-transparent' }`}>
-                              <img src={participant.avatar} alt={participant.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                            </div>
-                            {isMe ? (
-                              <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-orange-400 flex items-center justify-center text-[8px] font-black text-white shadow-sm">Me</span>
-                            ) : (
-                              <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white shadow-sm" style={{ backgroundColor: medalColors[idx] }}>
-                                {idx + 1}
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-[10px] font-medium text-gray-600 truncate w-full text-center px-0.5">{isMe ? 'Me' : participant.name.split(' ')[0]}</span>
-                          <span className={`text-[10px] font-bold ${ isMe ? 'text-orange-500' : 'text-gray-800' }`}>{isMe ? `Rank ${myRankInWidget}` : `Rank ${idx + 1}`}</span>
-                        </button>
-                        );
-                      })}
+                    <div className="space-y-3">
+                      <div className="flex gap-2">
+                        {top3.map((participant, idx) => {
+                          const isMe = (participant as any).isMe;
+                          return (
+                            <button
+                              key={participant.id + idx}
+                              onClick={() => setView('ranking')}
+                              className="flex-1 flex flex-col items-center gap-1.5 py-2 rounded-xl active:bg-gray-50 transition-colors"
+                            >
+                              <div className="relative">
+                                <div className={`w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 ${ isMe ? 'border-orange-400' : 'border-transparent' }`}>
+                                  <img src={participant.avatar} alt={participant.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                </div>
+                                {isMe ? (
+                                  <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-orange-400 flex items-center justify-center text-[8px] font-black text-white shadow-sm">Me</span>
+                                ) : (
+                                  <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white shadow-sm" style={{ backgroundColor: medalColors[idx] }}>
+                                    {idx + 1}
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[10px] font-medium text-gray-600 truncate w-full text-center px-0.5">{isMe ? 'Me' : participant.name.split(' ')[0]}</span>
+                              <span className={`text-[10px] font-bold ${ isMe ? 'text-orange-500' : 'text-gray-800' }`}>{isMe ? `Rank ${myRankInWidget}` : `Rank ${idx + 1}`}</span>
+                            </button>
+                          );
+                        })}
                       {/* 내가 top3 밖이면 오른쪽에 별도 "나" 슬롯 표시 */}
                       {!isMeInTop3 && (
                         <button
@@ -1100,42 +1107,48 @@ export default function App() {
                           <span className="text-[10px] font-bold text-orange-500">Rank {myRankInWidget}</span>
                         </button>
                       )}
+                      </div>
+                      <button
+                        onClick={() => setView('friends_main')}
+                        className="w-full rounded-2xl border border-orange-100 bg-gradient-to-r from-orange-50 via-white to-amber-50 px-3.5 py-3 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors active:from-orange-100 active:to-amber-100"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-sm">
+                              <Users className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[12px] font-bold text-gray-800">Open Friends Hub</p>
+                              <p className="text-[10px] text-gray-500 truncate">See all friends, requests, and invite more walkers</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-orange-500 shadow-sm">
+                            {friendCount} friends
+                            <ChevronRight className="w-3 h-3" />
+                          </div>
+                        </div>
+                      </button>
                     </div>
                   ) : (
-                    <div className="py-3 text-center">
-                      <p className="text-xs text-gray-400 mb-2">You have no friends yet. Add some!</p>
-                      <button
-                        onClick={() => { setView('friendManagement'); setSearchQuery(''); setFoundUser(null); }}
-                        className="text-xs font-bold text-orange-500 border border-orange-300 px-3 py-1 rounded-full"
-                      >
-                        Add Friends
-                      </button>
+                    <div className="rounded-2xl border border-dashed border-orange-200 bg-gradient-to-br from-orange-50 via-white to-amber-50 px-4 py-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="mb-1 text-[12px] font-bold text-gray-800">Build your walking crew</p>
+                          <p className="text-[10px] text-gray-500">Add friends to unlock rankings, requests, and shared step motivation.</p>
+                        </div>
+                        <button
+                          onClick={() => { setView('friendManagement'); setSearchQuery(''); setFoundUser(null); }}
+                          className="shrink-0 rounded-full bg-orange-500 px-3 py-1.5 text-[10px] font-bold text-white shadow-sm active:bg-orange-600"
+                        >
+                          Add Friends
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
             );
           })()}
-
-          {/* Friends Banner */}
-          <div className="mx-4 mt-3">
-            <motion.div 
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setView('friends_main')}
-              className="bg-gradient-to-r from-orange-400 to-orange-500 rounded-2xl p-4 shadow-md shadow-orange-100 flex items-center justify-between overflow-hidden relative"
-            >
-              <div className="relative z-10">
-                <h3 className="text-white font-bold text-sm mb-1">Find Cashtalk Friends!</h3>
-                <p className="text-orange-50 text-[11px]">Walking together is more fun</p>
-              </div>
-              <div className="bg-white/20 p-2 rounded-xl relative z-10 backdrop-blur-sm">
-                <UserPlus className="w-5 h-5 text-white" />
-              </div>
-              {/* Decorative circles */}
-              <div className="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full border border-white/5" />
-              <div className="absolute -right-2 -bottom-2 w-12 h-12 bg-white/5 rounded-full" />
-            </motion.div>
-          </div>
 
           <div className="p-4 flex gap-3 overflow-x-auto no-scrollbar">
             <div className="min-w-[140px] bg-white rounded-xl p-3 border border-gray-100 shadow-sm shrink-0">
