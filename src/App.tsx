@@ -120,21 +120,23 @@ const ProfileBottomSheet = ({
               {showMenu && (
                 <button 
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f5f5] text-[#3a3328]"
+                  className={`flex h-10 w-10 items-center justify-center rounded-full text-[#3a3328] transition-colors ${
+                    profileMenuOpen ? 'bg-[#ece7de]' : 'bg-[#f5f5f5]'
+                  }`}
                 >
                   <MoreHorizontal className="h-5 w-5" />
                 </button>
               )}
 
               {showMenu && profileMenuOpen && (
-                <div className="absolute right-0 top-12 w-32 overflow-hidden rounded-2xl border border-[#ececec] bg-white py-1 shadow-2xl">
+                <div className="absolute right-0 top-12 w-[132px] overflow-hidden rounded-2xl border border-black/5 bg-[#f7f3ec] py-1 shadow-[0_14px_32px_rgba(0,0,0,0.18)] backdrop-blur-sm">
                   <button 
                     onClick={() => {
                       handleRemoveFriend(selectedProfile.id);
                       setProfileMenuOpen(false);
                       setSelectedProfile(null);
                     }}
-                    className="w-full px-4 py-3 text-left text-sm font-bold text-red-500 transition-colors hover:bg-red-50"
+                    className="w-full px-4 py-3 text-left text-sm font-bold text-red-500 transition-colors hover:bg-[#fbe9e7]"
                   >
                     Unfriend
                   </button>

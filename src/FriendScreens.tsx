@@ -634,29 +634,18 @@ export function LeaderboardScreen({
         <section className="relative min-h-[calc(100vh-116px)] rounded-[14px] bg-white pb-20">
           <div className="pt-4 text-center text-[10px] font-medium text-[#9a9a9a]">2026. 03. 17</div>
 
-          {/* Slim status strip for few-friends mode */}
-          {isFewFriends && !isEmpty && (
-            <div className="mx-3 mt-3 rounded-[8px] bg-[#f5f5f5] px-3 py-2.5">
-              <div className="mb-2 flex items-center justify-between">
-                <p className="text-[11px] font-bold text-[#8a6900]">
-                  {friends.length} Friends · Add {5 - friends.length} more to start the real ranking.
-                </p>
-                <span className="text-[10px] font-semibold text-[#b8960b]">{friends.length}/5</span>
-              </div>
-              <div className="mt-1 flex items-center gap-1.5">
-                <span className="text-[10px] text-[#999]">
-                  {showRecommendedInRanking
-                    ? 'Suggested friends are included in this list.'
-                    : 'Suggested friends are hidden.'}
-                </span>
-                <button
-                  onClick={() => setView('settings')}
-                  className="shrink-0 text-[10px] font-semibold text-[#555] underline underline-offset-2 active:opacity-50"
-                >
-                  Change in Settings
-                </button>
-              </div>
-            </div>
+          {/* Info strip for few-friends mode */}
+          {isFewFriends && !isEmpty && showRecommendedInRanking && (
+            <p className="mx-3 mt-3 text-[11px] leading-[1.6] text-[#888]">
+              Suggested friends are shown because you have fewer than 5 friends. You can turn this off in{' '}
+              <button
+                onClick={() => setView('settings')}
+                className="font-semibold text-[#555] underline underline-offset-2 active:opacity-50"
+              >
+                Settings
+              </button>
+              .
+            </p>
           )}
 
           {/* Load mode toggle — only for full friends list */}
