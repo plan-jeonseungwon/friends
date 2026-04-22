@@ -1017,7 +1017,7 @@ export default function App() {
                     <div>
                       <span className="block text-sm font-bold text-gray-800">Today's Friend Ranking</span>
                       <span className="block text-[10px] text-gray-400">
-                        {widgetHasFriends ? `Competing with ${friendCount} friends today` : 'Add friends to start competing'}
+                        {widgetHasFriends ? `Walking is more fun together with ${friendCount} friends` : 'Find your friends. Walking is more fun together.'}
                       </span>
                     </div>
                   </div>
@@ -1110,40 +1110,42 @@ export default function App() {
                       </div>
                       <button
                         onClick={() => setView('friends_main')}
-                        className="w-full rounded-2xl border border-orange-100 bg-gradient-to-r from-orange-50 via-white to-amber-50 px-3.5 py-3 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors active:from-orange-100 active:to-amber-100"
+                        className="w-full rounded-full border border-orange-100 bg-gradient-to-r from-orange-50 via-white to-amber-50 px-3 py-2 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors active:from-orange-100 active:to-amber-100"
                       >
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex min-w-0 items-center gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-sm">
-                              <Users className="w-4 h-4" />
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex min-w-0 items-center gap-2.5">
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-500 text-white shadow-sm">
+                              <Users className="w-3.5 h-3.5" />
                             </div>
-                            <div className="min-w-0">
-                              <p className="text-[12px] font-bold text-gray-800">Open Friends Hub</p>
-                              <p className="text-[10px] text-gray-500 truncate">See all friends, requests, and invite more walkers</p>
-                            </div>
+                            <p className="min-w-0 truncate text-[11px] font-bold text-gray-700">
+                              Find your friends. Walking is more fun together.
+                            </p>
                           </div>
-                          <div className="flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-orange-500 shadow-sm">
-                            {friendCount} friends
+                          <div className="flex shrink-0 items-center gap-1 text-[10px] font-bold text-orange-500">
+                            {friendCount}
                             <ChevronRight className="w-3 h-3" />
                           </div>
                         </div>
                       </button>
                     </div>
                   ) : (
-                    <div className="rounded-2xl border border-dashed border-orange-200 bg-gradient-to-br from-orange-50 via-white to-amber-50 px-4 py-4">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="mb-1 text-[12px] font-bold text-gray-800">Build your walking crew</p>
-                          <p className="text-[10px] text-gray-500">Add friends to unlock rankings, requests, and shared step motivation.</p>
+                    <button
+                      onClick={() => { setView('friendManagement'); setSearchQuery(''); setFoundUser(null); }}
+                      className="flex w-full items-center justify-between gap-2 rounded-full border border-dashed border-orange-200 bg-gradient-to-r from-orange-50 via-white to-amber-50 px-3 py-2 text-left transition-colors active:from-orange-100 active:to-amber-100"
+                    >
+                      <div className="flex min-w-0 items-center gap-2.5">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-500 text-white shadow-sm">
+                          <Users className="w-3.5 h-3.5" />
                         </div>
-                        <button
-                          onClick={() => { setView('friendManagement'); setSearchQuery(''); setFoundUser(null); }}
-                          className="shrink-0 rounded-full bg-orange-500 px-3 py-1.5 text-[10px] font-bold text-white shadow-sm active:bg-orange-600"
-                        >
-                          Add Friends
-                        </button>
+                        <p className="min-w-0 truncate text-[11px] font-bold text-gray-700">
+                          Find your friends. Walking is more fun together.
+                        </p>
                       </div>
-                    </div>
+                      <div className="flex shrink-0 items-center gap-1 text-[10px] font-bold text-orange-500">
+                        Add
+                        <ChevronRight className="w-3 h-3" />
+                      </div>
+                    </button>
                   )}
                 </div>
               </div>
