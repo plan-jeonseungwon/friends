@@ -4,12 +4,12 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { 
-  ArrowLeft, 
-  UserPlus, 
-  Settings, 
-  Copy, 
-  ChevronRight, 
+import {
+  ArrowLeft,
+  UserPlus,
+  Settings,
+  Copy,
+  ChevronRight,
   Users,
   Trophy,
   Frown,
@@ -48,8 +48,15 @@ import { motion, AnimatePresence } from 'motion/react';
 import mockData from './data.json';
 import { AddFriendsScreen, LeaderboardScreen, ManageRequestsScreen, ConfirmModal } from './FriendScreens';
 
+type PreviewScenario = 'fresh' | 'partial' | 'limit';
+
+const RECOMMENDED_CARD_COUNT = 6;
+const DAILY_REQUEST_LIMIT = 10;
+const REFRESH_COOLDOWN_SECONDS = 10;
+const INITIAL_PREVIEW_SCENARIO: PreviewScenario = 'partial';
+
 type Tab = 'home' | 'challenge' | 'rewards' | 'play' | 'feeds';
-type ViewState = Tab | 'friends_main' | 'settings' | 'friendManagement' | 'ranking' | 'friendRequests' | 'lockscreen' | 'inviteFriends';
+export type ViewState = Tab | 'friends_main' | 'settings' | 'friendManagement' | 'ranking' | 'friendRequests' | 'lockscreen' | 'inviteFriends';
 
 
 interface Friend {
@@ -74,6 +81,64 @@ interface MockUser {
   friendCount: number;
 }
 
+interface RecommendedUser {
+  id: string;
+  name: string;
+  avatar: string;
+  steps: number;
+  friendCount: number;
+  mutualFriends: number;
+}
+
+const allRecommendedUsers: RecommendedUser[] = mockData.recommendedUsers;
+
+const buildRequestedSetForScenario = (scenario: PreviewScenario) => {
+  switch (scenario) {
+    case 'fresh':
+      return new Set<string>();
+    case 'partial':
+      return new Set(allRecommendedUsers.filter((_, index) => index % 2 === 1).slice(0, 3).map((user) => user.id));
+    case 'limit':
+      return new Set([
+        'rec_hidden_1',
+        'rec_hidden_2',
+        'rec_hidden_3',
+        'rec_hidden_4',
+        'rec_hidden_5',
+        'rec_hidden_6',
+        'rec_hidden_7',
+        'rec_hidden_8',
+        'rec_hidden_9',
+        'rec_hidden_10',
+      ]);
+    default:
+      return new Set<string>();
+  }
+};
+
+const getSuggestedWindow = (users: RecommendedUser[], startOffset = 0) => {
+  if (!users.length) return [];
+
+  const count = Math.min(RECOMMENDED_CARD_COUNT, users.length);
+  const start = startOffset % users.length;
+
+  return Array.from({ length: count }, (_, index) => users[(start + index) % users.length]);
+};
+
+const getAvailableSuggestedUsers = (requestedIds: Set<string>) =>
+  allRecommendedUsers.filter((user) => !requestedIds.has(user.id));
+
+const rebuildSuggestedAfterReentry = (
+  currentUsers: RecommendedUser[],
+  requestedIds: Set<string>,
+) => {
+  const keptUsers = currentUsers.filter((user) => !requestedIds.has(user.id));
+  const keptIds = new Set(keptUsers.map((user) => user.id));
+  const extraUsers = getAvailableSuggestedUsers(requestedIds).filter((user) => !keptIds.has(user.id));
+
+  return [...keptUsers, ...extraUsers].slice(0, RECOMMENDED_CARD_COUNT);
+};
+
 interface ProfileBottomSheetProps {
   selectedProfile: ProfileSheetUser | null;
   setSelectedProfile: (f: ProfileSheetUser | null) => void;
@@ -82,12 +147,12 @@ interface ProfileBottomSheetProps {
   handleRemoveFriend: (id: string) => void;
 }
 
-const ProfileBottomSheet = ({ 
-  selectedProfile, 
-  setSelectedProfile, 
-  profileMenuOpen, 
-  setProfileMenuOpen, 
-  handleRemoveFriend 
+const ProfileBottomSheet = ({
+  selectedProfile,
+  setSelectedProfile,
+  profileMenuOpen,
+  setProfileMenuOpen,
+  handleRemoveFriend
 }: ProfileBottomSheetProps) => {
   if (!selectedProfile) return null;
 
@@ -95,7 +160,7 @@ const ProfileBottomSheet = ({
 
   return (
     <AnimatePresence>
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -105,7 +170,7 @@ const ProfileBottomSheet = ({
         }}
         className="fixed inset-0 bg-black/55 z-[60]"
       />
-      <motion.div 
+      <motion.div
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
@@ -118,11 +183,10 @@ const ProfileBottomSheet = ({
           <div className="mb-4 flex items-center justify-end gap-2">
             <div className="relative">
               {showMenu && (
-                <button 
+                <button
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                  className={`flex h-10 w-10 items-center justify-center rounded-full text-[#3a3328] transition-colors ${
-                    profileMenuOpen ? 'bg-[#ece7de]' : 'bg-[#f5f5f5]'
-                  }`}
+                  className={`flex h-10 w-10 items-center justify-center rounded-full text-[#3a3328] transition-colors ${profileMenuOpen ? 'bg-[#ece7de]' : 'bg-[#f5f5f5]'
+                    }`}
                 >
                   <MoreHorizontal className="h-5 w-5" />
                 </button>
@@ -130,7 +194,7 @@ const ProfileBottomSheet = ({
 
               {showMenu && profileMenuOpen && (
                 <div className="absolute right-0 top-12 w-[132px] overflow-hidden rounded-2xl border border-black/5 bg-[#f7f3ec] py-1 shadow-[0_14px_32px_rgba(0,0,0,0.18)] backdrop-blur-sm">
-                  <button 
+                  <button
                     onClick={() => {
                       handleRemoveFriend(selectedProfile.id);
                       setProfileMenuOpen(false);
@@ -144,7 +208,7 @@ const ProfileBottomSheet = ({
               )}
             </div>
 
-            <button 
+            <button
               onClick={() => {
                 setSelectedProfile(null);
                 setProfileMenuOpen(false);
@@ -157,9 +221,9 @@ const ProfileBottomSheet = ({
 
           <div className="flex flex-col items-center pb-2 text-center">
             <div className="h-24 w-24 overflow-hidden rounded-full bg-[#f0f0f0]">
-              <img 
-                src={selectedProfile.avatar} 
-                alt={selectedProfile.name} 
+              <img
+                src={selectedProfile.avatar}
+                alt={selectedProfile.name}
                 className="h-full w-full object-cover"
                 referrerPolicy="no-referrer"
               />
@@ -181,9 +245,9 @@ const ProfileBottomSheet = ({
 };
 
 const Toggle = ({ enabled, setEnabled }: { enabled: boolean, setEnabled: (v: boolean) => void }) => (
-  <button 
+  <button
     onClick={() => setEnabled(!enabled)}
-    className={`w-12 h-6 rounded-full transition-colors relative ${enabled ? 'bg-orange-500' : 'bg-gray-300'}`}
+    className={`w-12 h-6 rounded-full transition-colors relative ${enabled ? 'bg-[#FFCC00]' : 'bg-gray-300'}`}
   >
     <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${enabled ? 'left-7' : 'left-1'}`} />
   </button>
@@ -221,20 +285,20 @@ const SideDrawer = ({ isOpen, onClose, onNavigate }: SideDrawerProps) => (
               <button onClick={onClose} className="p-1 -ml-2">
                 <ArrowLeft className="w-6 h-6 text-gray-800" />
               </button>
-              <button 
+              <button
                 onClick={() => { onNavigate('settings'); onClose(); }}
                 className="p-1 -mr-2"
               >
                 <Settings className="w-6 h-6 text-gray-800" />
               </button>
             </div>
-            
+
             <div className="w-20 h-20 rounded-full bg-[#00A9B5] flex items-center justify-center mb-3 border-4 border-white/20 shadow-inner">
               <span className="text-white text-2xl font-bold">SW</span>
             </div>
-            
+
             <h2 className="text-xl font-bold text-gray-800 mb-2">Seungwon Jeon</h2>
-            
+
             <div className="bg-white/30 px-3 py-1 rounded-full flex items-center gap-1 border border-white/20">
               <span className="font-bold text-gray-800 text-sm">345</span>
               <div className="w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center text-[10px] font-bold text-white border border-white shadow-sm">C</div>
@@ -243,7 +307,7 @@ const SideDrawer = ({ isOpen, onClose, onNavigate }: SideDrawerProps) => (
 
           {/* Menu Items */}
           <div className="flex-1 py-4 overflow-y-auto">
-            <button 
+            <button
               onClick={() => { onNavigate('lockscreen'); onClose(); }}
               className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
             >
@@ -262,10 +326,10 @@ const SideDrawer = ({ isOpen, onClose, onNavigate }: SideDrawerProps) => (
               <Watch className="w-6 h-6 text-gray-400 shrink-0" />
               <span className="text-gray-700 font-medium">Wearable Device</span>
             </button>
-            
+
             <div className="h-px bg-gray-100 my-2 mx-6" />
-            
-            <button 
+
+            <button
               onClick={() => { onNavigate('friends_main'); onClose(); }}
               className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
             >
@@ -279,13 +343,13 @@ const SideDrawer = ({ isOpen, onClose, onNavigate }: SideDrawerProps) => (
   </AnimatePresence>
 );
 
-export default function App() {
-  const [view, setView] = useState<ViewState>('home');
+export default function App({ initialView = 'home' }: { initialView?: ViewState } = {}) {
+  const [view, setView] = useState<ViewState>(initialView);
   const [currentTab, setCurrentTab] = useState<Tab>('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState<string | null>(null);
   const [foundUser, setFoundUser] = useState<MockUser | null>(null);
-  
+
   // Settings states
   const [allowSearch, setAllowSearch] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
@@ -320,16 +384,67 @@ export default function App() {
   const [widgetHasFriends, setWidgetHasFriends] = useState(true);
   const [simulateRank, setSimulateRank] = useState<number | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [addedRecommended, setAddedRecommended] = useState<Set<string>>(new Set());
+  const [previewScenario, setPreviewScenario] = useState<PreviewScenario>(INITIAL_PREVIEW_SCENARIO);
+  const [recommendedRefreshOffset, setRecommendedRefreshOffset] = useState(0);
+  const [refreshCooldownLeft, setRefreshCooldownLeft] = useState(0);
+  const [visibleRecommendedUsers, setVisibleRecommendedUsers] = useState<RecommendedUser[]>(
+    () => getSuggestedWindow(allRecommendedUsers),
+  );
+  const [addedRecommended, setAddedRecommended] = useState<Set<string>>(
+    () => buildRequestedSetForScenario(INITIAL_PREVIEW_SCENARIO),
+  );
   const [cancelModalId, setCancelModalId] = useState<string | null>(null);
+  const dailyRequestLimit = DAILY_REQUEST_LIMIT;
+  const sentRecommendedCount = addedRecommended.size;
+  const remainingRecommendedRequests = Math.max(0, dailyRequestLimit - sentRecommendedCount);
+  const hasReachedDailyRequestLimit = remainingRecommendedRequests === 0;
 
   const handleAddRecommended = (id: string, name: string) => {
+    if (hasReachedDailyRequestLimit) {
+      showToast('You have reached the 10-request limit in the last 24 hours (UTC).');
+      return;
+    }
+
     setAddedRecommended((prev) => new Set([...prev, id]));
     showToast(`Sent friend request to ${name}.`);
   };
 
   const handleRemoveRecommended = (id: string) => {
     setAddedRecommended((prev) => { const s = new Set(prev); s.delete(id); return s; });
+  };
+
+  const handleRefreshSuggestedFriends = () => {
+    if (hasReachedDailyRequestLimit) {
+      showToast('You have reached the 10-request limit in the last 24 hours (UTC).');
+      return;
+    }
+
+    if (refreshCooldownLeft > 0) {
+      showToast(`Refresh available in ${refreshCooldownLeft}s.`);
+      return;
+    }
+
+    const availableUsers = getAvailableSuggestedUsers(addedRecommended);
+    if (!availableUsers.length) {
+      showToast('No new suggested friends available right now.');
+      return;
+    }
+
+    const nextOffset = recommendedRefreshOffset + 2;
+    setVisibleRecommendedUsers(getSuggestedWindow(availableUsers, nextOffset));
+    setRecommendedRefreshOffset(nextOffset);
+    setRefreshCooldownLeft(REFRESH_COOLDOWN_SECONDS);
+    showToast('Loaded a new suggested friends list.');
+  };
+
+  const handleSimulateReentry = () => {
+    const nextUsers = rebuildSuggestedAfterReentry(visibleRecommendedUsers, addedRecommended);
+    setVisibleRecommendedUsers(nextUsers);
+    showToast(
+      nextUsers.length
+        ? 'Re-entered Friends page and cleaned up requested cards.'
+        : 'No suggested friends left to show after re-entry.',
+    );
   };
 
   useEffect(() => {
@@ -347,6 +462,23 @@ export default function App() {
       return () => clearTimeout(timer);
     }
   }, [toast]);
+
+  useEffect(() => {
+    if (refreshCooldownLeft <= 0) return;
+
+    const timer = setTimeout(() => {
+      setRefreshCooldownLeft((prev) => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [refreshCooldownLeft]);
+
+  useEffect(() => {
+    setAddedRecommended(buildRequestedSetForScenario(previewScenario));
+    setVisibleRecommendedUsers(getSuggestedWindow(allRecommendedUsers));
+    setRecommendedRefreshOffset(0);
+    setRefreshCooldownLeft(0);
+  }, [previewScenario]);
 
   const showToast = (message: string) => setToast(message);
 
@@ -388,8 +520,8 @@ export default function App() {
   const renderHeader = (title: string | React.ReactNode, showIcons = true, onBack?: () => void) => (
     <header className="sticky top-0 z-30 bg-white px-4 py-3 flex items-center justify-between border-b border-gray-100">
       <div className="flex items-center gap-4">
-        <ArrowLeft 
-          className="w-6 h-6 text-gray-700 cursor-pointer" 
+        <ArrowLeft
+          className="w-6 h-6 text-gray-700 cursor-pointer"
           onClick={() => {
             if (onBack) {
               onBack();
@@ -398,7 +530,7 @@ export default function App() {
               setSearchQuery('');
               setFoundUser(null);
             }
-          }} 
+          }}
         />
         {typeof title === 'string' ? (
           <h1 className="text-lg font-bold text-gray-800 tracking-tight flex-1 text-center pr-6">{title}</h1>
@@ -423,12 +555,12 @@ export default function App() {
 
   if (view === 'lockscreen') {
     return (
-      <div 
+      <div
         className="min-h-screen font-sans text-gray-900 max-w-md mx-auto relative overflow-hidden bg-cover bg-center"
         style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80)' }}
       >
         <div className="absolute inset-0 bg-black/10"></div>
-        
+
         {/* Android Status Bar */}
         <div className="relative z-10 flex items-center justify-between px-4 pt-2 pb-1 text-white">
           <div className="flex items-center gap-1 text-[13px] font-medium tracking-wide">
@@ -495,7 +627,7 @@ export default function App() {
                 A new version is available. <span className="font-bold text-white">Tap here to update</span>
               </span>
             </div>
-            
+
             {/* NEWS Banner */}
             <div className="w-full bg-black/40 backdrop-blur-md rounded-lg px-4 py-3.5 flex items-center shadow-lg pt-4 pb-4">
               <span className="border border-white/50 text-white/90 text-[10px] font-medium tracking-wider px-1.5 py-0.5 rounded mr-3 shrink-0">NEWS</span>
@@ -507,8 +639,8 @@ export default function App() {
         {/* Slide to unlock */}
         <div className="absolute bottom-[3.5rem] w-full text-center z-20">
           <span className="text-white font-bold text-[15px] tracking-wide drop-shadow-md cursor-pointer hover:opacity-80 transition-opacity" onClick={() => {
-            setView('home'); 
-            setIsDrawerOpen(false); 
+            setView('home');
+            setIsDrawerOpen(false);
           }}>
             Slide to unlock &gt;&gt;
           </span>
@@ -517,55 +649,38 @@ export default function App() {
     );
   }
 
-  if (view === 'settings') {
+    if (view === 'settings') {
     return (
-      <div className="min-h-screen bg-gray-50 font-sans text-gray-900 max-w-md mx-auto shadow-xl relative overflow-x-hidden">
-        {renderHeader("Cashtalk Settings", false)}
-        
-        <div className="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500">My Profile</div>
+      <div className="min-h-screen bg-white font-sans text-[#1A1A1A] max-w-md mx-auto shadow-xl relative overflow-x-hidden">
+        {renderHeader("Friends Settings", false)}
+
+        <div className="bg-[#F2F2F2] px-4 py-2 text-[12px] text-[#8C8C8C]">Privacy</div>
         <div className="bg-white">
-          <div className="px-4 py-4 flex items-center justify-between border-b border-gray-50">
-            <div>
-              <div className="font-bold text-gray-800">Allow recommendation code search</div>
-              <div className="text-xs text-gray-400">Others can search for you using your recommendation code.</div>
+          <div className="px-4 py-4 flex items-center justify-between border-b border-[#F2F2F2]">
+            <div className="pr-4">
+              <div className="text-[15px] text-[#1A1A1A] leading-snug">Allow Search by Referral Code</div>
+              <div className="text-[13px] text-[#A6A6A6] mt-1 leading-snug">Let others find you using your referral code.</div>
             </div>
-            <Toggle enabled={allowSearch} setEnabled={setAllowSearch} />
+            <div className="shrink-0"><Toggle enabled={allowSearch} setEnabled={setAllowSearch} /></div>
+          </div>
+          <div className="px-4 py-4 flex items-center justify-between border-b border-[#F2F2F2]">
+            <div className="pr-4">
+              <div className="text-[15px] text-[#1A1A1A] leading-snug">Allow Suggested Friends</div>
+              <div className="text-[13px] text-[#A6A6A6] mt-1 leading-snug">Receive friend suggestions and<br/>be suggested to others.</div>
+            </div>
+            <div className="shrink-0"><Toggle enabled={showRecommendedInRanking} setEnabled={setShowRecommendedInRanking} /></div>
           </div>
         </div>
 
-        <div className="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 mt-4">Notification Settings</div>
-        <div className="bg-white">
+        <div className="bg-[#F2F2F2] px-4 py-2 text-[12px] text-[#8C8C8C]">Notifications</div>
+        <div className="bg-white border-b border-[#F2F2F2]">
           <div className="px-4 py-4 flex items-center justify-between">
-            <div>
-              <div className="font-bold text-gray-800">Friend Request Push Notification</div>
-              <div className="text-xs text-gray-400">Get notified when you receive a new friend request.</div>
+            <div className="pr-4">
+              <div className="text-[15px] text-[#1A1A1A] leading-snug">Friend Request Alerts</div>
+              <div className="text-[13px] text-[#A6A6A6] mt-1 leading-snug">Get notified when someone sends you a<br/>friend request.</div>
             </div>
-            <Toggle enabled={pushNotifications} setEnabled={setPushNotifications} />
+            <div className="shrink-0"><Toggle enabled={pushNotifications} setEnabled={setPushNotifications} /></div>
           </div>
-        </div>
-
-        <div className="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 mt-4">Ranking Settings</div>
-        <div className="bg-white">
-          <div className="px-4 py-4 flex items-center justify-between border-b border-gray-50">
-            <div>
-              <div className="font-bold text-gray-800">Show Suggested Friends</div>
-              <div className="text-xs text-gray-400">Shows suggested friends in ranking when you have less than 5 friends.</div>
-            </div>
-            <Toggle enabled={showRecommendedInRanking} setEnabled={setShowRecommendedInRanking} />
-          </div>
-        </div>
-
-        <div className="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 mt-4">Manage Friends</div>
-        <div className="bg-white">
-          {[
-            { label: 'Add Friends', action: () => { setView('friendManagement'); setSearchQuery(''); setFoundUser(null); } },
-            { label: 'Manage Friend Requests', action: () => setView('friendRequests') },
-          ].map((item, idx) => (
-            <button key={idx} onClick={item.action} className="w-full px-4 py-4 flex items-center justify-between border-b border-gray-50 last:border-0 hover:bg-gray-50">
-              <span className="font-bold text-gray-800">{item.label}</span>
-              <ChevronRight className="w-5 h-5 text-gray-300" />
-            </button>
-          ))}
         </div>
 
         <ProfileBottomSheet {...profileBottomSheetProps} />
@@ -713,167 +828,196 @@ export default function App() {
 
         {/* Content */}
         <main className="flex flex-col gap-4 bg-gray-50">
-        {/* Profile Section */}
-        <section className="bg-white p-4">
-          <h2 className="text-xs font-semibold text-gray-500 mb-3">My Profile</h2>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-14 h-14 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                <img src={mockData.myProfile.avatar} alt="me" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-lg">{mockData.myProfile.id}</span>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] text-gray-400">My Recommendation Code</p>
-              <div className="flex items-center gap-1 text-gray-600 font-medium">
-                <span>{mockData.myProfile.recommendCode}</span>
-                <Copy className="w-3 h-3 cursor-pointer hover:text-orange-500 transition-colors" onClick={handleCopyCode} />
-              </div>
-            </div>
-          </div>
-        </section>
-
-
-        {/* Received Friend Requests */}
-        <section className="px-4">
-          <div 
-            onClick={() => setView('friendRequests')}
-            className="bg-white rounded-xl p-4 flex items-center justify-between border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100">
-                <img src="https://picsum.photos/seed/req_icon/100/100" alt="req" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-bold text-gray-500">Received Friend Requests</span>
-                <span className="text-sm font-bold text-gray-800">Check your friend requests</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {friendRequests.length > 0 && (
-                <span className="bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full">
-                  {friendRequests.length}
-                </span>
-              )}
-              <ChevronRight className="w-5 h-5 text-gray-300" />
-            </div>
-          </div>
-        </section>
-
-        {/* Today's Lucky Friends */}
-        <section className="bg-white p-4 pt-2">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-1">
-              <h2 className="text-sm font-bold text-gray-800">Suggested Friends</h2>
-            </div>
-            <div className="flex items-center gap-3">
-              <RefreshCw className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors" />
-              <ChevronUp className="w-5 h-5 text-gray-400 cursor-pointer" />
-            </div>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
-            {mockData.recommendedUsers.slice(0, 6).map((user) => (
-              <div key={user.id} className="flex flex-col items-center shrink-0 w-[110px] bg-[#f8f9fa] rounded-2xl p-4 border border-gray-50/50">
-                <div className="w-14 h-14 rounded-full overflow-hidden mb-2 border-2 border-white shadow-sm">
-                  <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+          {/* Profile Section */}
+          <section className="bg-white p-4">
+            <h2 className="text-xs font-semibold text-gray-500 mb-3">My Profile</h2>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                  <img src={mockData.myProfile.avatar} alt="me" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 </div>
-                <p className="text-xs font-bold text-gray-800 truncate w-full text-center px-1 mb-0.5">{user.name}</p>
-                <p className="text-[10px] text-gray-400 mb-4">{user.friendCount || user.mutualFriends * 20} Friends</p>
+                <div className="flex flex-col">
+                  <span className="font-bold text-lg">{mockData.myProfile.id}</span>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] text-gray-400">My Recommendation Code</p>
+                <div className="flex items-center gap-1 text-gray-600 font-medium">
+                  <span>{mockData.myProfile.recommendCode}</span>
+                  <Copy className="w-3 h-3 cursor-pointer hover:text-orange-500 transition-colors" onClick={handleCopyCode} />
+                </div>
+              </div>
+            </div>
+          </section>
+
+
+          {/* Received Friend Requests */}
+          <section className="px-4">
+            <div
+              onClick={() => setView('friendRequests')}
+              className="bg-white rounded-xl p-4 flex items-center justify-between border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100">
+                  <img src="https://picsum.photos/seed/req_icon/100/100" alt="req" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-gray-500">Received Friend Requests</span>
+                  <span className="text-sm font-bold text-gray-800">Check your friend requests</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {friendRequests.length > 0 && (
+                  <span className="bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full">
+                    {friendRequests.length}
+                  </span>
+                )}
+                <ChevronRight className="w-5 h-5 text-gray-300" />
+              </div>
+            </div>
+          </section>
+
+          {/* Today's Lucky Friends */}
+          <section className="bg-white p-4 pt-2">
+
+
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-1">
+                <h2 className="text-sm font-bold text-gray-800">Suggested Friends</h2>
+                <span className="rounded-full bg-[#fff5cc] px-2.5 py-1 text-[10px] font-bold text-[#8a6a00]">
+                  {remainingRecommendedRequests} left in 24h
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
                 <button
-                  onClick={() => {
-                    if (addedRecommended.has(user.id)) {
-                      setCancelModalId(user.id);
-                    } else {
-                      handleAddRecommended(user.id, user.name);
-                    }
-                  }}
-                  className={`h-8 w-full rounded-lg text-[11px] font-black transition-all active:scale-95 flex items-center justify-center ${
-                    addedRecommended.has(user.id)
-                      ? 'bg-white text-[#7a7a7a] border border-[#c0c0c0]'
-                      : 'bg-[#ffd100] text-black shadow-sm'
-                  }`}
+                  type="button"
+                  onClick={handleRefreshSuggestedFriends}
+                  className={`flex items-center gap-1 text-[10px] font-bold transition-colors ${hasReachedDailyRequestLimit
+                      ? 'text-gray-300'
+                      : 'text-gray-400 hover:text-gray-600'
+                    }`}
                 >
-                  {addedRecommended.has(user.id) ? <CheckCheck className="w-5 h-5" /> : '+ Add'}
+                  <RefreshCw className={`w-4 h-4 ${refreshCooldownLeft > 0 ? 'animate-spin' : ''}`} />
+                  <span>
+                    {hasReachedDailyRequestLimit
+                      ? 'Limit reached'
+                      : refreshCooldownLeft > 0
+                        ? `${refreshCooldownLeft}s`
+                        : 'Refresh'}
+                  </span>
                 </button>
+                <ChevronUp className="w-5 h-5 text-gray-400 cursor-pointer" />
               </div>
-            ))}
-          </div>
-        </section>
+            </div>
 
-        {/* Friends List or Empty State */}
-        <section className="bg-white p-4 min-h-[300px]">
-          {friends.length > 0 ? (
-            <>
-              <h2 className="text-sm font-semibold text-gray-500 mb-4">{friends.length} Friends</h2>
-              <div className="flex flex-col gap-4">
-                {friends.map(friend => (
-                  <div key={friend.id} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => openProfileSheet(friend)}>
-                      <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
-                        <img src={friend.avatar} alt={friend.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                      </div>
-                      <span className="font-bold text-gray-800">{friend.name}</span>
-                    </div>
+            {hasReachedDailyRequestLimit && (
+              <div className="mb-4 rounded-2xl border border-[#f3e2a4] bg-[#fff9e8] px-4 py-3">
+                <p className="text-[12px] font-semibold text-[#6e5a17]">
+                  You have reached the 10-request limit in the last 24 hours (UTC). More suggestions will unlock as that window clears.
+                </p>
+              </div>
+            )}
+
+
+
+            {visibleRecommendedUsers.length > 0 ? (
+              <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+              {visibleRecommendedUsers.map((user) => (
+                <div key={user.id} className="flex flex-col items-center shrink-0 w-[110px] bg-[#f8f9fa] rounded-2xl p-4 border border-gray-50/50">
+                  <div className="w-14 h-14 rounded-full overflow-hidden mb-2 border-2 border-white shadow-sm">
+                    <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                   </div>
-                ))}
+                  <p className="text-xs font-bold text-gray-800 truncate w-full text-center px-1 mb-0.5">{user.name}</p>
+                  <p className="text-[10px] text-gray-400 mb-4">{user.friendCount || user.mutualFriends * 20} Friends</p>
+                  <button
+                    onClick={() => {
+                      if (addedRecommended.has(user.id)) {
+                        setCancelModalId(user.id);
+                      } else {
+                        handleAddRecommended(user.id, user.name);
+                      }
+                    }}
+                    className={`h-8 w-full rounded-lg text-[11px] font-black transition-all flex items-center justify-center ${addedRecommended.has(user.id)
+                        ? 'bg-white text-[#7a7a7a] border border-[#c0c0c0]'
+                        : 'bg-[#ffd100] text-black shadow-sm'
+                      }`}
+                  >
+                    {addedRecommended.has(user.id) ? (
+                      <CheckCheck className="w-5 h-5" />
+                    ) : (
+                      '+ Add'
+                    )}
+                  </button>
+                </div>
+              ))}
               </div>
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-10 text-center px-6">
-              <p className="text-gray-500 font-bold mb-1">Oh, you have no Cashtalk friends yet.</p>
-              <p className="text-gray-400 text-sm mb-6">Make friends now and exchange cash!</p>
-            </div>
-          )}
-        </section>
-
-        {/* Invite non-member shortcut */}
-        <section className="px-4 pb-4">
-          <button
-            onClick={() => setView('inviteFriends')}
-            className="w-full rounded-[12px] bg-white border border-gray-100 px-4 py-3.5 flex items-center justify-between"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-[#fff3cc] flex items-center justify-center">
-                <Share2 className="w-4 h-4 text-[#b8860b]" />
+            ) : (
+              <div className="rounded-2xl border border-[#ececec] bg-[#fafafa] px-4 py-6 text-center">
+                <p className="text-[12px] font-semibold text-gray-500">
+                  No suggested friends right now.
+                </p>
+                <p className="mt-1 text-[11px] text-gray-400">
+                  Tap `Refresh` to load a new set.
+                </p>
               </div>
-              <div className="text-left">
-                <p className="text-[12px] font-bold text-gray-800">미가입 친구 초대하기</p>
-                <p className="text-[10px] text-gray-400">초대 후 가입하면 자동으로 친구가 됩니다</p>
+            )}
+          </section>
+
+          {/* Friends List or Empty State */}
+          <section className="bg-white p-4 min-h-[300px]">
+            {friends.length > 0 ? (
+              <>
+                <h2 className="text-sm font-semibold text-gray-500 mb-4">{friends.length} Friends</h2>
+                <div className="flex flex-col gap-4">
+                  {friends.map(friend => (
+                    <div key={friend.id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 cursor-pointer" onClick={() => openProfileSheet(friend)}>
+                        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
+                          <img src={friend.avatar} alt={friend.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                        </div>
+                        <span className="font-bold text-gray-800">{friend.name}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 text-center px-6">
+                <p className="text-gray-500 font-bold mb-1">Oh, you have no Cashtalk friends yet.</p>
+                <p className="text-gray-400 text-sm mb-6">Make friends now and exchange cash!</p>
               </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-gray-300" />
-          </button>
-        </section>
-      </main>
+            )}
+          </section>
 
-      <ProfileBottomSheet {...profileBottomSheetProps} />
+          
+        </main>
 
-      {cancelModalId && (
-        <ConfirmModal
-          title="Cancel friend request?"
-          cancelLabel="Close"
-          confirmLabel="Cancel Request"
-          onCancel={() => setCancelModalId(null)}
-          onConfirm={() => {
-            handleRemoveRecommended(cancelModalId);
-            setCancelModalId(null);
-            showToast('Canceled request');
-          }}
-        />
-      )}
+        <ProfileBottomSheet {...profileBottomSheetProps} />
 
-      {/* Toast Notification */}
-      {toast && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-800/90 text-white px-6 py-3 rounded-full text-sm font-medium z-50 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <Check className="w-4 h-4 text-green-400" />
-          {toast}
-        </div>
-      )}
+        {cancelModalId && (
+          <ConfirmModal
+            title="Cancel friend request?"
+            cancelLabel="Close"
+            confirmLabel="Cancel Request"
+            onCancel={() => setCancelModalId(null)}
+            onConfirm={() => {
+              handleRemoveRecommended(cancelModalId);
+              setCancelModalId(null);
+              showToast('Canceled request');
+            }}
+          />
+        )}
 
-      {/* Custom Styles for hiding scrollbar */}
-      <style>{`
+        {/* Toast Notification */}
+        {toast && (
+          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-800/90 text-white px-6 py-3 rounded-full text-sm font-medium z-50 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <Check className="w-4 h-4 text-green-400" />
+            {toast}
+          </div>
+        )}
+
+        {/* Custom Styles for hiding scrollbar */}
+        <style>{`
         .no-scrollbar::-webkit-scrollbar {
           display: none;
         }
@@ -882,7 +1026,7 @@ export default function App() {
           scrollbar-width: none;
         }
       `}</style>
-    </div>
+      </div>
     );
   }
 
@@ -890,21 +1034,21 @@ export default function App() {
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900 pb-32 max-w-md mx-auto shadow-xl relative overflow-x-hidden">
       {view === 'home' && (
         <>
-          <SideDrawer 
-            isOpen={isDrawerOpen} 
-            onClose={() => setIsDrawerOpen(false)} 
+          <SideDrawer
+            isOpen={isDrawerOpen}
+            onClose={() => setIsDrawerOpen(false)}
             onNavigate={(v) => { setView(v); setCurrentTab(v as Tab); }}
           />
           <header className="sticky top-0 z-30 bg-[#FFD700] px-4 py-3 flex items-center justify-between">
-            <Menu 
-              className="w-6 h-6 text-gray-800 cursor-pointer active:scale-95 transition-transform" 
+            <Menu
+              className="w-6 h-6 text-gray-800 cursor-pointer active:scale-95 transition-transform"
               onClick={() => setIsDrawerOpen(true)}
             />
             <h1 className="text-lg font-bold text-gray-800">Home</h1>
             <div className="flex items-center gap-3">
-              <div className="bg-white/30 px-3 py-1 rounded-full flex items-center gap-1">
-                <span className="font-bold text-gray-800 text-sm">342</span>
-                <div className="w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center text-[10px] font-bold text-white border border-white">C</div>
+              <div className="border border-gray-800/20 bg-white/10 px-3 py-1 rounded-full flex items-center gap-1">
+                <span className="font-bold text-gray-800 text-sm">377</span>
+                <div className="w-4 h-4 bg-[#FFCC00] rounded-full flex items-center justify-center text-[10px] font-bold text-white border border-white/50">C</div>
               </div>
               <Bell className="w-6 h-6 text-gray-800" />
             </div>
@@ -915,13 +1059,13 @@ export default function App() {
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <div className="w-56 h-56 rounded-full border-4 border-white/20 flex flex-col items-center justify-center relative">
                 <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" r="48" fill="none" stroke="#FFD700" strokeWidth="4" strokeDasharray="301.59" strokeDashoffset="150" strokeLinecap="round" className="transform -rotate-90 origin-center" />
+                  <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
                 </svg>
-                <span className="text-6xl font-bold text-white tracking-tighter">1573</span>
+                <span className="text-6xl font-bold text-white tracking-tighter">0</span>
                 <span className="text-white/80 text-sm mt-1">steps</span>
                 <div className="flex items-center gap-4 mt-2 text-white/90 text-sm">
-                  <span>70 kcal</span>
-                  <span>0.8 mi</span>
+                  <span>0 kcal</span>
+                  <span>0.0 mi</span>
                 </div>
               </div>
             </div>
@@ -930,6 +1074,10 @@ export default function App() {
               <Camera className="w-6 h-6" />
               <Share2 className="w-6 h-6" />
             </div>
+          </div>
+
+          <div className="bg-white py-2 flex justify-center items-center border-b border-gray-100 shadow-sm text-xs text-gray-500 font-medium">
+             <span className="mr-1">🎉</span> Douglas Hall won 1,000 coins 1 min ago
           </div>
 
           <div className="p-4 bg-white mt-2">
@@ -945,23 +1093,20 @@ export default function App() {
                   <Play className="w-3 h-3 fill-current" /> Claim
                 </button>
               </div>
-              <div className="min-w-[100px] bg-gray-200 rounded-xl p-3 flex flex-col items-center justify-center gap-2 shrink-0 opacity-70">
-                <Gift className="w-8 h-8 text-gray-400" />
-                <span className="text-xs font-bold text-gray-500 text-center">Open<br/>the 2nd Box</span>
+              <div className="min-w-[100px] bg-gray-500 rounded-xl p-3 flex flex-col items-center justify-center gap-2 shrink-0">
+                <Lock className="w-6 h-6 text-white" />
+                <span className="text-xs font-bold text-white text-center">Walk<br />1000 steps</span>
+                <div className="w-full h-1.5 bg-white rounded-full mt-1"></div>
               </div>
               <div className="min-w-[100px] bg-gray-500 rounded-xl p-3 flex flex-col items-center justify-center gap-2 shrink-0">
                 <Lock className="w-6 h-6 text-white" />
-                <span className="text-xs font-bold text-white text-center">Walk<br/>2000 steps</span>
-                <div className="w-full h-1.5 bg-gray-600 rounded-full overflow-hidden mt-1">
-                  <div className="w-3/4 h-full bg-[#FFD700]"></div>
-                </div>
+                <span className="text-xs font-bold text-white text-center">Walk<br />2000 steps</span>
+                <div className="w-full h-1.5 bg-white rounded-full mt-1"></div>
               </div>
               <div className="min-w-[100px] bg-gray-500 rounded-xl p-3 flex flex-col items-center justify-center gap-2 shrink-0">
                 <Lock className="w-6 h-6 text-white" />
-                <span className="text-xs font-bold text-white text-center">Walk<br/>3000 steps</span>
-                <div className="w-full h-1.5 bg-gray-600 rounded-full overflow-hidden mt-1">
-                  <div className="w-1/2 h-full bg-[#FFD700]"></div>
-                </div>
+                <span className="text-xs font-bold text-white text-center">Walk<br />3000 steps</span>
+                <div className="w-full h-1.5 bg-white rounded-full mt-1"></div>
               </div>
             </div>
           </div>
@@ -1038,29 +1183,7 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* 🔧 순위 시뮬레이터 토글 */}
-                {widgetHasFriends && (
-                  <div className="px-4 pb-2 flex items-center gap-1.5">
-                    <span className="text-[9px] text-gray-400 font-bold mr-0.5">Preview</span>
-                    {rankLabels.map((label, i) => {
-                      const val = rankValues[i];
-                      const isActive = simulateRank === val;
-                      return (
-                        <button
-                          key={label}
-                          onClick={() => setSimulateRank(isActive ? null : val)}
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-all ${
-                            isActive
-                              ? 'bg-orange-500 text-white border-orange-500 scale-105'
-                              : 'bg-gray-50 text-gray-400 border-gray-200 hover:border-orange-300 hover:text-orange-400'
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+
 
                 <div className="px-4 pb-3">
                   {widgetHasFriends ? (
@@ -1075,7 +1198,7 @@ export default function App() {
                               className="flex-1 flex flex-col items-center gap-1.5 py-2 rounded-xl active:bg-gray-50 transition-colors"
                             >
                               <div className="relative">
-                                <div className={`w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 ${ isMe ? 'border-orange-400' : 'border-transparent' }`}>
+                                <div className={`w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 ${isMe ? 'border-orange-400' : 'border-transparent'}`}>
                                   <img src={participant.avatar} alt={participant.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                                 </div>
                                 {isMe ? (
@@ -1087,26 +1210,26 @@ export default function App() {
                                 )}
                               </div>
                               <span className="text-[10px] font-medium text-gray-600 truncate w-full text-center px-0.5">{isMe ? 'Me' : participant.name.split(' ')[0]}</span>
-                              <span className={`text-[10px] font-bold ${ isMe ? 'text-orange-500' : 'text-gray-800' }`}>{isMe ? `Rank ${myRankInWidget}` : `Rank ${idx + 1}`}</span>
+                              <span className={`text-[10px] font-bold ${isMe ? 'text-orange-500' : 'text-gray-800'}`}>{isMe ? `Rank ${myRankInWidget}` : `Rank ${idx + 1}`}</span>
                             </button>
                           );
                         })}
-                      {/* 내가 top3 밖이면 오른쪽에 별도 "나" 슬롯 표시 */}
-                      {!isMeInTop3 && (
-                        <button
-                          onClick={() => setView('ranking')}
-                          className="flex-1 flex flex-col items-center gap-1.5 py-2 rounded-xl active:bg-gray-50 transition-colors"
-                        >
-                          <div className="relative">
-                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 border-orange-400">
-                              <img src={mockData.myProfile.avatar} alt="me" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                        {/* 내가 top3 밖이면 오른쪽에 별도 "나" 슬롯 표시 */}
+                        {!isMeInTop3 && (
+                          <button
+                            onClick={() => setView('ranking')}
+                            className="flex-1 flex flex-col items-center gap-1.5 py-2 rounded-xl active:bg-gray-50 transition-colors"
+                          >
+                            <div className="relative">
+                              <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 border-orange-400">
+                                <img src={mockData.myProfile.avatar} alt="me" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                              </div>
+                              <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-orange-400 flex items-center justify-center text-[8px] font-black text-white shadow-sm">Me</span>
                             </div>
-                            <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-orange-400 flex items-center justify-center text-[8px] font-black text-white shadow-sm">Me</span>
-                          </div>
-                          <span className="text-[10px] font-medium text-gray-600 truncate w-full text-center px-0.5">Me</span>
-                          <span className="text-[10px] font-bold text-orange-500">Rank {myRankInWidget}</span>
-                        </button>
-                      )}
+                            <span className="text-[10px] font-medium text-gray-600 truncate w-full text-center px-0.5">Me</span>
+                            <span className="text-[10px] font-bold text-orange-500">Rank {myRankInWidget}</span>
+                          </button>
+                        )}
                       </div>
                       <button
                         onClick={() => setView('friends_main')}
@@ -1114,7 +1237,7 @@ export default function App() {
                       >
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex min-w-0 items-center gap-2.5">
-                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-500 text-white shadow-sm">
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#FFCC00] text-white shadow-sm">
                               <Users className="w-3.5 h-3.5" />
                             </div>
                             <p className="min-w-0 truncate text-[11px] font-bold text-gray-700">
@@ -1134,7 +1257,7 @@ export default function App() {
                       className="flex w-full items-center justify-between gap-2 rounded-full border border-dashed border-orange-200 bg-gradient-to-r from-orange-50 via-white to-amber-50 px-3 py-2 text-left transition-colors active:from-orange-100 active:to-amber-100"
                     >
                       <div className="flex min-w-0 items-center gap-2.5">
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-500 text-white shadow-sm">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#FFCC00] text-white shadow-sm">
                           <Users className="w-3.5 h-3.5" />
                         </div>
                         <p className="min-w-0 truncate text-[11px] font-bold text-gray-700">
@@ -1196,7 +1319,7 @@ export default function App() {
           <div className="bg-[#FFE4B5] p-6 relative overflow-hidden">
             <div className="relative z-10">
               <p className="text-sm text-gray-800 mb-1">Make a healthy habit everyday</p>
-              <h2 className="text-xl font-bold text-gray-900 leading-tight">Earn exciting coins<br/>and Bonus gifts!</h2>
+              <h2 className="text-xl font-bold text-gray-900 leading-tight">Earn exciting coins<br />and Bonus gifts!</h2>
             </div>
             <Gift className="absolute right-4 bottom-[-10px] w-24 h-24 text-red-500 opacity-80 transform rotate-12" />
           </div>
@@ -1231,7 +1354,7 @@ export default function App() {
             <div className="flex flex-col gap-3">
               {['Beautiful skies', 'My 10K challenge day 1', 'Hoy es domingo mujeriego', 'Day 4', 'Gchfjf'].map((title, i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <span className="font-bold text-gray-800 w-5">0{i+1}</span>
+                  <span className="font-bold text-gray-800 w-5">0{i + 1}</span>
                   <span className="text-gray-700 flex-1 truncate">{title}</span>
                   <span className="text-orange-500 text-sm">[{Math.floor(Math.random() * 10) + 1}]</span>
                 </div>
@@ -1313,7 +1436,7 @@ export default function App() {
           <div className="bg-gradient-to-b from-cyan-400 to-blue-500 p-6 text-center text-white pb-10">
             <h2 className="text-3xl font-bold mb-2">Instant Games</h2>
             <p className="text-lg mb-6">Play free games!</p>
-            
+
             <div className="text-left mb-3 font-bold">Top Ranked</div>
             <div className="flex gap-3 overflow-x-auto no-scrollbar">
               {[
@@ -1323,7 +1446,7 @@ export default function App() {
               ].map((game, i) => (
                 <div key={i} className="relative w-28 h-28 rounded-xl overflow-hidden shrink-0 shadow-lg">
                   <img src={game.img} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                  <div className="absolute top-0 left-0 bg-[#a3e635] text-gray-900 font-bold text-xl px-3 py-1 rounded-br-lg">{i+1}</div>
+                  <div className="absolute top-0 left-0 bg-[#a3e635] text-gray-900 font-bold text-xl px-3 py-1 rounded-br-lg">{i + 1}</div>
                   <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center py-1 backdrop-blur-sm">{game.title}</div>
                 </div>
               ))}
@@ -1418,20 +1541,25 @@ export default function App() {
         </>
       )}
 
-      {/* Invite Banner */}
-      <div className="fixed bottom-[60px] left-0 right-0 max-w-md mx-auto bg-gray-900 text-white px-6 py-3 flex items-center justify-between z-40">
-        <div className="flex flex-col">
-          <span className="font-bold text-sm">Invite Your Friends and</span>
-          <span className="font-bold text-sm">Get Bonus Coins!</span>
-        </div>
-        <div className="flex items-end h-10">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=transparent" className="w-12 h-12 -mb-2" referrerPolicy="no-referrer" />
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka&backgroundColor=transparent" className="w-10 h-10 -mb-2 -ml-4" referrerPolicy="no-referrer" />
+      {/* AD Banner */}
+      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white flex items-center justify-between z-50 h-[60px] border-t border-gray-100">
+        <div className="flex items-center gap-3 w-full h-full">
+          <div className="w-[60px] h-full bg-black flex flex-col items-center justify-center text-white relative">
+            <span className="absolute top-1 left-1 bg-gray-500 text-white px-1 text-[8px]">AD</span>
+            <span className="text-[7px] text-center mt-2 leading-tight">musinsa<br/>standard</span>
+          </div>
+          <div className="flex flex-col justify-center py-2 flex-1">
+            <span className="font-bold text-[13px] text-gray-900">BEST 아이템 추천</span>
+            <span className="text-[11px] text-gray-500">26 SS New Arrivals</span>
+          </div>
+          <div className="flex items-center pr-4">
+            <span className="text-[11px] font-bold text-gray-800">인기 상품 확인하기 <ChevronRight className="w-3 h-3 inline" /></span>
+          </div>
         </div>
       </div>
 
       {/* Main Bottom Nav */}
-      <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-100 flex items-center justify-between px-2 py-1 z-50">
+      <nav className="fixed bottom-[60px] left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-100 flex items-center justify-between px-2 py-1 z-50">
         <button className={`flex flex-col items-center gap-1 p-2 w-16 ${currentTab === 'home' ? 'text-gray-900' : 'text-gray-400'}`} onClick={() => { setCurrentTab('home'); setView('home'); }}>
           <Footprints className="w-6 h-6 transform -rotate-45" />
           <span className="text-[10px] font-medium">Home</span>

@@ -1,0 +1,1434 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cashwalk Friends Offline Preview</title>
+  <style>
+    :root{
+      --bg:#d9d9d9;
+      --ink:#1f1f1f;
+      --muted:#7f7f7f;
+      --line:#ececec;
+      --panel:#f5f5f5;
+      --yellow:#ffd100;
+      --yellow-soft:#fff6cf;
+      --green:#167c4d;
+      --green-soft:#eefcf4;
+      --purple:#7c3aed;
+      --purple-soft:#f4ebff;
+      --red:#dc2626;
+      --shadow:0 18px 40px rgba(0,0,0,.18);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at top left, #f8f0c0 0, rgba(248,240,192,0) 32%),
+        radial-gradient(circle at bottom right, #ece5ff 0, rgba(236,229,255,0) 28%),
+        #dcdcdc;
+      color:var(--ink);
+    }
+    .page{
+      padding:28px 18px 36px;
+    }
+    .intro{
+      max-width:1100px;
+      margin:0 auto 18px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+    .intro h1{
+      margin:0;
+      font-size:28px;
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+    .intro p{
+      margin:8px 0 0;
+      font-size:13px;
+      color:#575757;
+      line-height:1.5;
+    }
+    .legend{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .pill{
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:11px;
+      font-weight:700;
+      border:1px solid rgba(0,0,0,.06);
+      background:#fff;
+      color:#555;
+    }
+    .pill.live{background:var(--yellow-soft); color:#775800;}
+    .pill.offline{background:var(--green-soft); color:var(--green);}
+    .wrap{
+      max-width:1200px;
+      margin:0 auto;
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      align-items:flex-start;
+      gap:14px;
+    }
+    .col{
+      width:214px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:center;
+    }
+    .label{
+      text-align:center;
+      font-size:11px;
+      font-weight:800;
+      color:#444;
+      line-height:1.35;
+      min-height:30px;
+    }
+    .phone{
+      width:214px;
+      height:485px;
+      background:#fff;
+      border:5px solid #191919;
+      border-radius:28px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      display:flex;
+      flex-direction:column;
+    }
+    .status{
+      height:22px;
+      padding:0 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      font-size:9px;
+      font-weight:700;
+      background:var(--yellow);
+    }
+    .header{
+      background:var(--yellow);
+      border-bottom:1px solid rgba(0,0,0,.06);
+      padding:8px 10px 7px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+    }
+    .header-title{
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:-.02em;
+      text-align:center;
+      flex:1;
+    }
+    .icon-row,.icon-btn{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+    }
+    .icon-btn{
+      width:22px;
+      height:22px;
+      border-radius:999px;
+      color:#222;
+      flex:0 0 auto;
+    }
+    .icon-btn svg{
+      width:14px;
+      height:14px;
+      stroke:currentColor;
+      fill:none;
+      stroke-width:2;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+    .tabs{
+      display:flex;
+      background:#fff;
+      border-bottom:1px solid var(--line);
+    }
+    .tab{
+      flex:1;
+      text-align:center;
+      padding:8px 6px;
+      font-size:10px;
+      color:#8b8b8b;
+      font-weight:700;
+      border-bottom:2px solid transparent;
+    }
+    .tab.active{
+      color:#1f1f1f;
+      border-bottom-color:#1f1f1f;
+    }
+    .scroll{
+      flex:1;
+      background:var(--panel);
+      overflow:hidden;
+    }
+    .section{
+      background:#fff;
+      margin-bottom:6px;
+    }
+    .section-pad{padding:10px}
+    .section-title{
+      font-size:8px;
+      font-weight:800;
+      color:#aaa;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:6px;
+    }
+    .profile{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+    }
+    .profile-main{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .avatar{
+      width:34px;
+      height:34px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:11px;
+      font-weight:800;
+      color:#fff;
+      flex:0 0 auto;
+      position:relative;
+      overflow:hidden;
+    }
+    .avatar.sm{width:28px;height:28px;font-size:9px}
+    .avatar.xs{width:22px;height:22px;font-size:8px}
+    .avatar.me{background:linear-gradient(135deg,#ffcb52,#e89b00); color:#5a3900}
+    .avatar.a{background:#93c5fd;color:#173d7a}
+    .avatar.b{background:#f9a8d4;color:#7a1847}
+    .avatar.c{background:#a7f3d0;color:#0f5132}
+    .avatar.d{background:#ddd6fe;color:#4c1d95}
+    .avatar.e{background:#fdba74;color:#7c2d12}
+    .avatar.f{background:#fde68a;color:#854d0e}
+    .avatar.g{background:#bfdbfe;color:#1e3a8a}
+    .badge{
+      position:absolute;
+      right:-2px;
+      bottom:-2px;
+      border-radius:999px;
+      background:#1f1f1f;
+      color:#fff;
+      padding:1px 4px;
+      font-size:6px;
+      font-weight:800;
+      border:1px solid #fff;
+    }
+    .name{
+      font-size:11px;
+      font-weight:800;
+      line-height:1.2;
+    }
+    .sub{
+      font-size:8px;
+      color:#919191;
+      line-height:1.35;
+    }
+    .code{
+      text-align:right;
+      font-size:8px;
+      color:#9a9a9a;
+    }
+    .code strong{
+      color:#4d4d4d;
+      font-size:10px;
+    }
+    .card{
+      margin:0 8px 6px;
+      border-radius:12px;
+      background:#fff;
+      border:1px solid #ece7d8;
+      overflow:hidden;
+    }
+    .card.pad{padding:10px}
+    .hero{
+      background:linear-gradient(135deg,#fff8dd,#fff1ad);
+      border:1px solid #f2df8b;
+    }
+    .hero-top{
+      display:flex;
+      gap:8px;
+      align-items:flex-start;
+      margin-bottom:9px;
+    }
+    .hero-icon{
+      width:30px;
+      height:30px;
+      border-radius:10px;
+      background:#1f1f1f;
+      color:var(--yellow);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:15px;
+      flex:0 0 auto;
+    }
+    .three{
+      display:flex;
+      gap:6px;
+    }
+    .share{
+      flex:1;
+      background:#fff;
+      border:1px solid #e9e9e9;
+      border-radius:10px;
+      padding:8px 4px;
+      text-align:center;
+    }
+    .share strong{
+      display:block;
+      font-size:8px;
+      margin-top:5px;
+    }
+    .share span{
+      display:block;
+      margin-top:2px;
+      font-size:7px;
+      color:#a0a0a0;
+      line-height:1.3;
+    }
+    .share-ico{
+      width:24px;
+      height:24px;
+      border-radius:999px;
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      font-size:11px;
+      font-weight:800;
+    }
+    .share-ico.gray{background:#4b5563}
+    .share-ico.blue{background:#38bdf8}
+    .share-ico.black{background:#1f1f1f}
+    .mini-banner{
+      margin:0 8px 6px;
+      border-radius:12px;
+      padding:10px;
+      background:#fffaf0;
+      border:1px dashed #efcf81;
+    }
+    .seg{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+    .seg span{
+      font-size:8px;
+      font-weight:800;
+      padding:5px 8px;
+      border-radius:999px;
+      border:1px solid #ead8a1;
+      background:#fff;
+      color:#7b631c;
+    }
+    .seg .on{background:var(--yellow); color:#1f1f1f; border-color:var(--yellow);}
+    .toolbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:0 10px 8px;
+    }
+    .count-chip{
+      background:#fff5cc;
+      color:#8a6a00;
+      border-radius:999px;
+      padding:4px 8px;
+      font-size:8px;
+      font-weight:800;
+    }
+    .text-btn{
+      font-size:9px;
+      font-weight:800;
+      color:#909090;
+    }
+    .cards{
+      display:flex;
+      gap:8px;
+      overflow:hidden;
+      padding:0 10px 8px;
+    }
+    .person-card{
+      width:94px;
+      background:#fafafa;
+      border:1px solid #f0f0f0;
+      border-radius:16px;
+      padding:10px 8px;
+      text-align:center;
+      flex:0 0 auto;
+    }
+    .person-card .avatar{
+      margin:0 auto 6px;
+      width:42px;
+      height:42px;
+      font-size:11px;
+    }
+    .person-card .name{
+      font-size:10px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .person-card .sub{font-size:7px; margin-top:2px; min-height:18px}
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:none;
+      border-radius:9px;
+      background:var(--yellow);
+      color:#111;
+      font-size:9px;
+      font-weight:900;
+      padding:6px 10px;
+      min-height:28px;
+    }
+    .btn.ghost{
+      background:#fff;
+      color:#7a7a7a;
+      border:1px solid #cfcfcf;
+    }
+    .btn.dark{
+      background:#1f1f1f;
+      color:#fff;
+    }
+    .btn.green{
+      background:#15803d;
+      color:#fff;
+    }
+    .list{
+      padding:10px;
+    }
+    .list-head{
+      font-size:9px;
+      font-weight:800;
+      color:#8f8f8f;
+      margin-bottom:8px;
+    }
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      padding:8px 0;
+      border-top:1px solid #f2f2f2;
+    }
+    .row:first-child{border-top:none;padding-top:0}
+    .left{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-width:0;
+      flex:1;
+    }
+    .rank{
+      width:18px;
+      text-align:center;
+      font-size:10px;
+      font-weight:900;
+      color:#888;
+      flex:0 0 auto;
+    }
+    .trophy{
+      width:18px;
+      text-align:center;
+      font-size:13px;
+      flex:0 0 auto;
+    }
+    .steps{
+      font-size:9px;
+      font-weight:800;
+      color:#8c8c8c;
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+    .meta{
+      display:flex;
+      gap:4px;
+      flex-wrap:wrap;
+      margin-top:2px;
+    }
+    .tag{
+      border-radius:999px;
+      padding:2px 6px;
+      font-size:6px;
+      font-weight:800;
+      line-height:1.2;
+    }
+    .tag.yellow{background:#fff0b8;color:#8b6600}
+    .tag.purple{background:var(--purple-soft);color:var(--purple)}
+    .tag.blue{background:#ebf4ff;color:#2159ad}
+    .tag.gray{background:#f0f0f0;color:#7d7d7d}
+    .shortcut{
+      margin:0 8px 8px;
+      border:1px solid #efefef;
+      border-radius:12px;
+      background:#fff;
+      padding:10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+    }
+    .shortcut .dot{
+      width:34px;
+      height:34px;
+      border-radius:50%;
+      background:#fff3cc;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex:0 0 auto;
+      font-size:14px;
+    }
+    .chev{
+      color:#c0c0c0;
+      font-size:15px;
+      font-weight:900;
+    }
+    .input{
+      margin:0 10px 8px;
+      border:1px solid #ececec;
+      border-radius:10px;
+      background:#fff;
+      padding:10px 12px;
+      font-size:10px;
+      color:#9a9a9a;
+    }
+    .empty{
+      margin:0 10px 8px;
+      min-height:164px;
+      border-radius:12px;
+      background:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:18px;
+      color:#a1a1a1;
+      font-size:10px;
+      line-height:1.5;
+    }
+    .info{
+      margin:0 10px 8px;
+      border-radius:12px;
+      background:#f7fcf8;
+      border-left:3px solid #22c55e;
+      padding:10px;
+    }
+    .info p{margin:0;font-size:8px;line-height:1.5;color:#15803d}
+    .divider{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin:0 10px 8px;
+      color:#bbb;
+      font-size:8px;
+      font-weight:800;
+    }
+    .divider:before,.divider:after{
+      content:"";
+      flex:1;
+      height:1px;
+      background:#e5e5e5;
+    }
+    .search-result{
+      margin:0 10px 8px;
+      border:1px solid #ededed;
+      border-radius:12px;
+      background:#fff;
+      padding:12px 10px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .grow{flex:1}
+    .notice{
+      margin:0 10px 8px;
+      border-radius:12px;
+      background:#fff9e8;
+      border:1px solid #f3e1aa;
+      padding:10px;
+      color:#6e5a17;
+      font-size:8px;
+      line-height:1.45;
+      font-weight:700;
+    }
+    .linkbox{
+      border-radius:8px;
+      background:#f5f5f5;
+      padding:8px 9px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      font-size:8px;
+      color:#666;
+    }
+    .linkbox .grow{
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .request-card{
+      margin:0 10px 8px;
+      border-radius:12px;
+      background:#fff;
+      padding:10px;
+    }
+    .request-tabs{
+      display:flex;
+      background:#fff;
+      border-bottom:1px solid var(--line);
+    }
+    .request-tabs span{
+      flex:1;
+      text-align:center;
+      padding:9px 4px 8px;
+      font-size:10px;
+      font-weight:800;
+      color:#8f8f8f;
+      border-bottom:2px solid transparent;
+    }
+    .request-tabs .active{
+      color:#1f1f1f;
+      border-bottom-color:#1f1f1f;
+    }
+    .toggle-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      padding:12px 10px;
+      border-top:1px solid #f2f2f2;
+      background:#fff;
+    }
+    .toggle-row:first-child{border-top:none}
+    .toggle{
+      width:34px;
+      height:20px;
+      border-radius:999px;
+      background:var(--yellow);
+      position:relative;
+      flex:0 0 auto;
+    }
+    .toggle.off{background:#d7d7d7}
+    .toggle:after{
+      content:"";
+      position:absolute;
+      top:2px;
+      right:2px;
+      width:16px;
+      height:16px;
+      border-radius:50%;
+      background:#fff;
+    }
+    .toggle.off:after{
+      left:2px;
+      right:auto;
+    }
+    .group-title{
+      padding:7px 10px 4px;
+      background:#f5f5f5;
+      color:#9b9b9b;
+      font-size:8px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .floating{
+      margin:6px 8px 8px;
+      border:2px solid var(--yellow);
+      border-radius:999px;
+      background:#fff;
+      padding:7px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+    }
+    .foot{
+      height:18px;
+      background:#f8f8f8;
+    }
+    /* Board layout override: always show multiple screens on one canvas */
+    body{
+      overflow-x:auto;
+    }
+    .page{
+      min-width:1060px;
+      padding:20px 14px 28px;
+    }
+    .intro{
+      max-width:1060px;
+      margin-bottom:14px;
+    }
+    .wrap{
+      width:max-content;
+      max-width:none;
+      display:grid;
+      grid-template-columns:repeat(4, 186px);
+      gap:12px;
+      justify-content:start;
+    }
+    .col{
+      width:186px;
+    }
+    .label{
+      font-size:10px;
+      min-height:28px;
+    }
+    .phone{
+      width:186px;
+      height:418px;
+      border-radius:24px;
+    }
+    .status{
+      height:19px;
+      padding:0 10px;
+      font-size:8px;
+    }
+    .header{
+      padding:6px 8px;
+      gap:6px;
+    }
+    .header-title{
+      font-size:12px;
+    }
+    .icon-btn{
+      width:18px;
+      height:18px;
+    }
+    .icon-row,.icon-btn{
+      gap:4px;
+    }
+    .icon-btn svg{
+      width:12px;
+      height:12px;
+    }
+    .tab{
+      padding:7px 4px;
+      font-size:9px;
+    }
+    .section{
+      margin-bottom:5px;
+    }
+    .section-pad,.card.pad,.mini-banner,.list,.request-card,.toggle-row,.shortcut,.info,.notice{
+      padding:8px;
+    }
+    .section-title,.group-title{
+      font-size:7px;
+    }
+    .avatar{
+      width:28px;
+      height:28px;
+      font-size:9px;
+    }
+    .avatar.sm{
+      width:24px;
+      height:24px;
+      font-size:8px;
+    }
+    .avatar.xs{
+      width:18px;
+      height:18px;
+      font-size:7px;
+    }
+    .name{
+      font-size:10px;
+    }
+    .sub,.code,.steps,.text-btn,.input,.empty{
+      font-size:7px;
+    }
+    .code strong{
+      font-size:9px;
+    }
+    .card,.mini-banner,.shortcut,.request-card,.empty,.search-result,.notice,.info{
+      margin-left:6px;
+      margin-right:6px;
+      margin-bottom:5px;
+      border-radius:10px;
+    }
+    .hero-top{
+      gap:6px;
+      margin-bottom:7px;
+    }
+    .hero-icon,.share-ico{
+      width:20px;
+      height:20px;
+      font-size:9px;
+    }
+    .three,.seg,.cards{
+      gap:5px;
+    }
+    .share{
+      border-radius:8px;
+      padding:6px 3px;
+    }
+    .share strong{
+      font-size:7px;
+      margin-top:4px;
+    }
+    .share span{
+      font-size:6px;
+    }
+    .seg span,.btn{
+      font-size:7px;
+    }
+    .seg span{
+      padding:4px 7px;
+    }
+    .toolbar{
+      padding:0 8px 6px;
+    }
+    .count-chip{
+      font-size:7px;
+      padding:4px 7px;
+    }
+    .cards{
+      padding:0 8px 6px;
+    }
+    .person-card{
+      width:79px;
+      border-radius:14px;
+      padding:8px 6px;
+    }
+    .person-card .avatar{
+      width:34px;
+      height:34px;
+      font-size:9px;
+      margin-bottom:5px;
+    }
+    .person-card .name{
+      font-size:9px;
+    }
+    .person-card .sub{
+      font-size:6px;
+      min-height:15px;
+    }
+    .btn{
+      min-height:24px;
+      padding:5px 8px;
+      border-radius:8px;
+    }
+    .row{
+      padding:7px 0;
+      gap:6px;
+    }
+    .left{
+      gap:6px;
+    }
+    .rank,.trophy{
+      width:15px;
+    }
+    .trophy{
+      font-size:11px;
+    }
+    .meta{
+      gap:3px;
+    }
+    .tag{
+      font-size:6px;
+      padding:2px 5px;
+    }
+    .input{
+      margin:0 6px 5px;
+      padding:8px 10px;
+      border-radius:9px;
+    }
+    .empty{
+      min-height:132px;
+      padding:14px;
+      font-size:8px;
+    }
+    .search-result{
+      padding:10px 8px;
+    }
+    .linkbox{
+      padding:7px 8px;
+      font-size:7px;
+      border-radius:7px;
+    }
+    .request-tabs span{
+      padding:8px 4px 7px;
+      font-size:9px;
+    }
+    .toggle{
+      width:30px;
+      height:18px;
+    }
+    .toggle:after{
+      width:14px;
+      height:14px;
+    }
+    .floating{
+      margin:5px 6px 6px;
+      padding:6px 8px;
+    }
+    .foot{
+      height:14px;
+    }
+    @media (max-width:640px){
+      .intro h1{font-size:22px}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="intro">
+      <div>
+        <h1>Cashwalk Friends<br />Offline Preview Board</h1>
+        <p>Single-file static HTML. No external images, no framework runtime, and multiple mobile screens visible in one canvas.</p>
+      </div>
+      <div class="legend">
+        <span class="pill offline">Fully Offline</span>
+        <span class="pill live">Friends Flow</span>
+        <span class="pill">8 Key Screens</span>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <div class="col">
+        <div class="label">1. Friends Home<br />Suggested friends + current friends</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>5G 100%</span></div>
+          <div class="header">
+            <div class="icon-btn">
+              <svg viewBox="0 0 16 16"><path d="M10.5 3.5 5.5 8l5 4.5"/></svg>
+            </div>
+            <div class="header-title">Friends</div>
+            <div class="icon-row">
+              <div class="icon-btn"><svg viewBox="0 0 16 16"><circle cx="6" cy="5.5" r="2.3"/><path d="M2 13c0-2.4 2-4 4.5-4"/><path d="M10.5 4.5h3"/><path d="M12 3v3"/></svg></div>
+              <div class="icon-btn"><svg viewBox="0 0 16 16"><path d="M8 3.2h.01"/><path d="M8 8h.01"/><path d="M8 12.8h.01"/></svg></div>
+            </div>
+          </div>
+          <div class="tabs"><div class="tab active">Friends</div><div class="tab">Leaderboard</div></div>
+          <div class="scroll">
+            <div class="section section-pad">
+              <div class="section-title">My Profile</div>
+              <div class="profile">
+                <div class="profile-main">
+                  <div class="avatar me">KN<div class="badge">Me</div></div>
+                  <div>
+                    <div class="name">KRNP37N</div>
+                    <div class="sub">Cashwalk profile</div>
+                  </div>
+                </div>
+                <div class="code">Friend Code<br /><strong>KRNP37N</strong></div>
+              </div>
+            </div>
+
+            <div class="card hero pad">
+              <div class="hero-top">
+                <div class="hero-icon">+</div>
+                <div>
+                  <div class="name">Invite friends to Cashwalk</div>
+                  <div class="sub">Users who join from your link and enter your code can be connected right away.</div>
+                </div>
+              </div>
+              <div class="three">
+                <div class="share">
+                  <div class="share-ico gray">C</div>
+                  <strong>Copy Link</strong>
+                  <span>Quick share</span>
+                </div>
+                <div class="share">
+                  <div class="share-ico blue">M</div>
+                  <strong>Message</strong>
+                  <span>Send invite</span>
+                </div>
+                <div class="share">
+                  <div class="share-ico black">S</div>
+                  <strong>Share</strong>
+                  <span>All apps</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mini-banner">
+              <div class="name">Preview mode</div>
+              <div class="sub">Suggested cards simulate the prototype states from the app.</div>
+              <div class="seg">
+                <span class="on">Fresh</span>
+                <span>3 Sent</span>
+                <span>10 Sent</span>
+              </div>
+            </div>
+
+            <div class="toolbar">
+              <div>
+                <div class="name" style="font-size:11px">Suggested Friends</div>
+              </div>
+              <span class="count-chip">7 left in 24h</span>
+            </div>
+            <div class="cards">
+              <div class="person-card">
+                <div class="avatar a">RT</div>
+                <div class="name">Running Teddy</div>
+                <div class="sub">43 friends</div>
+                <div class="btn">+ Add</div>
+              </div>
+              <div class="person-card">
+                <div class="avatar b">YR</div>
+                <div class="name">Youth Runner</div>
+                <div class="sub">67 friends</div>
+                <div class="btn ghost">Requested</div>
+              </div>
+            </div>
+
+            <div class="section list">
+              <div class="list-head">4 Friends</div>
+              <div class="row">
+                <div class="left"><div class="avatar sm c">PP</div><div><div class="name">Princess Puppy</div><div class="sub">9,103 steps</div></div></div>
+              </div>
+              <div class="row">
+                <div class="left"><div class="avatar sm d">WK</div><div><div class="name">Walk King</div><div class="sub">8,500 steps</div></div></div>
+              </div>
+              <div class="row">
+                <div class="left"><div class="avatar sm e">CM</div><div><div class="name">Cashwalk Mania</div><div class="sub">7,200 steps</div></div></div>
+              </div>
+              <div class="row">
+                <div class="left"><div class="avatar sm f">WF</div><div><div class="name">Walking Fairy</div><div class="sub">5,400 steps</div></div></div>
+              </div>
+            </div>
+
+            <div class="shortcut">
+              <div class="left"><div class="dot">+</div><div><div class="name">Invite non-members</div><div class="sub">Create a shareable friend link</div></div></div>
+              <div class="chev">›</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="label">2. Friends Home<br />Request limit reached state</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>5G 100%</span></div>
+          <div class="header">
+            <div class="icon-btn"><svg viewBox="0 0 16 16"><path d="M10.5 3.5 5.5 8l5 4.5"/></svg></div>
+            <div class="header-title">Friends</div>
+            <div class="icon-row">
+              <div class="icon-btn"><svg viewBox="0 0 16 16"><circle cx="6" cy="5.5" r="2.3"/><path d="M2 13c0-2.4 2-4 4.5-4"/><path d="M10.5 4.5h3"/><path d="M12 3v3"/></svg></div>
+              <div class="icon-btn"><svg viewBox="0 0 16 16"><path d="M8 3.2h.01"/><path d="M8 8h.01"/><path d="M8 12.8h.01"/></svg></div>
+            </div>
+          </div>
+          <div class="tabs"><div class="tab active">Friends</div><div class="tab">Leaderboard</div></div>
+          <div class="scroll">
+            <div class="section section-pad">
+              <div class="section-title">My Profile</div>
+              <div class="profile">
+                <div class="profile-main">
+                  <div class="avatar me">KN<div class="badge">Me</div></div>
+                  <div><div class="name">KRNP37N</div><div class="sub">Cashwalk profile</div></div>
+                </div>
+                <div class="code">Friend Code<br /><strong>KRNP37N</strong></div>
+              </div>
+            </div>
+
+            <div class="mini-banner">
+              <div class="name">Preview mode</div>
+              <div class="sub">This state mirrors the 10-request daily cap.</div>
+              <div class="seg">
+                <span>Fresh</span>
+                <span>3 Sent</span>
+                <span class="on">10 Sent</span>
+              </div>
+            </div>
+
+            <div class="toolbar">
+              <div class="name" style="font-size:11px">Suggested Friends</div>
+              <span class="count-chip">0 left in 24h</span>
+            </div>
+
+            <div class="notice">
+              You have reached the 10-request limit in the last 24 hours (UTC). More suggestions unlock after the rolling window clears.
+            </div>
+
+            <div class="card pad" style="background:#fafafa;border-color:#eeeeee">
+              <div class="name" style="font-size:10px">No visible suggested friends in this state</div>
+              <div class="sub" style="margin-top:4px">Try Fresh or 3 Sent when presenting the prototype flow.</div>
+            </div>
+
+            <div class="section list">
+              <div class="list-head">4 Friends</div>
+              <div class="row">
+                <div class="left"><div class="avatar sm c">PP</div><div><div class="name">Princess Puppy</div><div class="sub">9,103 steps</div></div></div>
+              </div>
+              <div class="row">
+                <div class="left"><div class="avatar sm d">WK</div><div><div class="name">Walk King</div><div class="sub">8,500 steps</div></div></div>
+              </div>
+              <div class="row">
+                <div class="left"><div class="avatar sm e">CM</div><div><div class="name">Cashwalk Mania</div><div class="sub">7,200 steps</div></div></div>
+              </div>
+              <div class="row">
+                <div class="left"><div class="avatar sm f">WF</div><div><div class="name">Walking Fairy</div><div class="sub">5,400 steps</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="label">3. Add Friends<br />Search by friend code</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>5G 100%</span></div>
+          <div class="header">
+            <div class="icon-btn"><svg viewBox="0 0 16 16"><path d="M10.5 3.5 5.5 8l5 4.5"/></svg></div>
+            <div class="header-title">Add Friends</div>
+            <div class="icon-btn"><svg viewBox="0 0 16 16"><path d="M8 3.2h.01"/><path d="M8 8h.01"/><path d="M8 12.8h.01"/></svg></div>
+          </div>
+          <div class="scroll">
+            <div class="info">
+              <p><strong>Automatic connection</strong><br />If someone joins from your invite link and enters your code, you can become friends immediately in the flow preview.</p>
+            </div>
+            <div class="card pad">
+              <div class="name" style="font-size:10px">Search by friend code</div>
+              <div class="sub" style="margin-top:4px">Find a friend directly with the code they shared.</div>
+            </div>
+            <div class="input">Search by recommendation code</div>
+            <div class="search-result">
+              <div class="avatar d">LF</div>
+              <div class="grow">
+                <div class="name">Lucky Friend</div>
+                <div class="sub">12 friends</div>
+              </div>
+              <div class="btn">Add Friend</div>
+            </div>
+
+            <div class="divider">OR</div>
+
+            <div class="card hero pad">
+              <div class="hero-top">
+                <div class="hero-icon">S</div>
+                <div>
+                  <div class="name">Invite non-joined friends</div>
+                  <div class="sub">Share your invite link to pull more people into the friends network.</div>
+                </div>
+              </div>
+              <div class="btn" style="width:100%">Create Invite Link</div>
+            </div>
+
+            <div class="empty">Search results and empty states stay fully functional in this offline preview because every visual is built from plain HTML and CSS.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="label">4. Invite Friends<br />Offline share sheet style</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>5G 100%</span></div>
+          <div class="header">
+            <div class="icon-btn"><svg viewBox="0 0 16 16"><path d="M10.5 3.5 5.5 8l5 4.5"/></svg></div>
+            <div class="header-title">Invite Friends</div>
+            <div class="icon-btn"></div>
+          </div>
+          <div class="scroll">
+            <div class="card pad">
+              <div class="name" style="font-size:10px">Automatically become friends when invited</div>
+              <div class="sub" style="margin-top:4px">If a user joins through the link and enters your recommendation code, the inviter and invited user can be connected in the experience.</div>
+            </div>
+
+            <div class="card pad">
+              <div class="section-title" style="margin-bottom:7px">My Invite Link</div>
+              <div class="linkbox">
+                <div class="grow">https://cashwalk.page.link/invite/KRNP37N</div>
+                <div class="btn" style="padding:5px 8px; min-height:24px">Copy</div>
+              </div>
+            </div>
+
+            <div class="card pad">
+              <div class="section-title" style="margin-bottom:7px">Share</div>
+              <div class="row" style="border:none;padding:0 0 8px">
+                <div class="left"><div class="share-ico" style="background:#fee500;color:#3c1e1e">K</div><div><div class="name" style="font-size:10px">Share via KakaoTalk</div><div class="sub">Most common social send path</div></div></div>
+              </div>
+              <div class="row">
+                <div class="left"><div class="share-ico" style="background:#e8f0fe;color:#1a56c4">S</div><div><div class="name" style="font-size:10px">Share via SMS</div><div class="sub">Simple text invite</div></div></div>
+              </div>
+              <div class="row">
+                <div class="left"><div class="share-ico black">L</div><div><div class="name" style="font-size:10px">Share Link</div><div class="sub">Generic link action</div></div></div>
+              </div>
+            </div>
+
+            <div class="card pad" style="background:#fff8e8;border-color:#f0dea7">
+              <div class="name" style="font-size:10px">Offline note</div>
+              <div class="sub" style="margin-top:4px;color:#7b6a2f">The preview does not call real sharing APIs. It is presentation-safe for export, review, and attachment.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="label">5. Friend Requests<br />Received + sent actions</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>5G 100%</span></div>
+          <div class="header">
+            <div class="icon-btn"><svg viewBox="0 0 16 16"><path d="M10.5 3.5 5.5 8l5 4.5"/></svg></div>
+            <div class="header-title">Manage Requests</div>
+            <div class="icon-btn"></div>
+          </div>
+          <div class="request-tabs">
+            <span class="active">Received</span>
+            <span>Sent</span>
+          </div>
+          <div class="scroll">
+            <div class="request-card">
+              <div class="row" style="border:none;padding:0">
+                <div class="left">
+                  <div class="avatar sm g">HK</div>
+                  <div>
+                    <div class="name">Hawkeye</div>
+                    <div class="sub">1 hour ago</div>
+                  </div>
+                </div>
+                <div style="display:flex; gap:6px">
+                  <div class="btn" style="padding:6px 10px">Accept</div>
+                  <div class="btn ghost" style="padding:6px 10px">Decline</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="request-card">
+              <div class="row" style="border:none;padding:0">
+                <div class="left">
+                  <div class="avatar sm b">CK</div>
+                  <div>
+                    <div class="name">Chul-soo Kim</div>
+                    <div class="sub">Recently sent you a request</div>
+                  </div>
+                </div>
+                <div style="display:flex; gap:6px">
+                  <div class="btn" style="padding:6px 10px">Accept</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card pad">
+              <div class="name" style="font-size:10px">Sent tab preview</div>
+              <div class="sub" style="margin-top:4px">Cashwalker2 appears with a single <strong>Cancel</strong> action in the sent state, matching the React flow.</div>
+            </div>
+
+            <div class="card pad" style="background:#fafafa;border-color:#ededed">
+              <div class="name" style="font-size:10px">Empty state</div>
+              <div class="sub" style="margin-top:4px">When there are no requests, the screen falls back to a centered illustration/message block with an Add Friends CTA.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="label">6. Leaderboard<br />Real friends + suggested ranking</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>5G 100%</span></div>
+          <div class="header">
+            <div class="icon-btn"><svg viewBox="0 0 16 16"><path d="M10.5 3.5 5.5 8l5 4.5"/></svg></div>
+            <div class="header-title">Friends</div>
+            <div class="icon-row">
+              <div class="icon-btn"><svg viewBox="0 0 16 16"><circle cx="6" cy="5.5" r="2.3"/><path d="M2 13c0-2.4 2-4 4.5-4"/><path d="M10.5 4.5h3"/><path d="M12 3v3"/></svg></div>
+              <div class="icon-btn"><svg viewBox="0 0 16 16"><path d="M7.8 3.2h.01"/><path d="M7.8 8h.01"/><path d="M7.8 12.8h.01"/></svg></div>
+            </div>
+          </div>
+          <div class="tabs"><div class="tab">Friends</div><div class="tab active">Leaderboard</div></div>
+          <div class="scroll">
+            <div class="card pad" style="margin-top:8px">
+              <div class="sub" style="font-size:9px">Suggested friends appear in ranking when you have fewer than 5 friends. This block reflects that setting.</div>
+            </div>
+
+            <div class="section list" style="padding-top:6px">
+              <div class="sub" style="padding:0 0 8px; font-size:9px">2026. 03. 17</div>
+
+              <div class="row">
+                <div class="left">
+                  <div class="trophy">🥇</div>
+                  <div class="avatar sm c">PP</div>
+                  <div>
+                    <div class="name">Princess Puppy</div>
+                    <div class="meta"><span class="tag gray">Real friend</span></div>
+                  </div>
+                </div>
+                <div class="steps">9,103</div>
+              </div>
+              <div class="row">
+                <div class="left">
+                  <div class="trophy">🥈</div>
+                  <div class="avatar sm d">WK</div>
+                  <div>
+                    <div class="name">Walk King</div>
+                    <div class="meta"><span class="tag gray">Real friend</span></div>
+                  </div>
+                </div>
+                <div class="steps">8,500</div>
+              </div>
+              <div class="row" style="background:#fff9e8;margin:0 -10px;padding:8px 10px;border-top:1px solid #f1e6bb;border-bottom:1px solid #f1e6bb">
+                <div class="left">
+                  <div class="trophy">🥉</div>
+                  <div class="avatar sm me">KN</div>
+                  <div>
+                    <div class="name">KRNP37N</div>
+                    <div class="meta"><span class="tag yellow">Me</span></div>
+                  </div>
+                </div>
+                <div class="steps">1,157</div>
+              </div>
+              <div class="row">
+                <div class="left">
+                  <div class="rank">4</div>
+                  <div class="avatar sm a">RT</div>
+                  <div>
+                    <div class="name">Running Teddy</div>
+                    <div class="meta"><span class="tag purple">Suggested</span><span class="tag blue">3 mutual</span></div>
+                  </div>
+                </div>
+                <div class="btn" style="padding:5px 8px; min-height:24px">+ Add</div>
+              </div>
+              <div class="row">
+                <div class="left">
+                  <div class="rank">5</div>
+                  <div class="avatar sm b">YR</div>
+                  <div>
+                    <div class="name">Youth Runner</div>
+                    <div class="meta"><span class="tag purple">Suggested</span><span class="tag blue">2 mutual</span></div>
+                  </div>
+                </div>
+                <div class="btn ghost" style="padding:5px 8px; min-height:24px">Requested</div>
+              </div>
+            </div>
+
+            <div class="floating">
+              <div class="left">
+                <div class="trophy">🥉</div>
+                <div class="avatar xs me">KN</div>
+                <div class="name" style="font-size:10px">KRNP37N</div>
+              </div>
+              <div class="steps">1,157 steps</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="label">7. Settings<br />Search, notifications, ranking toggles</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>5G 100%</span></div>
+          <div class="header">
+            <div class="icon-btn"><svg viewBox="0 0 16 16"><path d="M10.5 3.5 5.5 8l5 4.5"/></svg></div>
+            <div class="header-title">Cashtalk Settings</div>
+            <div class="icon-btn"></div>
+          </div>
+          <div class="scroll">
+            <div class="group-title">My Profile</div>
+            <div class="toggle-row">
+              <div>
+                <div class="name" style="font-size:10px">Allow recommendation code search</div>
+                <div class="sub">Others can search for you using your recommendation code.</div>
+              </div>
+              <div class="toggle"></div>
+            </div>
+
+            <div class="group-title">Notification Settings</div>
+            <div class="toggle-row">
+              <div>
+                <div class="name" style="font-size:10px">Friend Request Push Notification</div>
+                <div class="sub">Get notified when you receive a new friend request.</div>
+              </div>
+              <div class="toggle"></div>
+            </div>
+
+            <div class="group-title">Ranking Settings</div>
+            <div class="toggle-row">
+              <div>
+                <div class="name" style="font-size:10px">Show Suggested Friends</div>
+                <div class="sub">Shows suggested friends in ranking when you have less than 5 friends.</div>
+              </div>
+              <div class="toggle off"></div>
+            </div>
+
+            <div class="group-title">Manage Friends</div>
+            <div class="toggle-row">
+              <div>
+                <div class="name" style="font-size:10px">Add Friends</div>
+              </div>
+              <div class="chev">›</div>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div class="name" style="font-size:10px">Manage Friend Requests</div>
+              </div>
+              <div class="chev">›</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="label">8. Invite Result<br />Success / connected state</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>5G 100%</span></div>
+          <div class="header">
+            <div class="icon-btn"><svg viewBox="0 0 16 16"><path d="M10.5 3.5 5.5 8l5 4.5"/></svg></div>
+            <div class="header-title">Add Friends</div>
+            <div class="icon-btn"></div>
+          </div>
+          <div class="scroll">
+            <div class="info">
+              <p><strong>Connected automatically</strong><br />This card shows the payoff state after a user comes in through your invite flow.</p>
+            </div>
+            <div class="card pad">
+              <div class="name" style="font-size:10px">Search by friend code</div>
+              <div class="sub" style="margin-top:4px">A user can still be found directly, but the automatic path is highlighted below.</div>
+            </div>
+            <div class="input">KRNP37N</div>
+            <div class="card pad" style="background:#f0fff6;border-color:#bbf7d0">
+              <div class="hero-top" style="margin-bottom:7px">
+                <div class="share-ico" style="background:#22c55e">✓</div>
+                <div>
+                  <div class="name">Real competition begins</div>
+                  <div class="sub" style="color:#2c9a61">Friend connection completed from invite flow.</div>
+                </div>
+              </div>
+              <div class="row" style="border:none;padding:0 0 8px">
+                <div class="left">
+                  <div class="avatar sm c">CW</div>
+                  <div>
+                    <div class="name">Cashwalker4</div>
+                    <div class="sub">Now added to your friends list</div>
+                  </div>
+                </div>
+              </div>
+              <div class="btn green" style="width:100%">See Real Leaderboard</div>
+            </div>
+
+            <div class="card pad">
+              <div class="name" style="font-size:10px">Prototype note</div>
+              <div class="sub" style="margin-top:4px">This last screen gives the board a clear end-state so product, design, and engineering can review the whole funnel in one file.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

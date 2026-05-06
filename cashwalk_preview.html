@@ -1,0 +1,350 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+.wrap{display:flex;gap:12px;align-items:flex-start;justify-content:center;padding:1.5rem;background:#E0E0E0;flex-wrap:wrap;}
+.col{display:flex;flex-direction:column;align-items:center;gap:7px;}
+.slabel{font-size:10px;font-weight:600;color:#555;text-align:center;max-width:215px;line-height:1.4;}
+.chip{font-size:8px;padding:1px 5px;border-radius:8px;font-weight:700;margin-left:3px;}
+.chip-fix{background:#15803d;color:#fff;}
+.chip-same{background:#888;color:#fff;}
+.phone{width:210px;height:480px;background:#fff;border-radius:26px;border:5px solid #1a1a1a;box-shadow:0 14px 36px rgba(0,0,0,.22);overflow:hidden;display:flex;flex-direction:column;}
+.pscroll{flex:1;overflow-y:auto;background:#F5F5F5;}
+.pscroll::-webkit-scrollbar{width:0;}
+.sbar{background:#FFC800;padding:5px 12px 3px;display:flex;justify-content:space-between;}
+.sbar span{font-size:8px;font-weight:600;color:#1a1a1a;}
+.hdr{background:#FFC800;padding:5px 8px 6px;display:flex;align-items:center;justify-content:space-between;}
+.htitle{font-size:12px;font-weight:700;color:#1a1a1a;flex:1;text-align:center;}
+.hbtn{width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
+.hbtn svg{width:13px;height:13px;fill:none;stroke:#1a1a1a;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.tabs{display:flex;background:#fff;border-bottom:1px solid #E8E8E8;}
+.tab{flex:1;padding:7px 4px;text-align:center;font-size:10px;color:#999;border-bottom:2px solid transparent;}
+.tab.on{font-weight:700;color:#1a1a1a;border-bottom-color:#1a1a1a;}
+.sec{background:#fff;margin-bottom:5px;}
+.ava-init{border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;}
+.mebadge{position:absolute;bottom:-2px;right:-2px;background:#FFC800;border-radius:4px;font-size:6px;font-weight:700;color:#1a1a1a;padding:1px 3px;border:1px solid #fff;}
+.tp{display:inline-block;border-radius:8px;font-size:7px;padding:1px 5px;margin-top:2px;font-weight:500;}
+.tp-dist{background:#E8F4FF;color:#1a6bb5;}
+.tp-area{background:#FEF3C7;color:#92400e;}
+.match-reason{font-size:7px;color:#7C3AED;background:#F3E8FF;border-radius:6px;padding:1px 5px;margin-top:2px;display:inline-block;font-weight:500;}
+.pre-row{display:flex;align-items:center;gap:7px;padding:7px 10px;background:#fff;border-top:1px solid #F2F2F2;}
+.check-ring{width:18px;height:18px;border-radius:50%;border:2px solid #E0E0E0;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;}
+.check-ring.sel{background:#FFC800;border-color:#FFC800;}
+.check-ring svg{width:10px;height:10px;stroke:#1a1a1a;stroke-width:2.5;fill:none;}
+.gate-bar{background:#fff;border-top:2px solid #FFC800;padding:7px 10px;display:flex;align-items:center;justify-content:space-between;gap:7px;}
+.gate-btn{background:#FFC800;color:#1a1a1a;border:none;border-radius:11px;padding:5px 11px;font-size:9px;font-weight:700;cursor:pointer;font-family:inherit;}
+.gate-skip{font-size:8px;color:#888;text-decoration:underline;cursor:pointer;}
+.family-banner{margin:5px 8px;background:#FFF9D6;border-radius:8px;padding:10px;border:2px solid #FFC800;}
+.family-banner-top{display:flex;align-items:center;gap:7px;margin-bottom:8px;}
+.share-3{display:flex;gap:6px;width:100%;}
+.share-3-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;background:#fff;border-radius:8px;border:1px solid #E8E8E8;cursor:pointer;}
+.share-3-icon{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.share-3-label{font-size:8px;color:#333;font-weight:600;}
+.share-3-sub{font-size:7px;color:#aaa;text-align:center;}
+.lbrow{display:flex;align-items:center;gap:6px;padding:7px 10px;background:#fff;border-top:1px solid #F2F2F2;}
+.lbrow.me{background:#FFF9D6;}
+.lbrow.fam{background:#FFF8E1;}
+.lbrow.preview{background:#FDFAFF;}
+.lb-section-hdr{padding:5px 10px 3px;background:#F5F5F5;border-top:1px solid #EEEEEE;}
+/* FIXED preview section header */
+.preview-section-hdr{padding:6px 10px 5px;background:#F3E8FF;border-top:1px solid #E9D5FF;}
+.preview-section-hdr-title{font-size:8px;font-weight:700;color:#7C3AED;}
+/* KEY FIX: limitation text */
+.preview-limit-txt{font-size:7px;color:#9333ea;margin-top:2px;font-weight:600;}
+.trophy{width:18px;text-align:center;}
+.trophy svg{width:13px;height:13px;}
+.rankn{font-size:10px;font-weight:600;color:#999;width:16px;text-align:center;}
+.lname-wrap{flex:1;display:flex;flex-direction:column;gap:1px;}
+.lname{font-size:10px;color:#1a1a1a;}
+.metag{font-size:7px;background:#FFC800;color:#333;font-weight:700;padding:1px 3px;border-radius:3px;margin-left:2px;}
+.fam-tag{font-size:7px;background:#FFF0C0;color:#886600;font-weight:700;padding:1px 3px;border-radius:3px;margin-left:2px;}
+.lsteps{font-size:9px;color:#888;white-space:nowrap;}
+.atc-btn{font-size:7px;font-weight:700;border:none;border-radius:10px;padding:3px 7px;background:#FFC800;cursor:pointer;font-family:inherit;color:#1a1a1a;white-space:nowrap;}
+.lb-nudge{background:#FFF9D6;border-radius:6px;margin:5px 8px;padding:6px 9px;display:flex;align-items:center;justify-content:space-between;}
+.nudge-steps{font-size:8px;font-weight:700;color:#FFC800;background:#1a1a1a;border-radius:8px;padding:3px 7px;white-space:nowrap;}
+.fam-nudge{background:#FFF8E1;border-radius:6px;margin:5px 8px;padding:6px 9px;display:flex;align-items:center;gap:7px;}
+.fam-nudge-cta{font-size:8px;font-weight:700;color:#FFC800;background:#1a1a1a;border-radius:8px;padding:3px 7px;cursor:pointer;border:none;font-family:inherit;white-space:nowrap;}
+.float{margin:5px 8px;background:#fff;border:1px solid #E0E0E0;border-radius:13px;padding:5px 8px;display:flex;align-items:center;gap:5px;}
+.floatname{flex:1;font-size:9px;font-weight:600;}
+.floatsteps{font-size:8px;color:#888;}
+.lb-date{padding:6px 10px;font-size:9px;color:#aaa;background:#fff;border-bottom:1px solid #F2F2F2;}
+.comp-screen{display:flex;flex-direction:column;align-items:center;background:#FFC800;flex:1;padding:14px 14px 12px;position:relative;}
+.comp-back{position:absolute;top:2px;left:8px;font-size:8px;color:#774400;cursor:pointer;display:flex;align-items:center;gap:3px;}
+.comp-back svg{width:11px;height:11px;stroke:#774400;stroke-width:2;fill:none;}
+.inv-banner{margin:5px 8px;background:#FFF9D6;border-radius:7px;padding:9px;}
+.inv-title{font-size:9px;font-weight:700;color:#1a1a1a;margin-bottom:2px;}
+.inv-desc{font-size:8px;color:#888;line-height:1.4;margin-bottom:6px;}
+.auto-connect{background:#F0FFF6;border-radius:6px;padding:6px 8px;margin-bottom:7px;display:flex;align-items:flex-start;gap:5px;border-left:2px solid #22C55E;}
+.auto-connect-txt{font-size:8px;color:#15803d;line-height:1.5;}
+.auto-connect-txt strong{font-size:9px;}
+.inv-code{display:flex;align-items:center;gap:4px;background:#fff;border-radius:5px;padding:5px 7px;margin-bottom:7px;}
+.inv-code span{flex:1;font-size:8px;font-weight:600;font-family:monospace;}
+.inv-copy{font-size:8px;font-weight:700;color:#FFC800;cursor:pointer;}
+.lang-toggle{display:flex;align-items:center;gap:6px;padding:4px 0;margin-bottom:5px;}
+.lang-btn{font-size:8px;padding:3px 8px;border:1.5px solid #E0E0E0;border-radius:10px;background:#fff;cursor:pointer;font-family:inherit;color:#888;font-weight:500;}
+.lang-btn.active{border-color:#FFC800;background:#FFF9D6;color:#1a1a1a;font-weight:700;}
+.msg-preview{background:#fff;border-radius:6px;padding:7px 8px;margin-bottom:7px;border:1px solid #E0E0E0;}
+.copy-msg-btn{width:100%;background:#1a1a1a;color:#fff;border:none;border-radius:7px;padding:7px;font-size:9px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:7px;}
+.strow{display:flex;align-items:center;padding:9px 10px;border-top:1px solid #F2F2F2;}
+.sttxt{flex:1;}
+.sttitle{font-size:10px;color:#1a1a1a;}
+.stdesc{font-size:8px;color:#bbb;margin-top:1px;line-height:1.3;}
+.toggle{width:30px;height:17px;background:#FFC800;border-radius:9px;position:relative;flex-shrink:0;cursor:pointer;}
+.toggle.off{background:#DDD;}
+.toggle-dot{position:absolute;right:2px;top:1.5px;width:14px;height:14px;background:#fff;border-radius:50%;transition:all .15s;}
+.toggle.off .toggle-dot{right:auto;left:2px;}
+.info-box{margin:4px 10px 8px;background:#FFFBE6;border-radius:6px;padding:6px 8px;border-left:2px solid #FFC800;}
+.info-box p{font-size:8px;color:#886600;line-height:1.4;}
+.divider-row{display:flex;align-items:center;gap:8px;padding:6px 10px;}
+.divider-line{flex:1;height:1px;background:#E8E8E8;}
+.sbox{display:flex;align-items:center;gap:5px;background:#F5F5F5;border:1px solid #E0E0E0;border-radius:6px;padding:5px 8px;}
+.sbox input{flex:1;border:none;outline:none;font-size:9px;background:none;font-family:inherit;color:#1a1a1a;}
+.sbox svg{width:10px;height:10px;stroke:#bbb;stroke-width:2;fill:none;flex-shrink:0;}
+.empty-add{display:flex;flex-direction:column;align-items:center;padding:12px;background:#fff;}
+.empty-add svg{width:26px;height:26px;fill:#DDD;margin-bottom:5px;}
+.empty-add p{font-size:9px;color:#bbb;text-align:center;line-height:1.5;}
+</style>
+
+<!-- OS Share Sheet -->
+<div id="oss" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:flex-end;justify-content:center;padding:0 10px 20px;" onclick="closeSheet()">
+  <div style="background:#fff;border-radius:16px;padding:14px;width:100%;max-width:360px;" onclick="event.stopPropagation()">
+    <div style="font-size:9px;color:#888;text-align:center;margin-bottom:10px;">cashwalk.app/join/JSNK44</div>
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;min-width:52px;cursor:pointer;" onclick="closeSheet()"><div style="width:40px;height:40px;border-radius:10px;background:#FEE500;display:flex;align-items:center;justify-content:center;font-size:20px;">💬</div><span style="font-size:9px;color:#333;">KakaoTalk</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;min-width:52px;cursor:pointer;" onclick="closeSheet()"><div style="width:40px;height:40px;border-radius:10px;background:#25D366;display:flex;align-items:center;justify-content:center;font-size:20px;">📱</div><span style="font-size:9px;color:#333;">WhatsApp</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;min-width:52px;cursor:pointer;" onclick="closeSheet()"><div style="width:40px;height:40px;border-radius:10px;background:#1877F2;display:flex;align-items:center;justify-content:center;font-size:20px;">📘</div><span style="font-size:9px;color:#333;">Facebook</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;min-width:52px;cursor:pointer;" onclick="closeSheet()"><div style="width:40px;height:40px;border-radius:10px;background:#07C160;display:flex;align-items:center;justify-content:center;font-size:20px;">💚</div><span style="font-size:9px;color:#333;">WeChat</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;min-width:52px;cursor:pointer;" onclick="closeSheet()"><div style="width:40px;height:40px;border-radius:10px;background:#E0E0E0;display:flex;align-items:center;justify-content:center;font-size:18px;">⋯</div><span style="font-size:9px;color:#333;">More</span></div>
+    </div>
+    <button style="width:100%;background:#F5F5F5;border:none;border-radius:10px;padding:10px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#E24B4A;" onclick="closeSheet()">Cancel</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 1. Zero State -->
+  <div class="col">
+    <div class="slabel">Zero State <span class="chip chip-same">유지</span></div>
+    <div class="phone">
+      <div class="sbar"><span>9:41</span><span>●●● ■</span></div>
+      <div class="hdr">
+        <div class="hbtn"><svg viewBox="0 0 14 14"><polyline points="9,2 5,7 9,12"/></svg></div>
+        <span class="htitle">Friends</span>
+        <div style="display:flex;gap:2px;">
+          <div class="hbtn"><svg viewBox="0 0 14 14"><circle cx="6" cy="5" r="2.5"/><path d="M1 12c0-2.8 2.2-4.5 5-4.5"/><line x1="10" y1="3" x2="13" y2="3"/><line x1="11.5" y1="1.5" x2="11.5" y2="4.5"/></svg></div>
+          <div class="hbtn"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="1.2"/></svg></div>
+        </div>
+      </div>
+      <div class="tabs"><div class="tab on">Friends</div><div class="tab">Leaderboard</div></div>
+      <div class="pscroll">
+        <div class="sec">
+          <div style="font-size:8px;color:#aaa;padding:6px 10px 2px;font-weight:500;text-transform:uppercase;letter-spacing:.3px;">My Profile</div>
+          <div style="display:flex;align-items:center;gap:7px;padding:5px 10px 9px;">
+            <div style="position:relative;"><div class="ava-init" style="width:32px;height:32px;font-size:11px;background:#FEF3C7;color:#92400e;">JK</div><div class="mebadge">Me</div></div>
+            <div><div style="font-size:11px;font-weight:700;color:#1a1a1a;">JasonK</div><div style="display:flex;align-items:center;gap:3px;margin-top:2px;"><span style="font-size:8px;color:#aaa;">Friend Code</span><span style="font-size:9px;font-weight:600;">JSNK44</span></div></div>
+          </div>
+        </div>
+        <div class="family-banner">
+          <div class="family-banner-top">
+            <div style="font-size:16px;flex-shrink:0;">👨‍👩‍👧</div>
+            <div><div style="font-size:9px;font-weight:700;color:#1a1a1a;">Invite family & friends</div><div style="font-size:7px;color:#888;margin-top:1px;">They'll connect automatically when they join</div></div>
+          </div>
+          <div class="share-3">
+            <div class="share-3-btn" onclick="cp1(this)"><div class="share-3-icon" style="background:#555;"><svg viewBox="0 0 20 20" width="14" height="14" fill="none"><rect x="8" y="8" width="9" height="9" rx="1.5" stroke="#fff" stroke-width="1.5"/><path d="M12 8V5a2 2 0 00-2-2H5a2 2 0 00-2 2v5a2 2 0 002 2h3" stroke="#fff" stroke-width="1.5"/></svg></div><div class="share-3-label" id="l1">Copy Link</div></div>
+            <div class="share-3-btn" onclick="openSheet()"><div class="share-3-icon" style="background:#34AADF;"><svg viewBox="0 0 20 20" width="14" height="14" fill="none"><rect x="3" y="4" width="14" height="12" rx="2" stroke="#fff" stroke-width="1.5"/><polyline points="3,4 10,11 17,4" stroke="#fff" stroke-width="1.5"/></svg></div><div class="share-3-label">Messages</div></div>
+            <div class="share-3-btn" onclick="openSheet()"><div class="share-3-icon" style="background:#1a1a1a;"><svg viewBox="0 0 20 20" width="14" height="14" fill="none"><path d="M14 8l3-3-3-3M3 17v-3a5 5 0 015-5h9" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="share-3-label">Share</div><div class="share-3-sub">Opens your apps</div></div>
+          </div>
+        </div>
+        <div class="sec">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px 3px;">
+            <span style="font-size:9px;font-weight:500;color:#888;">Or try walkers near you</span>
+            <span style="font-size:7px;color:#7C3AED;font-weight:600;">Preview only</span>
+          </div>
+          <div class="pre-row"><div class="check-ring sel" id="cr1" onclick="tp(1)"><svg viewBox="0 0 10 10"><polyline points="2,5 4,8 8,2"/></svg></div><div class="ava-init" style="width:26px;height:26px;font-size:9px;background:#DBEAFE;color:#1e40af;">SW</div><div style="flex:1;"><div style="font-size:9px;color:#888;">Sam W.</div><div><span class="tp tp-dist" style="font-size:7px;">1.8 mi</span><span class="match-reason" style="font-size:6px;margin-left:2px;">preview</span></div></div></div>
+          <div class="pre-row"><div class="check-ring" id="cr2" onclick="tp(2)"><svg viewBox="0 0 10 10"><polyline points="2,5 4,8 8,2"/></svg></div><div class="ava-init" style="width:26px;height:26px;font-size:9px;background:#FCE7F3;color:#9d174d;">LK</div><div style="flex:1;"><div style="font-size:9px;color:#888;">Li Kun</div><div><span class="tp tp-dist" style="font-size:7px;">2.4 mi</span><span class="match-reason" style="font-size:6px;margin-left:2px;">preview</span></div></div></div>
+        </div>
+      </div>
+      <div class="gate-bar">
+        <div style="font-size:8px;color:#888;flex:1;" id="gc">1 preview selected</div>
+        <span class="gate-skip" onclick="openSheet()">Skip</span>
+        <button class="gate-btn">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Leaderboard Zero State — KEY FIX -->
+  <div class="col">
+    <div class="slabel">Leaderboard Zero <span class="chip chip-fix">텍스트 수정</span></div>
+    <div class="phone">
+      <div class="sbar"><span>9:41</span><span>●●● ■</span></div>
+      <div class="hdr">
+        <div class="hbtn"><svg viewBox="0 0 14 14"><polyline points="9,2 5,7 9,12"/></svg></div>
+        <span class="htitle">Friends</span>
+        <div style="display:flex;gap:2px;">
+          <div class="hbtn"><svg viewBox="0 0 14 14"><circle cx="6" cy="5" r="2.5"/></svg></div>
+          <div class="hbtn"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="1.2"/></svg></div>
+        </div>
+      </div>
+      <div class="tabs"><div class="tab">Friends</div><div class="tab on">Leaderboard</div></div>
+      <div class="pscroll">
+        <div class="lb-date">Mar 17, 2026</div>
+        <div class="lb-section-hdr"><span style="font-size:8px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.4px;">Your Friends <span style="color:#22C55E;font-size:7px;">● Real ranking</span></span></div>
+        <div class="lbrow me">
+          <div class="trophy"><svg viewBox="0 0 20 20"><path d="M10 2l2.5 5 5.5.8-4 3.9.9 5.4L10 14.5l-4.9 2.6.9-5.4L2 7.8l5.5-.8z" fill="#FFC800" stroke="#E0A800" stroke-width=".5"/></svg></div>
+          <div class="ava-init" style="width:26px;height:26px;font-size:10px;background:#FEF3C7;color:#92400e;border:2px solid #FFC800;">JK</div>
+          <div class="lname-wrap"><span class="lname">JasonK <span class="metag">Me</span></span><span style="font-size:7px;color:#b07700;">Only you so far</span></div>
+          <span class="lsteps">👣7,920</span>
+        </div>
+        <div class="fam-nudge">
+          <div style="font-size:14px;flex-shrink:0;">👨‍👩‍👧</div>
+          <div style="font-size:8px;color:#886600;flex:1;">Invite family to see<br/><strong>who walks the most</strong></div>
+          <button class="fam-nudge-cta" onclick="openSheet()">Invite →</button>
+        </div>
+
+        <!-- ★ KEY FIX: Preview section with limitation framing -->
+        <div class="preview-section-hdr">
+          <div class="preview-section-hdr-title">Preview Competition</div>
+          <!-- BEFORE: "Not friends yet · Add to make it real" -->
+          <!-- AFTER: real ranking starts when you add friends -->
+          <div class="preview-limit-txt">⚡ Real ranking starts when you add friends</div>
+        </div>
+
+        <div class="lbrow preview">
+          <div class="trophy"><svg viewBox="0 0 20 20"><path d="M10 2l2.5 5 5.5.8-4 3.9.9 5.4L10 14.5l-4.9 2.6.9-5.4L2 7.8l5.5-.8z" fill="#C0C0C0" stroke="#A0A0A0" stroke-width=".5"/></svg></div>
+          <div class="ava-init" style="width:26px;height:26px;font-size:10px;background:#DBEAFE;color:#1e40af;">SW</div>
+          <div class="lname-wrap"><span class="lname">Sam W.</span><div><span class="tp tp-dist" style="font-size:7px;">1.8 mi</span><span class="match-reason" style="margin-left:2px;margin-top:0;font-size:6px;">similar pace</span></div></div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;"><span class="lsteps">👣14,200</span><button class="atc-btn" onclick="this.textContent='Added ✓';this.style.background='#F0FFF6';this.style.color='#15803d';">Add to compete</button></div>
+        </div>
+        <div class="lbrow preview">
+          <div class="trophy"><span class="rankn">3</span></div>
+          <div class="ava-init" style="width:26px;height:26px;font-size:10px;background:#D1FAE5;color:#065f46;">PR</div>
+          <div class="lname-wrap"><span class="lname">Priya R.</span><div><span class="tp tp-dist" style="font-size:7px;">1.2 mi</span><span class="match-reason" style="margin-left:2px;margin-top:0;font-size:6px;">near you</span></div></div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;"><span class="lsteps">👣6,100</span><button class="atc-btn" onclick="this.textContent='Added ✓';this.style.background='#F0FFF6';this.style.color='#15803d';">Add to compete</button></div>
+        </div>
+
+        <!-- ★ KEY FIX: info box also updated -->
+        <div style="margin:5px 8px;background:#F3E8FF;border-radius:6px;padding:5px 9px;">
+          <p style="font-size:7px;color:#7C3AED;text-align:center;line-height:1.5;">Preview only · Real ranking starts when you add friends</p>
+        </div>
+
+        <div class="lb-nudge">
+          <div><div style="font-size:8px;color:#886600;">You're 1st among real friends 👣</div><div style="font-size:8px;color:#886600;margin-top:1px;">Invite someone to start a real competition</div></div>
+          <span class="nudge-steps">Invite →</span>
+        </div>
+        <div style="height:4px;background:#F5F5F5;"></div>
+        <div class="float"><svg viewBox="0 0 20 20" width="13" height="13"><path d="M10 2l2.5 5 5.5.8-4 3.9.9 5.4L10 14.5l-4.9 2.6.9-5.4L2 7.8l5.5-.8z" fill="#FFC800" stroke="#E0A800" stroke-width=".5"/></svg><div class="ava-init" style="width:20px;height:20px;font-size:8px;background:#FEF3C7;color:#92400e;">JK</div><span class="floatname">JasonK</span><span class="floatsteps">👣 7,920</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Competition Started -->
+  <div class="col">
+    <div class="slabel">Competition Started <span class="chip chip-fix">텍스트 수정</span></div>
+    <div class="phone">
+      <div class="sbar"><span>9:41</span><span>●●● ■</span></div>
+      <div class="hdr" style="justify-content:center;"><span class="htitle">Friends</span></div>
+      <div class="comp-screen">
+        <div class="comp-back"><svg viewBox="0 0 14 14"><polyline points="9,2 5,7 9,12"/></svg><span>Change selection</span></div>
+        <div style="font-size:28px;margin-bottom:4px;margin-top:6px;">🏆</div>
+        <div style="font-size:13px;font-weight:700;color:#1a1a1a;text-align:center;margin-bottom:3px;">Your preview ranking is ready!</div>
+        <div style="background:rgba(255,255,255,.6);border-radius:8px;padding:5px 10px;margin-bottom:10px;text-align:center;border:1px dashed rgba(119,68,0,.3);">
+          <!-- ★ KEY FIX -->
+          <p style="font-size:7px;color:#774400;line-height:1.5;"><strong>This is a preview.</strong> Add walkers as friends to start your <strong>real ranking</strong>.</p>
+        </div>
+        <div style="width:100%;display:flex;flex-direction:column;gap:4px;margin-bottom:10px;">
+          <div style="background:#fff;border-radius:9px;padding:6px 9px;display:flex;align-items:center;gap:7px;">
+            <div style="width:15px;height:15px;border-radius:50%;background:#1a1a1a;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 10 10" width="9" height="9"><polyline points="2,5 4,8 8,2" stroke="#FFC800" stroke-width="2.5" fill="none"/></svg></div>
+            <div class="ava-init" style="width:24px;height:24px;font-size:9px;background:#DBEAFE;color:#1e40af;">SW</div>
+            <div style="flex:1;"><div style="font-size:9px;font-weight:700;color:#1a1a1a;">Sam W.</div><div style="font-size:7px;color:#888;">1.8 mi · similar pace</div></div>
+            <div style="font-size:8px;color:#888;">👣14,200</div>
+          </div>
+        </div>
+        <div style="background:#fff;border-radius:9px;padding:8px 12px;width:100%;text-align:center;margin-bottom:10px;">
+          <div style="font-size:7px;color:#888;margin-bottom:2px;">Your preview rank today</div>
+          <div style="font-size:18px;font-weight:700;color:#1a1a1a;">#2</div>
+          <!-- ★ KEY FIX: limitation in rank card -->
+          <div style="font-size:7px;color:#9333ea;margin-top:2px;font-weight:600;">Real ranking starts when you add friends</div>
+        </div>
+        <button style="width:100%;background:#1a1a1a;color:#FFC800;border:none;border-radius:11px;padding:9px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;">See Preview Leaderboard →</button>
+        <div style="margin-top:6px;font-size:7px;color:#774400;cursor:pointer;text-decoration:underline;">Skip for now</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Add Friends -->
+  <div class="col">
+    <div class="slabel">Add Friends <span class="chip chip-same">유지</span></div>
+    <div class="phone">
+      <div class="sbar"><span>9:41</span><span>●●● ■</span></div>
+      <div class="hdr"><div class="hbtn"><svg viewBox="0 0 14 14"><polyline points="9,2 5,7 9,12"/></svg></div><span class="htitle">Add Friends</span><div class="hbtn"><svg viewBox="0 0 14 14"><circle cx="7" cy="3.5" r="1"/><circle cx="7" cy="7" r="1"/><circle cx="7" cy="10.5" r="1"/></svg></div></div>
+      <div class="pscroll">
+        <div style="margin:8px 8px 0;"><div class="auto-connect"><div style="font-size:11px;flex-shrink:0;margin-top:1px;">✅</div><div class="auto-connect-txt"><strong>Automatic connection</strong><br/>Friends who join via your link or enter your code are connected instantly.</div></div></div>
+        <div class="inv-banner">
+          <div class="inv-title">Invite friends & family</div>
+          <div class="lang-toggle"><span style="font-size:8px;color:#555;flex:1;">Message language</span><button class="lang-btn active" id="ben" onclick="setL('en')">EN</button><button class="lang-btn" id="bkr" onclick="setL('kr')">한국어</button></div>
+          <div class="msg-preview"><div style="font-size:7px;color:#aaa;margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:.3px;">Message preview</div><div id="men" style="font-size:8px;color:#333;line-height:1.5;">"Join me on Cashwalk! Enter my Friend Code: JSNK44. You'll connect automatically. 👟 cashwalk.app/join/JSNK44"</div><div id="mkr" style="display:none;font-size:8px;color:#1e40af;line-height:1.5;">"캐시워크 같이 해요! 친구 코드 <strong>JSNK44</strong> 입력하면 자동 연결돼요. 👟 cashwalk.app/join/JSNK44"</div></div>
+          <button class="copy-msg-btn" onclick="cm(this)">Copy Message</button>
+          <div class="share-3">
+            <div class="share-3-btn" onclick="cp2(this)"><div class="share-3-icon" style="background:#555;"><svg viewBox="0 0 20 20" width="14" height="14" fill="none"><rect x="8" y="8" width="9" height="9" rx="1.5" stroke="#fff" stroke-width="1.5"/><path d="M12 8V5a2 2 0 00-2-2H5a2 2 0 00-2 2v5a2 2 0 002 2h3" stroke="#fff" stroke-width="1.5"/></svg></div><div class="share-3-label" id="l2">Copy Link</div></div>
+            <div class="share-3-btn" onclick="openSheet()"><div class="share-3-icon" style="background:#34AADF;"><svg viewBox="0 0 20 20" width="14" height="14" fill="none"><rect x="3" y="4" width="14" height="12" rx="2" stroke="#fff" stroke-width="1.5"/><polyline points="3,4 10,11 17,4" stroke="#fff" stroke-width="1.5"/></svg></div><div class="share-3-label">Messages</div></div>
+            <div class="share-3-btn" onclick="openSheet()"><div class="share-3-icon" style="background:#1a1a1a;"><svg viewBox="0 0 20 20" width="14" height="14" fill="none"><path d="M14 8l3-3-3-3M3 17v-3a5 5 0 015-5h9" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="share-3-label">Share</div><div class="share-3-sub">KakaoTalk, WeChat...</div></div>
+          </div>
+        </div>
+        <div class="divider-row"><div class="divider-line"></div><span style="font-size:8px;color:#aaa;white-space:nowrap;">or search by Friend Code</span><div class="divider-line"></div></div>
+        <div style="padding:0 10px 8px;"><div class="sbox"><svg viewBox="0 0 14 14"><circle cx="6" cy="6" r="3.5"/><line x1="9" y1="9" x2="13" y2="13"/></svg><input id="sc" placeholder="Enter your friend's code" onkeydown="if(event.key==='Enter')scG()"/></div></div>
+        <div id="afd"><div class="empty-add"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><circle cx="16" cy="7" r="4"/><path d="M1 20c0-4 3.6-7 8-7"/><path d="M23 20c0-4-3.6-7-8-7"/></svg><p>Enter a Friend Code<br/>or send a link above</p></div></div>
+        <div id="afr" style="display:none;"><div style="margin:6px 8px;background:#fff;border:1px solid #E5E5E5;border-radius:7px;padding:9px;display:flex;align-items:center;gap:7px;"><div class="ava-init" style="width:30px;height:30px;font-size:10px;background:#EDE9FE;color:#5b21b6;">C4</div><span style="flex:1;font-size:11px;font-weight:600;">Cashwalker4</span><button style="background:#1a1a1a;color:#fff;border:none;border-radius:11px;padding:4px 9px;font-size:9px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="reqF()">Add Friend</button></div></div>
+        <div id="ccard" style="display:none;margin:6px 8px;background:#F0FFF6;border-radius:10px;padding:10px;border:1px solid #BBF7D0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="width:26px;height:26px;background:#22C55E;border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 14 14" width="13" height="13"><polyline points="2,7 5,10 12,3" stroke="#fff" stroke-width="2.5" fill="none"/></svg></div><div><div style="font-size:10px;font-weight:700;color:#15803d;">Real competition begins! 🏆</div><div style="font-size:8px;color:#4ade80;">Connected automatically</div></div></div><button style="width:100%;background:#15803d;color:#fff;border:none;border-radius:8px;padding:7px;font-size:9px;font-weight:700;cursor:pointer;font-family:inherit;">See Real Leaderboard →</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Leaderboard 가족 있음 -->
+  <div class="col">
+    <div class="slabel">Leaderboard — 가족 있음 <span class="chip chip-same">유지</span></div>
+    <div class="phone">
+      <div class="sbar"><span>9:41</span><span>●●● ■</span></div>
+      <div class="hdr"><div class="hbtn"><svg viewBox="0 0 14 14"><polyline points="9,2 5,7 9,12"/></svg></div><span class="htitle">Friends</span><div style="display:flex;gap:2px;"><div class="hbtn"><svg viewBox="0 0 14 14"><circle cx="6" cy="5" r="2.5"/></svg></div><div class="hbtn"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="1.2"/></svg></div></div></div>
+      <div class="tabs"><div class="tab">Friends</div><div class="tab on">Leaderboard</div></div>
+      <div class="pscroll">
+        <div class="lb-date">Mar 17, 2026</div>
+        <div class="lb-section-hdr"><span style="font-size:8px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.4px;">Family & Friends <span style="color:#22C55E;font-size:7px;">● Real ranking</span></span></div>
+        <div class="lbrow fam"><div class="trophy"><svg viewBox="0 0 20 20"><path d="M10 2l2.5 5 5.5.8-4 3.9.9 5.4L10 14.5l-4.9 2.6.9-5.4L2 7.8l5.5-.8z" fill="#FFC800" stroke="#E0A800" stroke-width=".5"/></svg></div><div class="ava-init" style="width:26px;height:26px;font-size:9px;background:#FCE7F3;color:#9d174d;border:2px solid #FFC800;">엄마</div><div class="lname-wrap"><span class="lname">Mom <span class="fam-tag">👨‍👩‍👧</span></span><span style="font-size:7px;color:#888;">Dallas</span></div><span class="lsteps">👣12,440</span></div>
+        <div class="lbrow fam"><div class="trophy"><svg viewBox="0 0 20 20"><path d="M10 2l2.5 5 5.5.8-4 3.9.9 5.4L10 14.5l-4.9 2.6.9-5.4L2 7.8l5.5-.8z" fill="#C0C0C0" stroke="#A0A0A0" stroke-width=".5"/></svg></div><div class="ava-init" style="width:26px;height:26px;font-size:9px;background:#E0E7FF;color:#3730a3;border:2px solid #B0B0B0;">SC</div><div class="lname-wrap"><span class="lname">Sarah <span class="fam-tag">👨‍👩‍👧</span></span><span style="font-size:7px;color:#888;">Austin</span></div><span class="lsteps">👣9,810</span></div>
+        <div class="lbrow me"><div class="trophy"><svg viewBox="0 0 20 20"><path d="M10 2l2.5 5 5.5.8-4 3.9.9 5.4L10 14.5l-4.9 2.6.9-5.4L2 7.8l5.5-.8z" fill="#CD7F32" stroke="#B06020" stroke-width=".5"/></svg></div><div class="ava-init" style="width:26px;height:26px;font-size:10px;background:#FEF3C7;color:#92400e;border:2px solid #CD7F32;">JK</div><div class="lname-wrap"><span class="lname">JasonK <span class="metag">Me</span></span><span style="font-size:7px;color:#b07700;">Real rank</span></div><span class="lsteps">👣7,920</span></div>
+        <div class="lbrow fam"><div class="trophy"><span class="rankn">4</span></div><div class="ava-init" style="width:26px;height:26px;font-size:9px;background:#D1FAE5;color:#065f46;">아빠</div><div class="lname-wrap"><span class="lname">Dad <span class="fam-tag">👨‍👩‍👧</span></span><span style="font-size:7px;color:#888;">Dallas</span></div><span class="lsteps">👣3,200</span></div>
+        <div class="lb-nudge"><div><div style="font-size:8px;color:#886600;">You're 3rd in family 👣</div><div style="font-size:8px;color:#886600;margin-top:1px;">Walk <strong>+1,890 steps</strong> to beat Sarah</div></div><span class="nudge-steps">1,890 more</span></div>
+        <div style="height:4px;background:#F5F5F5;"></div>
+        <div class="float"><svg viewBox="0 0 20 20" width="13" height="13"><path d="M10 2l2.5 5 5.5.8-4 3.9.9 5.4L10 14.5l-4.9 2.6.9-5.4L2 7.8l5.5-.8z" fill="#CD7F32" stroke="#B06020" stroke-width=".5"/></svg><div class="ava-init" style="width:20px;height:20px;font-size:8px;background:#FEF3C7;color:#92400e;">JK</div><span class="floatname">JasonK</span><span class="floatsteps">👣 7,920</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Friends Settings -->
+  <div class="col">
+    <div class="slabel">Friends Settings <span class="chip chip-same">유지</span></div>
+    <div class="phone">
+      <div class="sbar"><span>9:41</span><span>●●● ■</span></div>
+      <div class="hdr"><div class="hbtn"><svg viewBox="0 0 14 14"><polyline points="9,2 5,7 9,12"/></svg></div><span class="htitle">Friends Settings</span><div class="hbtn" style="width:22px;"></div></div>
+      <div class="pscroll">
+        <div class="sec"><div style="font-size:8px;color:#aaa;padding:6px 10px 2px;font-weight:500;text-transform:uppercase;letter-spacing:.3px;">My Profile</div><div class="strow"><div class="sttxt"><div class="sttitle">Allow Search by Friend Code</div><div class="stdesc">Others can find you by entering your code.</div></div><div class="toggle" onclick="this.classList.toggle('off')"><div class="toggle-dot"></div></div></div><div class="info-box"><p>💡 Only users who know your exact code can send a request. Strangers cannot browse or discover you.</p></div></div>
+        <div class="sec"><div style="font-size:8px;color:#aaa;padding:6px 10px 2px;font-weight:500;text-transform:uppercase;letter-spacing:.3px;">Manage Friends</div><div class="strow"><div class="sttxt"><div class="sttitle">Add Friends</div></div><svg viewBox="0 0 10 10" width="9" height="9"><polyline points="3,2 7,5 3,8" stroke="#ccc" stroke-width="2" fill="none"/></svg></div><div class="strow"><div class="sttxt"><div class="sttitle">Friend Requests</div></div><svg viewBox="0 0 10 10" width="9" height="9"><polyline points="3,2 7,5 3,8" stroke="#ccc" stroke-width="2" fill="none"/></svg></div></div>
+        <div class="sec"><div style="font-size:8px;color:#aaa;padding:6px 10px 2px;font-weight:500;text-transform:uppercase;letter-spacing:.3px;">Notifications</div><div class="strow"><div class="sttxt"><div class="sttitle">Friend Request Alerts</div><div class="stdesc">Get notified when someone sends you a friend request.</div></div><div class="toggle" onclick="this.classList.toggle('off')"><div class="toggle-dot"></div></div></div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let sel={1:true,2:false};
+function tp(n){sel[n]=!sel[n];document.getElementById('cr'+n).classList.toggle('sel',sel[n]);const c=Object.values(sel).filter(Boolean).length;document.getElementById('gc').textContent=c>0?c+' preview'+(c>1?'s':''):'0 preview';}
+function cp1(el){const l=el.querySelector('.share-3-label');l.textContent='Copied!';setTimeout(()=>l.textContent='Copy Link',1500);}
+function cp2(el){const l=el.querySelector('.share-3-label');l.textContent='Copied!';setTimeout(()=>l.textContent='Copy Link',1500);}
+function cm(btn){btn.textContent='Copied! ✓';setTimeout(()=>btn.textContent='Copy Message',1500);}
+function setL(l){document.getElementById('men').style.display=l==='en'?'block':'none';document.getElementById('mkr').style.display=l==='kr'?'block':'none';document.getElementById('ben').classList.toggle('active',l==='en');document.getElementById('bkr').classList.toggle('active',l==='kr');}
+function openSheet(){document.getElementById('oss').style.display='flex';}
+function closeSheet(){document.getElementById('oss').style.display='none';}
+function scG(){const v=document.getElementById('sc').value.trim().toUpperCase();document.getElementById('afd').style.display='none';if(v.length>=4){document.getElementById('afr').style.display='block';document.getElementById('ccard').style.display='none';}}
+function reqF(){document.getElementById('afr').style.display='none';document.getElementById('ccard').style.display='block';}
+document.getElementById('sc').addEventListener('keydown',e=>{if(e.key==='Enter')scG();});
+</script>
