@@ -37,6 +37,7 @@ type RequestItem = {
   name: string;
   avatar: string;
   cover: string;
+  steps?: number;
 };
 
 type LoadMode = 'all' | 'page' | 'infinite';
@@ -241,6 +242,7 @@ export function ManageRequestsScreen({ setView }: { setView: (v: ViewState) => v
       name: 'Hawkeye',
       avatar: 'https://picsum.photos/seed/hawkeye/100/100',
       cover: 'https://images.unsplash.com/photo-1474511320723-9a56873867b5?auto=format&fit=crop&w=1200&q=80',
+      steps: 8200,
     },
   ]);
   const [sent, setSent] = useState<RequestItem[]>([
@@ -249,10 +251,11 @@ export function ManageRequestsScreen({ setView }: { setView: (v: ViewState) => v
       name: 'Cashwalker2',
       avatar: 'https://picsum.photos/seed/cashwalker2/100/100',
       cover: 'https://images.unsplash.com/photo-1482192505345-5655af888cc4?auto=format&fit=crop&w=1200&q=80',
+      steps: 5400,
     },
   ]);
-  const [preview, setPreview] = useState<RequestItem | null>(null);
   const [modal, setModal] = useState<{ mode: 'accept' | 'decline' | 'cancel'; item: RequestItem } | null>(null);
+
 
   const activeItems = tab === 'received' ? received : sent;
 
@@ -294,13 +297,21 @@ export function ManageRequestsScreen({ setView }: { setView: (v: ViewState) => v
           {activeItems.length > 0 ? (
             <div className="space-y-2">
               {activeItems.map((item) => (
-                <div key={item.id} className="flex items-center justify-between py-1.5">
-                  <button onClick={() => setPreview(item)} className="flex items-center gap-3">
-                    <div className="h-11 w-11 overflow-hidden rounded-full bg-[#d8d8d8]">
+                <div key={item.id} className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-3">
+                    <div className="h-11 w-11 overflow-hidden rounded-full bg-[#d8d8d8] shrink-0">
                       <img src={item.avatar} alt={item.name} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
                     </div>
-                    <span className="text-[14px] font-semibold text-[#525252]">{item.name}</span>
-                  </button>
+                    <div className="flex flex-col">
+                      <span className="text-[14px] font-semibold text-[#525252]">{item.name}</span>
+                      {item.steps != null && (
+                        <span className="flex items-center gap-1 text-[12px] text-[#a0a0a0] mt-0.5">
+                          <Footprints className="h-3 w-3" />
+                          {item.steps.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
                   {tab === 'received' ? (
                     <div className="flex items-center gap-2">
@@ -363,7 +374,6 @@ export function ManageRequestsScreen({ setView }: { setView: (v: ViewState) => v
           onConfirm={confirmRequestAction}
         />
       )}
-      {preview && <RequestsPreviewSheet item={preview} onClose={() => setPreview(null)} />}
     </div>
   );
 }
@@ -474,7 +484,6 @@ export function LeaderboardScreen({
   myAvatar,
   myId,
   mySteps,
-  setSelectedProfile,
   setView,
   recommendedUsers,
   showRecommendedInRanking = true,
@@ -487,7 +496,6 @@ export function LeaderboardScreen({
   myAvatar: string;
   myId: string;
   mySteps: number;
-  setSelectedProfile: (f: ProfileSheetUser) => void;
   setView: (v: ViewState) => void;
   recommendedUsers?: RecommendedUser[];
   showRecommendedInRanking?: boolean;
@@ -704,7 +712,7 @@ export function LeaderboardScreen({
                         rank={index + 1}
                         highlight={isMe}
                         isMe={isMe}
-                        onClick={() => setSelectedProfile({ ...entry, isMe })}
+                        onClick={() => {}}
                         isRecommended={entry.isRecommended}
                         isAdded={addedRecommended?.has(entry.id)}
                         onAddFriend={

@@ -12,7 +12,6 @@ import {
   ChevronRight,
   Users,
   Trophy,
-  Frown,
   Check,
   CheckCheck,
   Menu,
@@ -66,12 +65,6 @@ interface Friend {
   avatar: string;
   steps: number;
   friendCount?: number;
-}
-
-interface ProfileSheetUser extends Friend {
-  isRecommended?: boolean;
-  isMe?: boolean;
-  mutualFriends?: number;
 }
 
 interface MockUser {
@@ -138,111 +131,6 @@ const rebuildSuggestedAfterReentry = (
   const extraUsers = getAvailableSuggestedUsers(requestedIds).filter((user) => !keptIds.has(user.id));
 
   return [...keptUsers, ...extraUsers].slice(0, RECOMMENDED_CARD_COUNT);
-};
-
-interface ProfileBottomSheetProps {
-  selectedProfile: ProfileSheetUser | null;
-  setSelectedProfile: (f: ProfileSheetUser | null) => void;
-  profileMenuOpen: boolean;
-  setProfileMenuOpen: (v: boolean) => void;
-  handleRemoveFriend: (id: string) => void;
-}
-
-const ProfileBottomSheet = ({
-  selectedProfile,
-  setSelectedProfile,
-  profileMenuOpen,
-  setProfileMenuOpen,
-  handleRemoveFriend
-}: ProfileBottomSheetProps) => {
-  if (!selectedProfile) return null;
-
-  const showMenu = !selectedProfile.isRecommended && !selectedProfile.isMe;
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={() => {
-          setSelectedProfile(null);
-          setProfileMenuOpen(false);
-        }}
-        className="fixed inset-0 bg-black/55 z-[60]"
-      />
-      <motion.div
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
-        transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-[70] overflow-hidden rounded-t-[28px] bg-white shadow-[0_-16px_50px_rgba(0,0,0,0.16)]"
-      >
-        <div className="relative px-5 pt-3 pb-8">
-          <div className="mx-auto mb-5 h-1.5 w-14 rounded-full bg-black/10" />
-
-          <div className="mb-4 flex items-center justify-end gap-2">
-            <div className="relative">
-              {showMenu && (
-                <button
-                  onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                  className={`flex h-10 w-10 items-center justify-center rounded-full text-[#3a3328] transition-colors ${profileMenuOpen ? 'bg-[#ece7de]' : 'bg-[#f5f5f5]'
-                    }`}
-                >
-                  <MoreHorizontal className="h-5 w-5" />
-                </button>
-              )}
-
-              {showMenu && profileMenuOpen && (
-                <div className="absolute right-0 top-12 w-[132px] overflow-hidden rounded-2xl border border-black/5 bg-[#f7f3ec] py-1 shadow-[0_14px_32px_rgba(0,0,0,0.18)] backdrop-blur-sm">
-                  <button
-                    onClick={() => {
-                      handleRemoveFriend(selectedProfile.id);
-                      setProfileMenuOpen(false);
-                      setSelectedProfile(null);
-                    }}
-                    className="w-full px-4 py-3 text-left text-sm font-bold text-red-500 transition-colors hover:bg-[#fbe9e7]"
-                  >
-                    Unfriend
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <button
-              onClick={() => {
-                setSelectedProfile(null);
-                setProfileMenuOpen(false);
-              }}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f5f5] text-[#3a3328]"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          <div className="flex flex-col items-center pb-2 text-center">
-            <div className="h-24 w-24 overflow-hidden rounded-full bg-[#f0f0f0]">
-              <img
-                src={selectedProfile.avatar}
-                alt={selectedProfile.name}
-                className="h-full w-full object-cover"
-                referrerPolicy="no-referrer"
-              />
-            </div>
-            <h3 className="mt-4 text-[24px] font-bold tracking-[-0.03em] text-[#1f1f1f]">
-              {selectedProfile.name}
-            </h3>
-            <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#f7f7f7] px-4 py-2.5 text-[#333]">
-              <Footprints className="h-4 w-4" fill="currentColor" />
-              <span className="text-[16px] font-bold">
-                {selectedProfile.steps.toLocaleString()} steps
-              </span>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </AnimatePresence>
-  );
 };
 
 const Toggle = ({ enabled, setEnabled }: { enabled: boolean, setEnabled: (v: boolean) => void }) => (
@@ -355,8 +243,6 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
   const [allowSearch, setAllowSearch] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [showRecommendedInRanking, setShowRecommendedInRanking] = useState(true);
-  const [selectedProfile, setSelectedProfile] = useState<ProfileSheetUser | null>(null);
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [friendRequests, setFriendRequests] = useState<any[]>([
     {
       id: 'req_hawkeye',
@@ -366,26 +252,10 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
       cover: 'https://images.unsplash.com/photo-1682687982501-1e58ab814714?auto=format&fit=crop&w=1200&q=80',
     },
   ]);
-  const [sentRequests, setSentRequests] = useState<any[]>([
-    {
-      id: 'sent_cashwalker2',
-      name: 'Cashwalker2',
-      avatar: 'https://picsum.photos/seed/cashwalker2/100/100',
-      time: 'just now',
-      cover: 'https://images.unsplash.com/photo-1482192505345-5655af888cc4?auto=format&fit=crop&w=1200&q=80',
-    },
-  ]);
-  const [requestTab, setRequestTab] = useState<'received' | 'sent'>('received');
-  const [requestActionModal, setRequestActionModal] = useState<{
-    mode: 'accept' | 'decline' | 'cancel';
-    request: any;
-  } | null>(null);
-  const [requestPreview, setRequestPreview] = useState<any | null>(null);
   const [friends, setFriends] = useState<Friend[]>(mockData.friends);
   const [widgetHasFriends, setWidgetHasFriends] = useState(true);
-  const [simulateRank, setSimulateRank] = useState<number | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [previewScenario, setPreviewScenario] = useState<PreviewScenario>(INITIAL_PREVIEW_SCENARIO);
+const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [previewScenario] = useState<PreviewScenario>(INITIAL_PREVIEW_SCENARIO);
   const [recommendedRefreshOffset, setRecommendedRefreshOffset] = useState(0);
   const [refreshCooldownLeft, setRefreshCooldownLeft] = useState(0);
   const [showRequestLimitTooltip, setShowRequestLimitTooltip] = useState(false);
@@ -396,6 +266,7 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
     () => buildRequestedSetForScenario(INITIAL_PREVIEW_SCENARIO),
   );
   const [cancelModalId, setCancelModalId] = useState<string | null>(null);
+  const [openFriendMenuId, setOpenFriendMenuId] = useState<string | null>(null);
   const dailyRequestLimit = DAILY_REQUEST_LIMIT;
   const sentRecommendedCount = addedRecommended.size;
   const remainingRecommendedRequests = Math.max(0, dailyRequestLimit - sentRecommendedCount);
@@ -437,16 +308,6 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
     setRecommendedRefreshOffset(nextOffset);
     setRefreshCooldownLeft(REFRESH_COOLDOWN_SECONDS);
     showToast('Loaded a new suggested friends list.');
-  };
-
-  const handleSimulateReentry = () => {
-    const nextUsers = rebuildSuggestedAfterReentry(visibleRecommendedUsers, addedRecommended);
-    setVisibleRecommendedUsers(nextUsers);
-    showToast(
-      nextUsers.length
-        ? 'Re-entered Friends page and cleaned up requested cards.'
-        : 'No suggested friends left to show after re-entry.',
-    );
   };
 
   useEffect(() => {
@@ -500,25 +361,6 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
     showToast('Friend removed.');
   };
 
-  const openProfileSheet = (profile: ProfileSheetUser) => {
-    setProfileMenuOpen(false);
-    setSelectedProfile(profile);
-  };
-
-  const confirmRequestAction = () => {
-    if (!requestActionModal) return;
-
-    if (requestActionModal.mode === 'accept' || requestActionModal.mode === 'decline') {
-      setFriendRequests((prev) => prev.filter((req: any) => req.id !== requestActionModal.request.id));
-      showToast(requestActionModal.mode === 'accept' ? 'Accepted request' : 'Declined request');
-    } else {
-      setSentRequests((prev) => prev.filter((req: any) => req.id !== requestActionModal.request.id));
-      showToast('Canceled request');
-    }
-
-    setRequestActionModal(null);
-  };
-
   const renderHeader = (title: string | React.ReactNode, showIcons = true, onBack?: () => void) => (
     <header className="sticky top-0 z-30 bg-white px-4 py-3 flex items-center justify-between border-b border-gray-100">
       <div className="flex items-center gap-4">
@@ -546,14 +388,6 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
       )}
     </header>
   );
-
-  const profileBottomSheetProps = {
-    selectedProfile,
-    setSelectedProfile,
-    profileMenuOpen,
-    setProfileMenuOpen,
-    handleRemoveFriend
-  };
 
   if (view === 'lockscreen') {
     return (
@@ -685,7 +519,6 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
           </div>
         </div>
 
-        <ProfileBottomSheet {...profileBottomSheetProps} />
       </div>
     );
   }
@@ -715,7 +548,6 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
           myAvatar={mockData.myProfile.avatar}
           myId={mockData.myProfile.id}
           mySteps={mockData.myProfile.steps}
-          setSelectedProfile={openProfileSheet}
           setView={setView}
           recommendedUsers={mockData.recommendedUsers}
           showRecommendedInRanking={showRecommendedInRanking}
@@ -723,7 +555,6 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
           onAddRecommended={handleAddRecommended}
           onRemoveRecommended={handleRemoveRecommended}
         />
-        <ProfileBottomSheet {...profileBottomSheetProps} />
       </>
     );
   }
@@ -984,15 +815,47 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
           <section className="bg-white p-4 min-h-[300px]">
             {friends.length > 0 ? (
               <>
-                <h2 className="text-sm font-semibold text-gray-500 mb-4">{friends.length} Friends</h2>
-                <div className="flex flex-col gap-4">
+                <h2 className="text-base font-bold text-gray-900 mb-4">
+                  My Friends <span className="font-normal text-gray-500">{friends.length}</span>
+                </h2>
+                <div className="flex flex-col divide-y divide-gray-100">
                   {friends.map(friend => (
-                    <div key={friend.id} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 cursor-pointer" onClick={() => openProfileSheet(friend)}>
-                        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
+                    <div key={friend.id} className="flex items-center justify-between py-3 relative">
+                      <div className="flex items-center gap-3">
+                        <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-200 shrink-0">
                           <img src={friend.avatar} alt={friend.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                         </div>
-                        <span className="font-bold text-gray-800">{friend.name}</span>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-[16px] text-gray-900">{friend.name}</span>
+                          <span className="flex items-center gap-1 text-[13px] text-gray-400 mt-0.5">
+                            <Footprints className="w-3.5 h-3.5" />
+                            {friend.steps.toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <button
+                          onClick={() => setOpenFriendMenuId(openFriendMenuId === friend.id ? null : friend.id)}
+                          className="p-2 text-gray-400"
+                        >
+                          <MoreHorizontal className="w-5 h-5" />
+                        </button>
+                        {openFriendMenuId === friend.id && (
+                          <>
+                            <div className="fixed inset-0 z-10" onClick={() => setOpenFriendMenuId(null)} />
+                            <div className="absolute right-0 top-9 z-20 w-[140px] rounded-xl border border-gray-100 bg-white shadow-lg overflow-hidden">
+                              <button
+                                onClick={() => {
+                                  handleRemoveFriend(friend.id);
+                                  setOpenFriendMenuId(null);
+                                }}
+                                className="w-full px-4 py-3 text-left text-[14px] font-medium text-gray-800"
+                              >
+                                Remove Friend
+                              </button>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -1006,10 +869,7 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
             )}
           </section>
 
-          
         </main>
-
-        <ProfileBottomSheet {...profileBottomSheetProps} />
 
         {cancelModalId && (
           <ConfirmModal
@@ -1135,20 +995,7 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
             const sortedForWidget = [...friends].sort((a, b) => b.steps - a.steps);
             const realMySteps = mockData.myProfile.steps;
 
-            // 순위 시뮬레이션: simulateRank가 설정되면 해당 순위에 맞는 걸음수로 치환
-            let mySteps = realMySteps;
-            if (simulateRank !== null) {
-              const totalCount = sortedForWidget.length + 1; // 친구 수 + 나
-              if (simulateRank === 1) {
-                mySteps = sortedForWidget[0].steps + 500;
-              } else if (simulateRank > sortedForWidget.length) {
-                mySteps = sortedForWidget[sortedForWidget.length - 1].steps - 500;
-              } else {
-                const above = sortedForWidget[simulateRank - 2].steps;
-                const below = sortedForWidget[simulateRank - 1].steps;
-                mySteps = Math.floor((above + below) / 2);
-              }
-            }
+            const mySteps = realMySteps;
 
             const myRankInWidget = sortedForWidget.filter(f => f.steps > mySteps).length + 1;
 
@@ -1167,8 +1014,6 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
             const isMeInTop3 = myRankInWidget <= 3;
 
             const medalColors = ['#FFD700', '#C0C0C0', '#CD7F32'];
-            const rankLabels = ['Rank 1', 'Rank 2', 'Rank 3', 'Rank 4', 'Rank 5', 'Last'];
-            const rankValues = [1, 2, 3, 4, 5, sortedForWidget.length + 1];
             const friendCount = sortedForWidget.length;
 
             return (
