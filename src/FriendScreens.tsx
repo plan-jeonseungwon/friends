@@ -274,14 +274,14 @@ export function ManageRequestsScreen({ setView }: { setView: (v: ViewState) => v
         <div className="grid grid-cols-2 text-center">
           <button
             onClick={() => setTab('received')}
-            className={`relative h-11 text-[11px] font-semibold ${tab === 'received' ? 'text-black' : 'text-[#8e8e8e]'}`}
+            className={`relative h-12 text-[14px] font-semibold ${tab === 'received' ? 'text-black' : 'text-[#8e8e8e]'}`}
           >
             Received
             {tab === 'received' && <span className="absolute inset-x-0 bottom-0 mx-auto h-[1.5px] w-full bg-black" />}
           </button>
           <button
             onClick={() => setTab('sent')}
-            className={`relative h-11 text-[11px] font-semibold ${tab === 'sent' ? 'text-black' : 'text-[#8e8e8e]'}`}
+            className={`relative h-12 text-[14px] font-semibold ${tab === 'sent' ? 'text-black' : 'text-[#8e8e8e]'}`}
           >
             Sent
             {tab === 'sent' && <span className="absolute inset-x-0 bottom-0 mx-auto h-[1.5px] w-full bg-black" />}
@@ -296,23 +296,23 @@ export function ManageRequestsScreen({ setView }: { setView: (v: ViewState) => v
               {activeItems.map((item) => (
                 <div key={item.id} className="flex items-center justify-between py-1.5">
                   <button onClick={() => setPreview(item)} className="flex items-center gap-3">
-                    <div className="h-8 w-8 overflow-hidden rounded-full bg-[#d8d8d8]">
+                    <div className="h-11 w-11 overflow-hidden rounded-full bg-[#d8d8d8]">
                       <img src={item.avatar} alt={item.name} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
                     </div>
-                    <span className="text-[10px] font-semibold text-[#525252]">{item.name}</span>
+                    <span className="text-[14px] font-semibold text-[#525252]">{item.name}</span>
                   </button>
 
                   {tab === 'received' ? (
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setModal({ mode: 'accept', item })}
-                        className="h-9 rounded-[4px] bg-[#f3cf4a] px-5 text-[10px] font-semibold text-white"
+                        className="h-9 rounded-[4px] bg-[#f3cf4a] px-5 text-[13px] font-semibold text-white"
                       >
                         Accept
                       </button>
                       <button
                         onClick={() => setModal({ mode: 'decline', item })}
-                        className="h-9 rounded-[4px] border border-[#8e8e8e] bg-white px-4 text-[10px] font-semibold text-[#8e8e8e]"
+                        className="h-9 rounded-[4px] border border-[#8e8e8e] bg-white px-4 text-[13px] font-semibold text-[#8e8e8e]"
                       >
                         Decline
                       </button>
@@ -320,7 +320,7 @@ export function ManageRequestsScreen({ setView }: { setView: (v: ViewState) => v
                   ) : (
                     <button
                       onClick={() => setModal({ mode: 'cancel', item })}
-                      className="h-9 rounded-[4px] border border-[#8e8e8e] bg-white px-4 text-[10px] font-semibold text-[#8e8e8e]"
+                      className="h-9 rounded-[4px] border border-[#8e8e8e] bg-white px-4 text-[13px] font-semibold text-[#8e8e8e]"
                     >
                       Cancel
                     </button>
@@ -331,14 +331,14 @@ export function ManageRequestsScreen({ setView }: { setView: (v: ViewState) => v
           ) : (
             <div className="flex min-h-[560px] flex-col items-center justify-center px-8 text-center">
               <Frown className="h-7 w-7 text-[#9d9d9d]" strokeWidth={1.75} />
-              <p className="mt-3 text-[11px] font-medium leading-[1.25] text-[#767676]">
+              <p className="mt-3 text-[13px] font-medium leading-[1.4] text-[#767676]">
                 No friend requests yet.
                 <br />
                 Add friends and walk together.
               </p>
               <button
                 onClick={() => setView('friendManagement')}
-                className="mt-4 inline-flex h-9 items-center gap-2 rounded-[7px] bg-[#ffd100] px-4 text-[10px] font-semibold text-black"
+                className="mt-4 inline-flex h-10 items-center gap-2 rounded-[7px] bg-[#ffd100] px-5 text-[13px] font-semibold text-black"
               >
                 <Users className="h-4 w-4" strokeWidth={2.25} />
                 Add Friends

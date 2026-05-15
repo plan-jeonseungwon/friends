@@ -43,6 +43,7 @@ import {
   RefreshCw,
   ChevronUp,
   X,
+  Info,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import mockData from './data.json';
@@ -387,6 +388,7 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
   const [previewScenario, setPreviewScenario] = useState<PreviewScenario>(INITIAL_PREVIEW_SCENARIO);
   const [recommendedRefreshOffset, setRecommendedRefreshOffset] = useState(0);
   const [refreshCooldownLeft, setRefreshCooldownLeft] = useState(0);
+  const [showRequestLimitTooltip, setShowRequestLimitTooltip] = useState(false);
   const [visibleRecommendedUsers, setVisibleRecommendedUsers] = useState<RecommendedUser[]>(
     () => getSuggestedWindow(allRecommendedUsers),
   );
@@ -885,8 +887,23 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
               <div className="flex items-center gap-1">
                 <h2 className="text-sm font-bold text-gray-800">Suggested Friends</h2>
                 <span className="rounded-full bg-[#fff5cc] px-2.5 py-1 text-[10px] font-bold text-[#8a6a00]">
-                  {remainingRecommendedRequests} left in 24h
+                  {remainingRecommendedRequests} requests left
                 </span>
+                <div className="relative">
+                  <button
+                    type="button"
+                    aria-label="Friend request limit information"
+                    onClick={() => setShowRequestLimitTooltip((value) => !value)}
+                    className="flex h-5 w-5 items-center justify-center rounded-full text-[#8a6a00] transition-colors active:bg-[#fff5cc]"
+                  >
+                    <Info className="h-3.5 w-3.5" />
+                  </button>
+                  {showRequestLimitTooltip && (
+                    <div className="absolute left-1/2 top-7 z-20 w-56 -translate-x-1/2 rounded-xl bg-gray-900 px-3 py-2 text-[11px] font-medium leading-snug text-white shadow-lg">
+                      You can send up to 10 friend requests per day. Your request limit resets every day.
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="flex items-center gap-3">
                 <button
@@ -1155,7 +1172,18 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
             const friendCount = sortedForWidget.length;
 
             return (
-              <div className="mx-4 mt-1 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setView('ranking')}
+                onKeyDown={(event) => {
+                  if (event.currentTarget === event.target && (event.key === 'Enter' || event.key === ' ')) {
+                    event.preventDefault();
+                    setView('ranking');
+                  }
+                }}
+                className="mx-4 mt-1 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden cursor-pointer active:bg-gray-50"
+              >
                 <div className="px-4 pt-3 pb-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Trophy className="w-4 h-4 text-yellow-500" />
@@ -1169,13 +1197,19 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
                   <div className="flex items-center gap-2">
                     {/* 친구 있음/없음 토글 */}
                     <button
-                      onClick={() => setWidgetHasFriends(v => !v)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setWidgetHasFriends(v => !v);
+                      }}
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-colors ${widgetHasFriends ? 'border-green-400 text-green-600 bg-green-50' : 'border-gray-300 text-gray-400 bg-gray-50'}`}
                     >
                       {widgetHasFriends ? 'Has Friends' : 'No Friends'}
                     </button>
                     <button
-                      onClick={() => setView(widgetHasFriends ? 'ranking' : 'friends_main')}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setView('ranking');
+                      }}
                       className="text-[11px] text-gray-400 flex items-center gap-0.5 active:text-gray-600"
                     >
                       View All <ChevronRight className="w-3 h-3" />
@@ -1192,10 +1226,9 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
                         {top3.map((participant, idx) => {
                           const isMe = (participant as any).isMe;
                           return (
-                            <button
+                            <div
                               key={participant.id + idx}
-                              onClick={() => setView('ranking')}
-                              className="flex-1 flex flex-col items-center gap-1.5 py-2 rounded-xl active:bg-gray-50 transition-colors"
+                              className="flex-1 flex flex-col items-center gap-1.5 py-2 rounded-xl transition-colors"
                             >
                               <div className="relative">
                                 <div className={`w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 ${isMe ? 'border-orange-400' : 'border-transparent'}`}>
@@ -1211,14 +1244,13 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
                               </div>
                               <span className="text-[10px] font-medium text-gray-600 truncate w-full text-center px-0.5">{isMe ? 'Me' : participant.name.split(' ')[0]}</span>
                               <span className={`text-[10px] font-bold ${isMe ? 'text-orange-500' : 'text-gray-800'}`}>{isMe ? `Rank ${myRankInWidget}` : `Rank ${idx + 1}`}</span>
-                            </button>
+                            </div>
                           );
                         })}
                         {/* 내가 top3 밖이면 오른쪽에 별도 "나" 슬롯 표시 */}
                         {!isMeInTop3 && (
-                          <button
-                            onClick={() => setView('ranking')}
-                            className="flex-1 flex flex-col items-center gap-1.5 py-2 rounded-xl active:bg-gray-50 transition-colors"
+                          <div
+                            className="flex-1 flex flex-col items-center gap-1.5 py-2 rounded-xl transition-colors"
                           >
                             <div className="relative">
                               <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 border-2 border-orange-400">
@@ -1228,11 +1260,14 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
                             </div>
                             <span className="text-[10px] font-medium text-gray-600 truncate w-full text-center px-0.5">Me</span>
                             <span className="text-[10px] font-bold text-orange-500">Rank {myRankInWidget}</span>
-                          </button>
+                          </div>
                         )}
                       </div>
                       <button
-                        onClick={() => setView('friends_main')}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setView('friends_main');
+                        }}
                         className="w-full rounded-full border border-orange-100 bg-gradient-to-r from-orange-50 via-white to-amber-50 px-3 py-2 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors active:from-orange-100 active:to-amber-100"
                       >
                         <div className="flex items-center justify-between gap-2">
@@ -1253,7 +1288,10 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
                     </div>
                   ) : (
                     <button
-                      onClick={() => { setView('friendManagement'); setSearchQuery(''); setFoundUser(null); }}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setView('friends_main');
+                      }}
                       className="flex w-full items-center justify-between gap-2 rounded-full border border-dashed border-orange-200 bg-gradient-to-r from-orange-50 via-white to-amber-50 px-3 py-2 text-left transition-colors active:from-orange-100 active:to-amber-100"
                     >
                       <div className="flex min-w-0 items-center gap-2.5">
