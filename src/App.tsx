@@ -56,7 +56,7 @@ const REFRESH_COOLDOWN_SECONDS = 10;
 const INITIAL_PREVIEW_SCENARIO: PreviewScenario = 'partial';
 
 type Tab = 'home' | 'challenge' | 'rewards' | 'play' | 'feeds';
-export type ViewState = Tab | 'friends_main' | 'settings' | 'friendManagement' | 'ranking' | 'friendRequests' | 'lockscreen' | 'inviteFriends';
+export type ViewState = Tab | 'friends_main' | 'settings' | 'friendManagement' | 'ranking' | 'friendRequests' | 'lockscreen' | 'inviteFriends' | 'reward_detail' | 'reward_phone_verify' | 'reward_calling_verify';
 
 
 interface Friend {
@@ -146,9 +146,10 @@ interface SideDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigate: (view: ViewState) => void;
+  userCoins: number;
 }
 
-const SideDrawer = ({ isOpen, onClose, onNavigate }: SideDrawerProps) => (
+const SideDrawer = ({ isOpen, onClose, onNavigate, userCoins }: SideDrawerProps) => (
   <AnimatePresence>
     {isOpen && (
       <>
@@ -189,7 +190,7 @@ const SideDrawer = ({ isOpen, onClose, onNavigate }: SideDrawerProps) => (
             <h2 className="text-xl font-bold text-gray-800 mb-2">Seungwon Jeon</h2>
 
             <div className="bg-white/30 px-3 py-1 rounded-full flex items-center gap-1 border border-white/20">
-              <span className="font-bold text-gray-800 text-sm">345</span>
+              <span className="font-bold text-gray-800 text-sm">{userCoins}</span>
               <div className="w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center text-[10px] font-bold text-white border border-white shadow-sm">C</div>
             </div>
           </div>
@@ -238,6 +239,25 @@ export default function App({ initialView = 'home' }: { initialView?: ViewState 
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState<string | null>(null);
   const [foundUser, setFoundUser] = useState<MockUser | null>(null);
+
+  // Rewards redemption state flow
+  const [selectedReward, setSelectedReward] = useState<any>(null);
+  const [isVerified, setIsVerified] = useState(false);
+  const [verificationPhone, setVerificationPhone] = useState('');
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [showCallConfirmModal, setShowCallConfirmModal] = useState(false);
+  const [userCoins, setUserCoins] = useState(345);
+
+  const formatPhoneNumber = (value: string) => {
+    if (!value) return value;
+    const phoneNumber = value.replace(/[^\d]/g, '');
+    const phoneNumberLength = phoneNumber.length;
+    if (phoneNumberLength < 4) return phoneNumber;
+    if (phoneNumberLength < 7) {
+      return `(${phoneNumber.slice(0, 3)})${phoneNumber.slice(3)}`;
+    }
+    return `(${phoneNumber.slice(0, 3)})${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+  };
 
   // Settings states
   const [allowSearch, setAllowSearch] = useState(true);
@@ -626,6 +646,392 @@ const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
 
 
+  if (view === 'reward_detail') {
+    if (!selectedReward) {
+      setView('rewards');
+      return null;
+    }
+    return (
+      <div className="min-h-screen bg-white font-sans text-gray-900 pb-32 max-w-md mx-auto shadow-xl relative overflow-x-hidden flex flex-col">
+        {/* Header */}
+        <header className="sticky top-0 z-30 bg-white px-4 py-3 flex items-center">
+          <button 
+            onClick={() => setView('rewards')} 
+            className="p-1 -ml-1 text-gray-800 active:scale-95 transition-transform"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+        </header>
+
+        {/* Content */}
+        <div className="flex-1 px-4 overflow-y-auto">
+          {/* Card Container */}
+          <div className="border-[3px] border-[#006241] rounded-[24px] p-6 bg-white flex items-center justify-center aspect-[1.4/1] shadow-sm mb-4">
+            {selectedReward.logo === 'Starbucks' ? (
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/en/d/d3/Starbucks_Corporation_Logo.svg" 
+                alt="Starbucks" 
+                className="w-36 h-36 object-contain"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className={`w-full h-full rounded-xl ${selectedReward.color} flex items-center justify-center text-white text-3xl font-extrabold shadow-inner`}>
+                {selectedReward.logo}
+              </div>
+            )}
+          </div>
+
+          {/* Info */}
+          <div className="mb-6">
+            <span className="text-xs text-gray-400 font-bold block mb-1">{selectedReward.brand}</span>
+            <div className="flex justify-between items-start">
+              <h2 className="text-xl font-bold text-gray-900 flex-1 leading-tight">{selectedReward.name}</h2>
+              <div className="flex items-center gap-1.5 shrink-0 ml-4 mt-0.5">
+                <span className="text-lg font-black text-gray-900">{(selectedReward.price || 4000).toLocaleString()}</span>
+                <div className="w-5 h-5 bg-[#FFCC00] rounded-full flex items-center justify-center text-[11px] font-black text-white border border-white/50 shadow-sm">C</div>
+              </div>
+            </div>
+            
+            <div className="flex justify-between items-center mt-3 text-xs text-gray-500 font-medium">
+              <span>Your balance</span>
+              <div className="flex items-center gap-1">
+                <span className="font-bold text-gray-700">{userCoins.toLocaleString()}</span>
+                <div className="w-4 h-4 bg-[#FFCC00] rounded-full flex items-center justify-center text-[9px] font-black text-white">C</div>
+                
+                {/* Helper / Test Buttons (Aesthetics / Premium UX) */}
+                <button 
+                  onClick={() => {
+                    setUserCoins(prev => prev + 5000);
+                    showToast('Added 5,000 Coins (Test Mode)');
+                  }}
+                  className="ml-2 text-[9px] bg-gray-100 hover:bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded border border-gray-200 transition-colors font-bold"
+                >
+                  +5k (Test)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <hr className="border-t border-gray-100 my-4" />
+
+          {/* Description */}
+          <p className="text-[13px] text-gray-600 leading-relaxed font-normal mb-8">
+            {selectedReward.description}
+          </p>
+        </div>
+
+        {/* Footer Button Container */}
+        <div className="bg-white p-4 border-t border-gray-50 max-w-md mx-auto w-full fixed bottom-0 left-0 right-0 z-40">
+          <button 
+            onClick={() => {
+              if (!isVerified) {
+                setShowVerificationModal(true);
+              } else {
+                // Redeem logic
+                const price = selectedReward.price || 4000;
+                if (userCoins < price) {
+                  showToast(`Insufficient balance! You need ${price.toLocaleString()} C.`);
+                } else {
+                  setUserCoins(prev => prev - price);
+                  showToast(`Successfully redeemed ${selectedReward.name}!`);
+                  setView('rewards');
+                }
+              }
+            }}
+            className="w-full bg-[#FFD100] active:bg-[#e6bd00] transition-colors py-4 rounded-2xl text-center font-black text-gray-900 text-[15px] shadow-sm"
+          >
+            Redeem
+          </button>
+          {/* Mobile indicator line bar */}
+          <div className="w-32 h-1 bg-gray-300 rounded-full mx-auto mt-4"></div>
+        </div>
+
+        {/* Account Verification Modal */}
+        {showVerificationModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-6 max-w-md mx-auto">
+            <div className="w-full bg-white rounded-[28px] p-6 shadow-2xl relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+              {/* Close button */}
+              <button 
+                onClick={() => setShowVerificationModal(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-1 rounded-full transition-colors active:bg-gray-100"
+              >
+                <X className="w-5 h-5" strokeWidth={2.5} />
+              </button>
+
+              {/* Avatar Illustration */}
+              <div className="mt-4 mb-5">
+                <div className="relative w-20 h-20 mx-auto">
+                  <svg viewBox="0 0 100 100" className="w-full h-full">
+                    {/* Circle background */}
+                    <circle cx="50" cy="50" r="48" fill="#F4EFEB" />
+                    
+                    {/* Orange-haired Guy Avatar */}
+                    {/* Shoulders / Shirt */}
+                    <path d="M25 88 C25 76, 75 76, 75 88 Z" fill="#8B7B70" />
+                    
+                    {/* Neck */}
+                    <rect x="46" y="60" width="8" height="15" fill="#FDD7C2" />
+                    
+                    {/* Face */}
+                    <circle cx="50" cy="46" r="20" fill="#FDD7C2" />
+                    
+                    {/* Hair (orange, short/fluffy) */}
+                    <path d="M30 40 C30 25, 70 25, 70 40 C70 42, 67 36, 62 31 C56 26, 44 26, 38 31 C33 36, 30 42, 30 40 Z" fill="#E67A43" />
+                    {/* Sideburns */}
+                    <path d="M30 38 Q26 42 30 46 L32 44 Z" fill="#E67A43" />
+                    <path d="M70 38 Q74 42 70 46 L68 44 Z" fill="#E67A43" />
+                    
+                    {/* Eyes */}
+                    <circle cx="44" cy="45" r="2" fill="#2E2E2E" />
+                    <circle cx="56" cy="45" r="2" fill="#2E2E2E" />
+                    
+                    {/* Eyebrows */}
+                    <path d="M40 40 Q44 39 48 41" fill="none" stroke="#E67A43" strokeWidth="1.5" strokeLinecap="round" />
+                    <path d="M60 40 Q56 39 52 41" fill="none" stroke="#E67A43" strokeWidth="1.5" strokeLinecap="round" />
+                    
+                    {/* Smile */}
+                    <path d="M46 54 Q50 57 54 54" fill="none" stroke="#2E2E2E" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                  
+                  {/* Blue check icon */}
+                  <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-[#0095F6] rounded-full border-2 border-white flex items-center justify-center shadow-[0_2px_8px_rgba(0,149,246,0.3)]">
+                    <Check className="w-4 h-4 text-white" strokeWidth={3.5} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Title & Body */}
+              <div className="text-center px-2">
+                <h3 className="text-[19px] font-black text-gray-900 leading-snug">Account verification required</h3>
+                <p className="text-[13px] text-gray-500 font-normal leading-relaxed mt-3">
+                  In order to redeem your Reward, you must complete a mandatory account verification process. Please complete this process so that we can ensure your account and Rewards are safely protected.
+                </p>
+              </div>
+
+              {/* Action Button */}
+              <button
+                onClick={() => {
+                  setShowVerificationModal(false);
+                  setView('reward_phone_verify');
+                }}
+                className="w-full bg-[#FFD100] active:bg-[#e6bd00] transition-colors py-4 rounded-2xl text-center font-black text-gray-900 text-[15px] mt-6 shadow-sm"
+              >
+                Verify my account
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (view === 'reward_phone_verify') {
+    return (
+      <div className="min-h-screen bg-[#FFD100] font-sans text-gray-900 max-w-md mx-auto shadow-xl relative overflow-x-hidden flex flex-col">
+        {/* Header */}
+        <header className="px-4 py-3 flex items-center bg-transparent">
+          <button 
+            onClick={() => setView('reward_detail')} 
+            className="p-1 -ml-1 text-gray-900 active:scale-95 transition-transform"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+        </header>
+
+        {/* Content */}
+        <div className="flex-1 px-6 pt-8 pb-12 flex flex-col justify-start">
+          <p className="text-[17px] font-bold text-gray-900 mb-6">Please enter your phone number.</p>
+          
+          {/* Input field wrapper */}
+          <div className="flex items-center gap-3 border-b-2 border-gray-900 pb-2 focus-within:border-black transition-colors mb-8">
+            <span className="text-2xl font-black text-gray-900 tracking-tight">+1</span>
+            
+            {/* Divider line */}
+            <div className="w-[1.5px] h-6 bg-gray-900/60 self-center"></div>
+            
+            {/* Phone Input */}
+            <input 
+              type="tel"
+              value={verificationPhone}
+              onChange={(e) => {
+                const formatted = formatPhoneNumber(e.target.value);
+                if (formatted.length <= 13) {
+                  setVerificationPhone(formatted);
+                }
+              }}
+              placeholder="(650)123-4567"
+              className="text-2xl font-bold bg-transparent outline-none border-none flex-1 text-gray-900 placeholder-gray-900/30 tracking-wide w-full"
+            />
+          </div>
+
+          {/* SEND CODE Button */}
+          <button 
+            onClick={() => {
+              if (verificationPhone.replace(/[^\d]/g, '').length < 10) {
+                showToast('Please enter a valid phone number.');
+              } else {
+                setShowCallConfirmModal(true);
+              }
+            }}
+            className="w-full bg-[#2A2A2A] active:bg-black transition-colors py-4 rounded-lg text-center font-bold text-white text-[14px] tracking-wider"
+          >
+            SEND CODE
+          </button>
+        </div>
+
+        {/* Call Confirmation Popup Overlay */}
+        {showCallConfirmModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-6 max-w-md mx-auto">
+            <div className="w-full bg-white rounded-[28px] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+              
+              {/* Illustration of phone receiver and message bubble */}
+              <div className="mb-4">
+                <div className="w-24 h-24 mx-auto flex items-center justify-center relative">
+                  <svg viewBox="0 0 100 100" className="w-20 h-20">
+                    {/* Yellow Speech bubble */}
+                    <path 
+                      d="M48 20 C64 20, 76 29, 76 40 C76 50, 65 59, 50 59 C46 59, 42 58, 38 56 L26 62 L30 52 C24 49, 20 45, 20 40 C20 29, 32 20, 48 20 Z" 
+                      fill="#FDBA3B" 
+                    />
+                    {/* 3 white dots in bubble */}
+                    <circle cx="38" cy="40" r="3" fill="white" />
+                    <circle cx="48" cy="40" r="3" fill="white" />
+                    <circle cx="58" cy="40" r="3" fill="white" />
+
+                    {/* Blue Phone Receiver */}
+                    <path 
+                      d="M32 42 C32 50, 42 66, 54 66 C59 66, 63 60, 58 56 L50 49 C47 46, 43 49, 41 51 C37 48, 34 45, 31 41 C33 39, 36 35, 33 32 L26 24 C22 20, 17 23, 17 28 C17 34, 24 42, 32 42 Z" 
+                      fill="#4B91E2" 
+                      transform="rotate(-5 40 40)"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Title & Body */}
+              <div className="text-center px-1">
+                <h3 className="text-[19px] font-black text-gray-900 leading-snug">We'll give you a call to verify</h3>
+                <p className="text-[13px] text-gray-500 font-medium leading-relaxed mt-3">
+                  We'll give you a quick call with a code. Please answer to continue.
+                </p>
+                <p className="text-[11.5px] text-gray-400 font-normal leading-relaxed mt-4">
+                  This verification call is free from CashWalk. Carrier rates may apply.
+                </p>
+              </div>
+
+              {/* Buttons side-by-side */}
+              <div className="flex gap-3 justify-between w-full mt-6">
+                <button
+                  onClick={() => setShowCallConfirmModal(false)}
+                  className="flex-1 border border-gray-300 active:bg-gray-50 transition-colors py-3.5 rounded-xl text-center font-bold text-gray-500 text-[14px]"
+                >
+                  Not now
+                </button>
+                <button
+                  onClick={() => {
+                    setShowCallConfirmModal(false);
+                    setView('reward_calling_verify');
+                  }}
+                  className="flex-1 bg-[#FFD100] active:bg-[#e6bd00] transition-colors py-3.5 rounded-xl text-center font-bold text-gray-900 text-[14px] shadow-sm"
+                >
+                  Get code
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (view === 'reward_calling_verify') {
+    return (
+      <div className="min-h-screen bg-white font-sans text-gray-900 pb-32 max-w-md mx-auto shadow-xl relative overflow-x-hidden flex flex-col justify-between">
+        {/* Header */}
+        <header className="px-4 py-3 flex items-center bg-transparent">
+          <button 
+            onClick={() => setView('reward_phone_verify')} 
+            className="p-1 -ml-1 text-gray-800 active:scale-95 transition-transform"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+        </header>
+
+        {/* Content */}
+        <div className="flex-1 flex flex-col items-center justify-center px-8 text-center -mt-16">
+          {/* Animated Ringing Phone Illustration */}
+          <div className="w-36 h-36 relative flex items-center justify-center mb-6">
+            <svg viewBox="0 0 100 100" className="w-28 h-28 animate-[bounce_1.5s_infinite_ease-in-out]">
+              {/* Sound waves emitting from receiver */}
+              <path 
+                d="M62 38 A16 16 0 0 1 73 49" 
+                fill="none" 
+                stroke="#FDBA3B" 
+                strokeWidth="3.5" 
+                strokeLinecap="round" 
+                className="animate-[pulse_1s_infinite_alternate]"
+              />
+              <path 
+                d="M68 30 A26 26 0 0 1 86 48" 
+                fill="none" 
+                stroke="#FDBA3B" 
+                strokeWidth="3.5" 
+                strokeLinecap="round" 
+                className="animate-[pulse_1s_infinite_alternate_200ms]"
+              />
+              <path 
+                d="M74 22 A36 36 0 0 1 99 47" 
+                fill="none" 
+                stroke="#FDBA3B" 
+                strokeWidth="3.5" 
+                strokeLinecap="round" 
+                className="animate-[pulse_1s_infinite_alternate_400ms]"
+              />
+
+              {/* Blue Phone Receiver */}
+              <path 
+                d="M34 32 C30 29, 24 31, 21 35 C16 42, 16 54, 26 67 C36 80, 48 84, 56 80 C60 78, 62 72, 59 69 L51 60 C48 57, 43 58, 41 61 C36 57, 33 53, 29 48 C32 46, 33 41, 30 38 L22 30 Z" 
+                fill="#4B91E2" 
+                transform="rotate(-15 45 50)"
+              />
+            </svg>
+          </div>
+
+          <h2 className="text-xl font-bold text-gray-900 tracking-tight leading-snug">We're calling you...</h2>
+          <p className="text-[13.5px] text-gray-500 font-normal leading-relaxed mt-4 max-w-xs">
+            Pick up the call and follow the instructions. Then tap the button below when you're done.
+          </p>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="bg-white p-4 max-w-md mx-auto w-full fixed bottom-0 left-0 right-0 z-40">
+          <div className="text-center mb-4">
+            <span className="text-[12.5px] text-gray-500 font-medium">Didn't receive a call? </span>
+            <button 
+              onClick={() => showToast('Re-requesting verification call...')}
+              className="text-[12.5px] text-[#0095F6] hover:underline font-bold"
+            >
+              Request again
+            </button>
+          </div>
+          
+          <button 
+            onClick={() => {
+              setIsVerified(true);
+              showToast('Account verified successfully!');
+              setView('reward_detail');
+            }}
+            className="w-full bg-[#FFD100] active:bg-[#e6bd00] transition-colors py-4 rounded-2xl text-center font-black text-gray-900 text-[15px] shadow-sm"
+          >
+            I'm verified
+          </button>
+          {/* Mobile indicator line bar */}
+          <div className="w-32 h-1 bg-gray-300 rounded-full mx-auto mt-4"></div>
+        </div>
+      </div>
+    );
+  }
+
   if (view === 'friends_main') {
     return (
       <div className="min-h-screen bg-gray-50 font-sans text-gray-900 pb-20 max-w-md mx-auto shadow-xl relative overflow-x-hidden">
@@ -915,6 +1321,7 @@ const [isDrawerOpen, setIsDrawerOpen] = useState(false);
             isOpen={isDrawerOpen}
             onClose={() => setIsDrawerOpen(false)}
             onNavigate={(v) => { setView(v); setCurrentTab(v as Tab); }}
+            userCoins={userCoins}
           />
           <header className="sticky top-0 z-30 bg-[#FFD700] px-4 py-3 flex items-center justify-between">
             <Menu
@@ -924,7 +1331,7 @@ const [isDrawerOpen, setIsDrawerOpen] = useState(false);
             <h1 className="text-lg font-bold text-gray-800">Home</h1>
             <div className="flex items-center gap-3">
               <div className="border border-gray-800/20 bg-white/10 px-3 py-1 rounded-full flex items-center gap-1">
-                <span className="font-bold text-gray-800 text-sm">377</span>
+                <span className="font-bold text-gray-800 text-sm">{userCoins}</span>
                 <div className="w-4 h-4 bg-[#FFCC00] rounded-full flex items-center justify-center text-[10px] font-bold text-white border border-white/50">C</div>
               </div>
               <Bell className="w-6 h-6 text-gray-800" />
@@ -1186,7 +1593,7 @@ const [isDrawerOpen, setIsDrawerOpen] = useState(false);
           <header className="sticky top-0 z-30 bg-white px-4 py-3 flex items-center justify-center border-b border-gray-100">
             <h1 className="text-lg font-bold text-gray-800">Challenge</h1>
             <div className="absolute right-4 flex items-center gap-2">
-              <span className="font-bold text-gray-800 text-sm">345</span>
+              <span className="font-bold text-gray-800 text-sm">{userCoins}</span>
               <div className="w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center text-[10px] font-bold text-white">C</div>
             </div>
           </header>
@@ -1197,7 +1604,7 @@ const [isDrawerOpen, setIsDrawerOpen] = useState(false);
           <div className="p-4 bg-white flex items-center gap-2">
             <div className="w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center text-xs font-bold text-white">C</div>
             <span className="text-gray-500 text-sm">Coins</span>
-            <span className="font-bold text-gray-800">345</span>
+            <span className="font-bold text-gray-800">{userCoins}</span>
           </div>
           <div className="bg-[#FFE4B5] p-6 relative overflow-hidden">
             <div className="relative z-10">
@@ -1252,7 +1659,7 @@ const [isDrawerOpen, setIsDrawerOpen] = useState(false);
           <header className="sticky top-0 z-30 bg-[#FFD700] px-4 py-3 flex items-center justify-center">
             <h1 className="text-lg font-bold text-gray-800">Rewards</h1>
             <div className="absolute right-4 flex items-center gap-2 bg-white/30 px-3 py-1 rounded-full">
-              <span className="font-bold text-gray-800 text-sm">345</span>
+              <span className="font-bold text-gray-800 text-sm">{userCoins}</span>
               <div className="w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center text-[10px] font-bold text-white border border-white">C</div>
             </div>
           </header>
@@ -1270,12 +1677,29 @@ const [isDrawerOpen, setIsDrawerOpen] = useState(false);
           </div>
           <div className="p-4 flex flex-col gap-3">
             {[
-              { name: 'Amazon.ca Gift Certificate CA', brand: 'Amazon.ca', color: 'bg-gray-900', logo: 'amazon' },
-              { name: 'Walmart Gift Card CA', brand: 'Walmart Canada', color: 'bg-blue-600', logo: 'Walmart' },
-              { name: "Tim Horton's E-Gift TimCard® CA", brand: 'Tim Hortons Canada', color: 'bg-red-800', logo: 'Tim Hortons' },
-              { name: 'Starbucks eGift Canada CA', brand: 'Starbucks Canada', color: 'bg-green-700', logo: 'Starbucks' },
+              { name: 'Amazon.ca Gift Certificate CA', brand: 'Amazon.ca', color: 'bg-gray-900', logo: 'amazon', price: 10000, value: '$10' },
+              { name: 'Walmart Gift Card CA', brand: 'Walmart Canada', color: 'bg-blue-600', logo: 'Walmart', price: 10000, value: '$10' },
+              { name: "Tim Horton's E-Gift TimCard® CA", brand: 'Tim Hortons Canada', color: 'bg-red-800', logo: 'Tim Hortons', price: 10000, value: '$10' },
+              { name: 'Starbucks Card $10', brand: 'Starbucks', color: 'bg-green-700', logo: 'Starbucks', price: 4000, value: '$10' },
             ].map((card, i) => (
-              <div key={i} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex flex-col gap-3">
+              <div 
+                key={i} 
+                onClick={() => {
+                  setSelectedReward({
+                    name: card.name,
+                    brand: card.brand,
+                    color: card.color,
+                    logo: card.logo,
+                    price: card.price,
+                    value: card.value,
+                    description: card.logo === 'Starbucks' 
+                      ? "A Starbucks Card can bring a little goodness into everyone's day. Whether you want to cheer up a friend who loves her morning mocha. Or reward yourself with your favorite flavored iced tea. The Starbucks Card is a great way for you or a loved one to enjoy a slice of happiness. Redeem it at thousands of Starbucks locations. Register the Card to earn free drinks or food and other great rewards. Reload it whenever you need to."
+                      : `A ${card.brand} Gift Card can bring a little goodness into everyone's day. Redeem it online or in stores for your favorite products.`
+                  });
+                  setView('reward_detail');
+                }}
+                className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex flex-col gap-3 cursor-pointer hover:bg-gray-50/50 transition-all active:scale-[0.99]"
+              >
                 <div className="flex gap-3 items-center">
                   <div className={`w-16 h-12 ${card.color} rounded-lg flex items-center justify-center text-white text-xs font-bold`}>{card.logo}</div>
                   <div>
@@ -1289,12 +1713,8 @@ const [isDrawerOpen, setIsDrawerOpen] = useState(false);
                     <span className="text-sm font-bold text-gray-400">5,000 C</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="bg-[#FFD700] text-gray-800 text-xs font-bold px-1.5 py-0.5 rounded">10$</div>
-                    <span className="text-sm font-bold text-gray-800">10,000 C</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="bg-[#FFD700] text-gray-800 text-xs font-bold px-1.5 py-0.5 rounded">15$</div>
-                    <span className="text-sm font-bold text-gray-800">15,000 C</span>
+                    <div className="bg-[#FFD700] text-gray-800 text-xs font-bold px-1.5 py-0.5 rounded">{card.value}</div>
+                    <span className="text-sm font-bold text-gray-800">{card.price.toLocaleString()} C</span>
                   </div>
                 </div>
               </div>
@@ -1308,7 +1728,7 @@ const [isDrawerOpen, setIsDrawerOpen] = useState(false);
           <header className="sticky top-0 z-30 bg-[#FFD700] px-4 py-3 flex items-center justify-center">
             <h1 className="text-lg font-bold text-gray-800">Play</h1>
             <div className="absolute right-4 flex items-center gap-2 bg-white/30 px-3 py-1 rounded-full">
-              <span className="font-bold text-gray-800 text-sm">345</span>
+              <span className="font-bold text-gray-800 text-sm">{userCoins}</span>
               <div className="w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center text-[10px] font-bold text-white border border-white">C</div>
             </div>
           </header>
